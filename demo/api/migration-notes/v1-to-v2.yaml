@@ -1,0 +1,31 @@
+# Migration note: Demo Shop API 1.0.0 -> 2.0.0
+# Each entry CONFIRMS an old->new mapping (BR-04). Changes without an entry are
+# unconfirmed and must not be repaired automatically.
+# DELETE /orders/{id} is removed with NO entry on purpose (BR-04, BR-05).
+api: demo-shop
+from: '1.0.0'
+to: '2.0.0'
+mappings:
+  - kind: field_renamed
+    method: GET
+    path: /customers/{id}
+    location: response
+    old: customer_name
+    new: full_name
+  - kind: field_type_changed
+    method: GET
+    path: /orders/{id}
+    field: total
+    old_type: number
+    new_type: string
+    conversion: 'Number(value)'
+  - kind: required_param_added
+    method: GET
+    path: /orders
+    param: status
+    in: query
+    default_value: 'all'
+  - kind: endpoint_removed
+    method: GET
+    path: /orders/{id}/invoice
+    replacement: { method: GET, path: '/invoices/{orderId}' }

@@ -1,0 +1,163 @@
+openapi: 3.1.0
+info:
+  title: Demo Shop API
+  version: 1.0.0
+  description: Demo REST API used as test material for Self-Maintaining APIs (v1).
+servers:
+  - url: http://localhost:4001
+paths:
+  /customers/{id}:
+    get:
+      operationId: getCustomer
+      summary: Get a customer by id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: The customer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /orders:
+    get:
+      operationId: listOrders
+      summary: List orders, optionally filtered by status
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [open, closed, all]
+      responses:
+        '200':
+          description: Matching orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      summary: Get an order by id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: The order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: deleteOrder
+      summary: Delete (cancel) an order
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Order deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /orders/{id}/invoice:
+    get:
+      operationId: getOrderInvoice
+      summary: Get the invoice for an order
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: The invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Customer:
+      type: object
+      required: [id, customer_name, email]
+      properties:
+        id:
+          type: integer
+        customer_name:
+          type: string
+        email:
+          type: string
+          format: email
+    OrderStatus:
+      type: string
+      enum: [open, closed]
+    Order:
+      type: object
+      required: [id, customerId, total, status]
+      properties:
+        id:
+          type: integer
+        customerId:
+          type: integer
+        total:
+          type: number
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+    OrderSummary:
+      type: object
+      required: [id, customerId, status]
+      properties:
+        id:
+          type: integer
+        customerId:
+          type: integer
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+    Invoice:
+      type: object
+      required: [orderId, invoiceNumber, amountDue, issuedAt]
+      properties:
+        orderId:
+          type: integer
+        invoiceNumber:
+          type: string
+        amountDue:
+          type: number
+        issuedAt:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
