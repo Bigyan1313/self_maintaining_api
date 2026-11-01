@@ -1,0 +1,6 @@
+{
+  "name": "@sma/demo-consumer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sample TypeScript consumer repo that calls the demo API."
+}
