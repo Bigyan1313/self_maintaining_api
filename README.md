@@ -33,6 +33,11 @@ npm run db:down         # stop PostgreSQL (data kept in a named volume)
 
 npm run dev -w @sma/server   # API on http://127.0.0.1:3000 (GET /health)
 npm run dev -w @sma/web      # dashboard on http://localhost:5173
+
+npm run start:v1 -w @sma/demo-api   # Demo Shop API v1 on :4001 (start:v2 → :4002)
+npm run consumer:install            # install the standalone sample consumer (demo/consumer)
+npm run consumer:test:v1            # consumer tests against recorded v1 responses: all pass
+npm run consumer:test:v2            # against v2: the 5 breaking changes make tests fail (by design)
 ```
 
 ## Layout
@@ -41,7 +46,8 @@ npm run dev -w @sma/web      # dashboard on http://localhost:5173
 packages/core   pure domain logic (no network / Docker / LLM)
 apps/server     Fastify HTTP + pipeline orchestrator (src/http, src/infra, src/pipeline)
 apps/web        React + Vite dashboard
-demo/           demo API (v1/v2) and sample consumer repo
+demo/api        Demo Shop API (v1/v2), OpenAPI specs, migration notes, fixture + client scripts
+demo/consumer   standalone sample consumer repo (NOT a workspace member)
 scenarios/      frozen evaluation scenarios
 eval/           evaluation script + results
 prompts/        Module-of-Thought prompts, saved verbatim
