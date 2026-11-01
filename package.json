@@ -7,7 +7,7 @@
   "workspaces": [
     "packages/*",
     "apps/*",
-    "demo/*",
+    "demo/api",
     "eval"
   ],
   "engines": {
@@ -21,7 +21,11 @@
     "test": "npm run test --workspaces --if-present",
     "docs": "typedoc",
     "db:up": "docker compose up -d --wait postgres",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "consumer:install": "npm ci --prefix demo/consumer",
+    "consumer:typecheck": "npm run typecheck --prefix demo/consumer",
+    "consumer:test:v1": "API_VERSION=v1 npm test --prefix demo/consumer",
+    "consumer:test:v2": "API_VERSION=v2 npm test --prefix demo/consumer"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

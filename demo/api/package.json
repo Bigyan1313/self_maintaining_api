@@ -2,5 +2,24 @@
   "name": "@sma/demo-api",
   "version": "0.1.0",
   "private": true,
-  "description": "Demo REST API served at v1 and v2, with OpenAPI specs and migration notes."
+  "description": "Demo Shop REST API served at v1 and v2, with OpenAPI specs and migration notes.",
+  "type": "module",
+  "scripts": {
+    "start:v1": "tsx src/main.ts v1",
+    "start:v2": "tsx src/main.ts v2",
+    "record:fixtures": "tsx scripts/record-fixtures.ts",
+    "gen:client": "tsx scripts/gen-client.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "fastify": "5.12.7"
+  },
+  "devDependencies": {
+    "@seriousme/openapi-schema-validator": "2.11.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "tsx": "4.23.15",
+    "yaml": "2.9.1"
+  }
 }
