@@ -13,6 +13,8 @@ export default tseslint.config(
       'docs/api/**',
       '.work/**',
       'apps/server/drizzle/**',
+      // Standalone consumer repo (stands in for a developer's own project); it has its own tooling.
+      'demo/consumer/**',
     ],
   },
   js.configs.recommended,

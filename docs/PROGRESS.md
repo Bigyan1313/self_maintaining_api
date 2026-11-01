@@ -3,7 +3,7 @@
 | Inc | Capability                                                                                     | SRS refs                                 | Priority                  | Status      |
 | --- | ---------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------- | ----------- |
 | 01  | Project setup: workspaces, TS, Vitest, lint, Postgres, CI, TypeDoc                             | C-05, C-07                               | Standard                  | Done        |
-| 02  | Demo API v1/v2 + specs + migration notes + sample consumer repo (tests pass on v1, fail on v2) | 2.2, 5.2                                 | Standard                  | Not started |
+| 02  | Demo API v1/v2 + specs + migration notes + sample consumer repo (tests pass on v1, fail on v2) | 2.2, 5.2                                 | Standard                  | Done        |
 | 03  | Database schema + migrations (incl. 4-attempt limit + guard-name constraints)                  | DR-01–05                                 | Standard                  | Not started |
 | 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, failure handling                        | FR-01–05, FR-11, FR-12                   | Standard                  | Not started |
 | 05  | Detect: oasdiff runner + parser + evidence                                                     | FR-06, FR-08                             | Standard                  | Not started |

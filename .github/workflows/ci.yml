@@ -13,7 +13,15 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            demo/consumer/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
+      # Standalone sample consumer repo: must typecheck and pass against v1.
+      # (consumer:test:v2 is expected to FAIL by design — failing-before rule, EV-02 — so it is not run here.)
+      - run: npm run consumer:install
+      - run: npm run consumer:typecheck
+      - run: npm run consumer:test:v1
