@@ -1,0 +1,39 @@
+{
+  "name": "self-maintaining-apis",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Detects breaking OpenAPI changes, repairs TypeScript consumer code with a validated LLM agent, and opens a pull request.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "demo/*",
+    "eval"
+  ],
+  "engines": {
+    "node": ">=22.13.0 <23.0.0"
+  },
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "docs": "typedoc",
+    "db:up": "docker compose up -d --wait postgres",
+    "db:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "eslint": "10.14.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.14.0",
+    "prettier": "3.9.10",
+    "typedoc": "0.28.20",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.0.5"
+  }
+}

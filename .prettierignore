@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+docs/api
+.work
+package-lock.json
+prompts/
+docs/*.pdf
+apps/server/drizzle
+CLAUDE.md
