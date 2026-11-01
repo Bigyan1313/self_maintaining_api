@@ -1,0 +1,8 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Self-Maintaining APIs",
+  "entryPointStrategy": "packages",
+  "entryPoints": ["packages/core", "apps/server"],
+  "out": "docs/api",
+  "excludePrivate": true
+}
