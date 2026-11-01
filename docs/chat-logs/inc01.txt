@@ -1,0 +1,1146 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.316
+           Opus 5.5 · Claude Pro
+ ▘▘   ▝▝   ~/Desktop/self_maintaining_api
+
+
+❯ /model                                                                        
+  ⎿  Set model to Opus 5.5 and saved as your default for new sessions
+
+❯ /restart 
+  ⎿  Successfully updated from 2.1.304 to version 2.1.316
+
+❯    mv ~/Downloads/00_master_context.md ~/Downloads/01_project_setup.md        
+  ~/Desktop/self_maintaining_api/prompts/                                       
+
+⏺ Bash(ls -la ~/Downloads/00_master_context.md ~/Downloads/01_project_setup.md;
+      mkdir -p ~/Desktop/self_maintaining_api/prompts && mv -n
+      ~/Downloads/00_master_context.…)
+  ⎿  -rw-r--r--@ 1 turbo  staff  11845 Nov  1 12:29 /Users/turbo/Downloads/
+     00_master_context.md
+     -rw-r--r--@ 1 turbo  staff   4069 Nov  1 12:29 /Users/turbo/Downloads/
+     … +6 lines (ctrl+o to expand)
+  ⎿  Created prompts/00_master_context.md (+146 -0)
+        1 +# PROMPT 00 — MASTER CONTEXT: Self-Maintaining APIs (CS 4398, 
+          +Group 13)                                                     
+        2 +                                                              
+        3 +### CRITICAL — READ FIRST ###                                 
+        4 +**MANDATORY:** This is the master context for the whole projec
+          +t. It is built with the **Module of Thought (MoT)** method: on
+          +e master context plus one prompt per capability ("increment").
+        5 +**MANDATORY:** Do the following now, and nothing else:        
+        6 +1. Save this entire prompt **verbatim** to `prompts/00_master_
+          +context.md`.                                                  
+        7 +2. Create `CLAUDE.md` in the repo root. It must say: "Before a
+          +ny work, read `prompts/00_master_context.md` and `docs/PROGRES
+          +S.md`. Follow the Working Rules in the master context." Copy S
+          +ections 7 and 8 of this prompt into it as well.               
+        8 +3. Create `docs/PROGRESS.md` with the increment table from Sec
+          +tion 9 (all rows "Not started").                              
+        9 +4. Create `docs/DECISIONS.md` (empty log, with a heading).    
+       10 +5. **Do NOT write any application code yet.** Increment 01 com
+          +es in the next prompt.                                        
+       11 +6. Reply with a short confirmation and the file list.         
+       12 +                                                              
+       13 +---                                                           
+       14 +                                                              
+       15 +## 1. Domain background                                       
+       16 +                                                              
+       17 +Applications call external REST APIs. Providers change their *
+          +*OpenAPI** specs: endpoints get removed, fields get renamed, t
+          +ypes change, and new required parameters are added. Today a de
+          +veloper has to notice the change, find the affected code, fix 
+          +it, and prove the fix works. Existing tools cover only one pie
+          +ce of that:                                                   
+       18 +- Dependabot/Renovate bump versions but don't change code.    
+       19 +- OpenRewrite/ast-grep need a hand-written rule.              
+       20 +- Spec-diff tools report changes but don't fix consumer code. 
+       21 +                                                              
+       22 +**Our system joins the whole path** (spec history → validated 
+          +fix in the consumer's code → pull request) **and measures** ho
+          +w often an LLM agent repairs a breaking change correctly, and 
+          +where it fails.                                               
+       23 +                                                              
+       24 +The full requirements are in `docs/SRS.pdf` (Group 13 SRS v1.0
+          +). **Requirement IDs (FR-xx, NFR-xx, DR-xx, BR-xx, C-xx, EV-xx
+          +, AT-xx) refer to that document.** When a prompt cites an ID, 
+          +read that part of the SRS.                                    
+       25 +                                                              
+       26 +## 2. System architecture — 7-stage pipeline                  
+       27 +                                                              
+       28 +Each stage **writes its result to the database before the next
+          + stage begins** (FR-38). Runs are **append-only** (FR-39).    
+       29 +                                                              
+       30 +| # | Stage | Input | Output recorded |                       
+       31 +|---|-------|-------|-----------------|                       
+       32 +| 1 | Ingest | Spec URL or uploaded file | Spec version, norma
+          +lized JSON, SHA-256 hash |                                    
+       33 +| 2 | Detect | Two spec versions | Structured diff list (path,
+          + method, JSON pointer, before/after evidence) |               
+       34 +| 3 | Classify | One difference | breaking / safe / unknown, c
+          +onfidence 0–1, mapping status |                               
+       35 +| 4 | Locate | Change + repo | Call sites (file, line, column,
+          + pattern, excerpt) + coverage report |                        
+       36 +| 5 | Repair | Change, sites, migration note, prior errors | P
+          +atch (unified diff), tokens, cost, model, attempt # |         
+       37 +| 6 | Validate | Patch + isolated working copy | pass / fail /
+          + cheating (+ guard name) |                                    
+       38 +| 7 | Deliver | Validated patch | PR URL, or flagged finding +
+          + reason |                                                     
+       39 +                                                              
+       40 +**THE RULE THAT IS NEVER BROKEN (BR-04, C-04):** A spec differ
+          +ence is NOT proof that two fields mean the same thing. Stage 5
+          + (Repair) runs **only** when the old→new mapping is **confirme
+          +d by a migration note or a human**. Everything else stops at s
+          +tage 4 and is reported.                                       
+     … 106 more lines (ctrl+o to expand)
+  ⎿  Created prompts/01_project_setup.md (+56 -0)
+       1 +# INCREMENT 01: Project Setup                                  
+       2 +Status: Standard                                               
+       3 +Dependencies: Prompt 00 (master context)                       
+       4 +                                                               
+       5 +### CRITICAL — READ FIRST ###                                  
+       6 +**MANDATORY:** Follow the Working Rules in `prompts/00_master_c
+         +ontext.md` Section 7. Save this prompt verbatim to `prompts/01_
+         +project_setup.md` first. Work on branch `feat/inc01-project-set
+         +up`.                                                           
+       7 +**CRITICAL:** Build ONLY the project skeleton and tooling. **No
+         + pipeline logic** (no ingest, diff, or LLM code) in this increm
+         +ent.                                                           
+       8 +                                                               
+       9 +---                                                            
+      10 +                                                               
+      11 +## Capability                                                  
+      12 +A working npm-workspaces monorepo where `npm ci`, `npm run type
+         +check`, `npm run lint`, `npm test`, and `npm run docs` all succ
+         +eed on a clean clone, with PostgreSQL available through docker-
+         +compose and CI running on every push.                          
+      13 +                                                               
+      14 +## Tasks                                                       
+      15 +                                                               
+      16 +1. **Root setup**                                              
+      17 +   - `package.json` with npm workspaces: `packages/*`, `apps/*`
+         +, `demo/*`, `eval`.                                            
+      18 +   - Root scripts: `typecheck`, `lint`, `format`, `test`, `docs
+         +` (TypeDoc), `db:up`, `db:down`.                               
+      19 +   - `.nvmrc` = Node 22. `engines` field set.                  
+      20 +   - `tsconfig.base.json`: `strict: true`, `noUncheckedIndexedA
+         +ccess: true`, ES2022, NodeNext modules. Each workspace extends 
+         +it.                                                            
+      21 +   - ESLint (flat config) + Prettier. Lint rule: ban `@ts-ignor
+         +e` / `@ts-nocheck` in our own source.                          
+      22 +   - `.gitignore` (node_modules, dist, .env, coverage, `.work/`
+         + for future isolated working copies).                          
+      23 +   - `.env.example` with placeholders only: `DATABASE_URL`, `GI
+         +THUB_TOKEN`, `ANTHROPIC_API_KEY`, `LLM_MODEL`, `RUN_TOKEN_CEILI
+         +NG`.                                                           
+      24 +   - **Pin every dependency to an exact version** (`save-exact=
+         +true` in `.npmrc`).                                            
+      25 +                                                               
+      26 +2. **Workspaces (empty shells, each with 1 smoke test)**       
+      27 +   - `packages/core` — exports a `version` constant + a `Result
+         +<T,E>` type. **No imports from apps/*.**                       
+      28 +   - `apps/server` — Fastify app with `GET /health` → `{ status
+         +: "ok" }`, built with a `buildApp()` factory so tests can use `
+         +app.inject()` without opening a port. Folders: `src/http/`, `sr
+         +c/infra/`, `src/pipeline/` (empty `index.ts` placeholders).    
+      29 +   - `apps/web` — React + Vite page that shows "Self-Maintainin
+         +g APIs" and calls `/health`.                                   
+      30 +   - `demo/api`, `demo/consumer`, `eval` — placeholder `package
+         +.json` + README line saying which increment fills them.        
+      31 +                                                               
+      32 +3. **Database**                                                
+      33 +   - `docker-compose.yml` with `postgres:16` **pinned by digest
+         +**, a named volume, and a healthcheck. Credentials only from `.
+         +env`.                                                          
+      34 +   - Add Drizzle ORM + drizzle-kit to `apps/server`, with a con
+         +fig file and an empty schema file (tables come in Increment 03)
+         +.                                                              
+      35 +                                                               
+      36 +4. **CI** — `.github/workflows/ci.yml`: on push/PR → setup Node
+         + 22, `npm ci`, typecheck, lint, test. (No Docker or DB steps ye
+         +t.)                                                            
+      37 +                                                               
+      38 +5. **Docs**                                                    
+      39 +   - `typedoc.json` covering `packages/core` and `apps/server`,
+         + output to `docs/api/` (gitignored).                           
+      40 +   - `README.md`: what the project is (2–3 lines), prerequisite
+         +s (Node 22, Docker, git, oasdiff), and setup commands.         
+     … 16 more lines (ctrl+o to expand)
+
+⏺ I moved both files into prompts/, which I created because it didn't exist yet:
+
+  - prompts/00_master_context.md (11.8 KB)
+  - prompts/01_project_setup.md (4.1 KB)
+
+  I haven't opened them. Do you want me to read them and start on the project
+  setup?
+
+✻ Sautéed for 10s · done 12:55 PM
+
+❯    ls ~/Desktop/self_maintaining_api/prompts                                  
+
+  Listed 1 directory (ctrl+o to expand)
+
+⏺ Both files are in prompts/:
+
+  - 00_master_context.md
+  - 01_project_setup.md
+
+✻ Cooked for 4s · done 12:55 PM
+
+❯    Read prompts/00_master_context.md and follow it exactly.                   
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+⏺ Step 1 is already done: prompts/00_master_context.md is the verbatim prompt.
+  Next I'll create the other three files.
+
+⏺ Write(CLAUDE.md)
+  ⎿  Wrote 28 lines to CLAUDE.md
+       1 # CLAUDE.md — Self-Maintaining APIs (CS 4398, Group 13)
+       2 
+       3 Before any work, read `prompts/00_master_context.md` and `docs/P
+         ROGRESS.md`. Follow the Working Rules in the master context.
+       4 
+       5 ## 7. Working rules for every increment (MANDATORY)
+       6 
+       7 1. **ONE capability per increment.** Do not start the next incre
+         ment until told to.
+       8 2. First, save the increment prompt **verbatim** to `prompts/NN_
+     … +21 lines (~1 KB) (ctrl+o to expand)
+
+⏺ Write(docs/PROGRESS.md)
+  ⎿  Wrote 21 lines to docs/PROGRESS.md
+       1 # Progress
+       2 
+       3 | Inc | Capability | SRS refs | Priority | Status |
+       4 |---|---|---|---|---|
+       5 | 01 | Project setup: workspaces, TS, Vitest, lint, Postgres, CI
+         , TypeDoc | C-05, C-07 | Standard | Not started |
+       6 | 02 | Demo API v1/v2 + specs + migration notes + sample consume
+         r repo (tests pass on v1, fail on v2) | 2.2, 5.2 | Standard | No
+         t started |
+       7 | 03 | Database schema + migrations (incl. 4-attempt limit + gua
+     … +15 lines (~2 KB) (ctrl+o to expand)
+
+⏺ Write(docs/DECISIONS.md)
+  ⎿  Wrote 4 lines to docs/DECISIONS.md
+      1 # Decisions Log
+      2 
+      3 | Date | Increment | Decision | Why |
+      4 |---|---|---|---|
+
+⏺ The master context is in place. I didn't write any application code.
+
+  Files:
+  - prompts/00_master_context.md: already the verbatim prompt, so I left it
+    unchanged
+  - CLAUDE.md: the instruction to read the master context and docs/PROGRESS.md
+    first, plus Sections 7 (working rules) and 8 (report format)
+  - docs/PROGRESS.md: the Section 9 increment table, every row "Not started"
+  - docs/DECISIONS.md: a heading and an empty table (Date | Increment | Decision
+    | Why)
+
+  In Section 9, the "Status" column actually holds Standard/CRITICAL. In
+  PROGRESS.md I renamed that column to Priority and added a separate Status
+  column. I didn't put this in DECISIONS.md because the prompt asked for it to
+  start empty.
+
+  The repo still has no commits, so main doesn't exist yet. I didn't commit
+  anything because the prompt didn't ask for it, but increment 01 needs main to
+  branch from. Do you want me to make an initial commit of these files first?
+
+  Ready for increment 01 (prompts/01_project_setup.md) when you are.
+
+✻ Crunched for 27s · done 12:56 PM
+
+❯    Read prompts/01_project_setup.md and follow it exactly.                    
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+⏺ All the prerequisites are installed, Docker is running, and a remote is set.
+  The repo has no commits, so I'll commit the Prompt 00 files to main first and
+  branch from there.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Next I'll look up current versions so I can pin them exactly.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ TypeScript 7 is the native (Go) rewrite, so I'll check that typescript-eslint
+  and TypeDoc accept it before choosing a version.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ I'll use TypeScript 6.0.3 rather than the latest 7.0.2: typescript-eslint and
+  TypeDoc only accept TypeScript up to 6.0.x. Writing the root config next.
+
+⏺ Bash(cd ~/Desktop/self_maintaining_api && mkdir -p packages/core/src
+      apps/server/src/{http,infra/db,pipeline} apps/web/src demo/api
+      demo/consumer eval .github/workfl…)
+  ⎿  ok
+  ⎿  Created .env.example (+18 -0)
+       1 +# Copy to .env and fill in real values. Never commit .env.     
+       2 +                                                               
+       3 +# PostgreSQL (used by docker-compose and the server)           
+       4 +POSTGRES_USER=sma                                              
+       5 +POSTGRES_PASSWORD=change-me                                    
+       6 +POSTGRES_DB=sma                                                
+       7 +POSTGRES_PORT=5432                                             
+       8 +DATABASE_URL=postgres://sma:change-me@localhost:5432/sma       
+       9 +                                                               
+      10 +# GitHub token used by Delivery (Increment 12) to push branches
+         + and open PRs                                                  
+      11 +GITHUB_TOKEN=                                                  
+      12 +                                                               
+      13 +# LLM provider (used only by apps/server/src/infra/llm/adapter.
+         +ts, Increment 10)                                              
+      14 +ANTHROPIC_API_KEY=                                             
+      15 +LLM_MODEL=claude-sonnet-5-5                                    
+      16 +                                                               
+      17 +# Maximum tokens per repair run; exceeding it aborts the run (F
+         +R-24)                                                          
+      18 +RUN_TOKEN_CEILING=200000                                       
+  ⎿  Created .github/workflows/ci.yml (+19 -0)
+       1 +name: CI                                                       
+       2 +                                                               
+       3 +on:                                                            
+       4 +  push:                                                        
+       5 +  pull_request:                                                
+       6 +                                                               
+       7 +jobs:                                                          
+       8 +  check:                                                       
+       9 +    runs-on: ubuntu-latest                                     
+      10 +    steps:                                                     
+      11 +      - uses: actions/checkout@v4                              
+      12 +      - uses: actions/setup-node@v4                            
+      13 +        with:                                                  
+      14 +          node-version-file: .nvmrc                            
+      15 +          cache: npm                                           
+      16 +      - run: npm ci                                            
+      17 +      - run: npm run typecheck                                 
+      18 +      - run: npm run lint                                      
+      19 +      - run: npm test                                          
+  ⎿  Created .gitignore (+10 -0)
+       1 +node_modules/                                                  
+       2 +dist/                                                          
+       3 +coverage/                                                      
+       4 +.env                                                           
+       5 +.env.*                                                         
+       6 +!.env.example                                                  
+       7 +.work/                                                         
+       8 +docs/api/                                                      
+       9 +*.tsbuildinfo                                                  
+      10 +.DS_Store                                                      
+  ⎿  Created .npmrc (+2 -0)
+      1 +save-exact=true                                                 
+      2 +engine-strict=true                                              
+  ⎿  Created .nvmrc (+1 -0)
+      1 +22                                                              
+  ⎿  … 7 more files changed
+
+⏺ Next, the workspaces.
+
+⏺ Bash(cd ~/Desktop/self_maintaining_api
+      # ---------- packages/core ----------…)
+  ⎿  done
+  ⎿  Created apps/server/drizzle.config.ts (+18 -0)
+       1 +import { existsSync } from 'node:fs';                          
+       2 +import { fileURLToPath } from 'node:url';                      
+       3 +import { defineConfig } from 'drizzle-kit';                    
+       4 +                                                               
+       5 +// Credentials come only from the repo-root .env (never committ
+         +ed).                                                           
+       6 +const envFile = fileURLToPath(new URL('../../.env', import.meta
+         +.url));                                                        
+       7 +if (existsSync(envFile)) process.loadEnvFile(envFile);         
+       8 +                                                               
+       9 +export default defineConfig({                                  
+      10 +  dialect: 'postgresql',                                       
+      11 +  schema: './src/infra/db/schema.ts',                          
+      12 +  out: './drizzle',                                            
+      13 +  dbCredentials: {                                             
+      14 +    url: process.env.DATABASE_URL ?? '',                       
+      15 +  },                                                           
+      16 +  strict: true,                                                
+      17 +  verbose: true,                                               
+      18 +});                                                            
+  ⎿  Created apps/server/package.json (+26 -0)
+       1 +{                                                              
+       2 +  "name": "@sma/server",                                       
+       3 +  "version": "0.1.0",                                          
+       4 +  "private": true,                                             
+       5 +  "description": "Fastify HTTP API and pipeline orchestrator.",
+       6 +  "type": "module",                                            
+       7 +  "scripts": {                                                 
+       8 +    "build": "tsc -p tsconfig.build.json",                     
+       9 +    "dev": "tsx watch src/main.ts",                            
+      10 +    "start": "node dist/main.js",                              
+      11 +    "typecheck": "tsc --noEmit",                               
+      12 +    "test": "vitest run",                                      
+      13 +    "db:generate": "drizzle-kit generate",                     
+      14 +    "db:migrate": "drizzle-kit migrate"                        
+      15 +  },                                                           
+      16 +  "dependencies": {                                            
+      17 +    "drizzle-orm": "0.45.4",                                   
+      18 +    "fastify": "5.12.7",                                       
+      19 +    "pg": "8.23.1"                                             
+      20 +  },                                                           
+      21 +  "devDependencies": {                                         
+      22 +    "@types/pg": "8.23.1",                                     
+      23 +    "drizzle-kit": "0.31.11",                                  
+      24 +    "tsx": "4.23.15"                                           
+      25 +  }                                                            
+      26 +}                                                              
+  ⎿  Created apps/server/src/app.test.ts (+21 -0)
+       1 +import { afterAll, describe, expect, it } from 'vitest';       
+       2 +import { buildApp } from './app.js';                           
+       3 +                                                               
+       4 +describe('GET /health', () => {                                
+       5 +  const app = buildApp();                                      
+       6 +                                                               
+       7 +  afterAll(async () => {                                       
+       8 +    await app.close();                                         
+       9 +  });                                                          
+      10 +                                                               
+      11 +  it('returns 200 { status: "ok" }', async () => {             
+      12 +    const res = await app.inject({ method: 'GET', url: '/health
+         +' });                                                          
+      13 +    expect(res.statusCode).toBe(200);                          
+      14 +    expect(res.json()).toEqual({ status: 'ok' });              
+      15 +  });                                                          
+      16 +                                                               
+      17 +  it('returns 404 for unknown routes', async () => {           
+      18 +    const res = await app.inject({ method: 'GET', url: '/nope' 
+         +});                                                            
+      19 +    expect(res.statusCode).toBe(404);                          
+      20 +  });                                                          
+      21 +});                                                            
+  ⎿  Created apps/server/src/app.ts (+26 -0)
+       1 +/**                                                            
+       2 + * HTTP application factory for the Self-Maintaining APIs serve
+         +r.                                                             
+       3 + *                                                             
+       4 + * @packageDocumentation                                       
+       5 + */                                                            
+       6 +import Fastify, { type FastifyInstance, type FastifyServerOptio
+         +ns } from 'fastify';                                           
+       7 +                                                               
+       8 +/** Body returned by `GET /health`. */                         
+       9 +export interface HealthResponse {                              
+      10 +  status: 'ok';                                                
+      11 +}                                                              
+      12 +                                                               
+      13 +/**                                                            
+      14 + * Builds the Fastify application without opening a port, so te
+         +sts can call                                                   
+      15 + * `app.inject()` directly.                                    
+      16 + *                                                             
+      17 + * @param opts - Fastify server options (for example `{ logger:
+         + true }`).                                                     
+      18 + * @returns A configured, not-yet-listening Fastify instance.  
+      19 + */                                                            
+      20 +export function buildApp(opts: FastifyServerOptions = {}): Fast
+         +ifyInstance {                                                  
+      21 +  const app = Fastify(opts);                                   
+      22 +                                                               
+      23 +  app.get('/health', async (): Promise<HealthResponse> => ({ st
+         +atus: 'ok' }));                                                
+      24 +                                                               
+      25 +  return app;                                                  
+      26 +}                                                              
+  ⎿  Created apps/server/src/http/index.ts (+2 -0)
+      1 +// HTTP route modules (Fastify plugins) are added here from Incr
+        +ement 04 onward.                                                
+      2 +export {};                                                      
+  ⎿  … 28 more files changed
+⏺ Bash(cd ~/Desktop/self_maintaining_api && sed -i '' "s#from './App.js'#from
+      './App'#" apps/web/src/main.tsx apps/web/src/App.test.tsx && npm install
+      2>&1 | tail -15)
+  ⎿  npm error code EBADENGINE
+     npm error engine Unsupported engine
+     npm error engine Not compatible with your version of node/npm: jsdom@3
+     … +7 lines (ctrl+o to expand)
+  ⎿  Updated apps/web/src/App.test.tsx (+1 -1)
+      1  import { afterEach, describe, expect, it, vi } from 'vitest';
+      2  import { cleanup, render, screen } from '@testing-library/react'
+         ;
+      3 -import { App } from './App.js';                                 
+      3 +import { App } from './App';                                    
+      4  
+      5  afterEach(() => {
+      6    cleanup();
+  ⎿  Updated apps/web/src/main.tsx (+1 -1)
+      1  import { StrictMode } from 'react';
+      2  import { createRoot } from 'react-dom/client';
+      3 -import { App } from './App.js';                                 
+      3 +import { App } from './App';                                    
+      4  
+      5  const root = document.getElementById('root');
+      6  if (!root) throw new Error('Missing #root element');
+  ⎿  (timeout 10m)
+
+⏺ jsdom 30 requires Node 22.22 or newer, and this machine has 22.19. I'll pin a
+  jsdom version that supports it.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Bash(cd ~/Desktop/self_maintaining_api && sed -i '' 's/"jsdom":
+      "30.1.3"/"jsdom": "29.1.1"/' apps/web/package.json && npm install 2>&1 |
+      tail -15)
+  ⎿  added 296 packages, and audited 303 packages in 28s
+
+     77 packages are looking for funding
+     … +11 lines (ctrl+o to expand)
+  ⎿  Updated apps/web/package.json (+1 -1)
+      20      "@types/react": "19.3.0",
+      21      "@types/react-dom": "19.3.0",
+      22      "@vitejs/plugin-react": "6.1.2",
+      23 -    "jsdom": "30.1.3",                                         
+      23 +    "jsdom": "29.1.1",                                         
+      24      "vite": "8.3.5"
+      25    }
+      26  }
+  ⎿  … 1 more file changed
+  ⎿  (timeout 10m)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Typecheck, lint, and all 7 tests pass. Next I'll check TypeDoc, the lint ban,
+  Prettier, pinning, and the core import rule.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I'll rerun the pinning check on our own package.json files, skipping
+  node_modules as the last pass did, and then fix the formatting. CLAUDE.md
+  mirrors the master context exactly, so Prettier will leave it alone.
+
+⏺ Bash(cd ~/Desktop/self_maintaining_api && echo CLAUDE.md >> .prettierignore &&
+      npx prettier --write apps/web/src docs/DECISIONS.md docs/PROGRESS.md
+      >/dev/null && npx…)
+  ⎿  Checking formatting...
+     All matched files use Prettier code style!
+     === UNPINNED
+     … +5 lines (ctrl+o to expand)
+  ⎿  Updated .prettierignore (+1 -0)
+       7  prompts/
+       8  docs/*.pdf
+       9  apps/server/drizzle
+      10 +CLAUDE.md                                                      
+  ⎿  Updated apps/web/src/App.test.tsx (+4 -1)
+      20    });
+      21  
+      22    it('shows an unreachable label when the request fails', async
+           () => {
+      23 -    vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new
+         - Error('down'))));                                             
+      23 +    vi.stubGlobal(                                             
+      24 +      'fetch',                                                 
+      25 +      vi.fn(async () => Promise.reject(new Error('down'))),    
+      26 +    );                                                         
+      27  
+      28      render(<App />);
+      29  
+  ⎿  Updated apps/web/src/App.tsx (+3 -1)
+      19        .then(async (res) => {
+      20          const body: unknown = res.ok ? await res.json() : null;
+      21          const isOk =
+      22 -          typeof body === 'object' && body !== null && (body as
+         - { status?: unknown }).status === 'ok';                        
+      22 +          typeof body === 'object' &&                          
+      23 +          body !== null &&                                     
+      24 +          (body as { status?: unknown }).status === 'ok';      
+      25          if (!cancelled) setHealth(isOk ? 'ok' : 'unreachable');
+      26        })
+      27        .catch(() => {
+  ⎿  Updated docs/DECISIONS.md (+1 -1)
+      1  # Decisions Log
+      2  
+      3  | Date | Increment | Decision | Why |
+      4 -|---|---|---|---|                                               
+      4 +| ---- | --------- | -------- | --- |                           
+  ⎿  Updated docs/PROGRESS.md (+19 -19)
+       1  # Progress
+       2  
+       3 -| Inc | Capability | SRS refs | Priority | Status |            
+       4 -|---|---|---|---|---|                                          
+       5 -| 01 | Project setup: workspaces, TS, Vitest, lint, Postgres, C
+         -I, TypeDoc | C-05, C-07 | Standard | Not started |             
+       6 -| 02 | Demo API v1/v2 + specs + migration notes + sample consum
+         -er repo (tests pass on v1, fail on v2) | 2.2, 5.2 | Standard | 
+         -Not started |                                                  
+       7 -| 03 | Database schema + migrations (incl. 4-attempt limit + gu
+         -ard-name constraints) | DR-01–05 | Standard | Not started |    
+       8 -| 04 | Ingest: upload/URL, normalize, hash, baseline, dedupe, f
+         -ailure handling | FR-01–05, FR-11, FR-12 | Standard | Not start
+         -ed |                                                           
+       9 -| 05 | Detect: oasdiff runner + parser + evidence | FR-06, FR-0
+         -8 | Standard | Not started |                                   
+      10 -| 06 | Classify + migration-note parsing + mapping confirmation
+         - | FR-07, FR-09, FR-10, BR-01, BR-04, BR-05 | **CRITICAL** | No
+         -t started |                                                    
+      11 -| 07 | Locate: ts-morph call sites + coverage report | FR-13–17
+         -, BR-02 | Standard | Not started |                             
+      12 -| 08 | Validator: Docker sandbox + output parsing | FR-25, FR-2
+         -6, FR-32, NFR-03 | **CRITICAL (checkpoint)** | Not started |   
+      13 -| 09 | Cheat guards | FR-27–31, DR-04 | **CRITICAL** | Not star
+         -ted |                                                          
+      14 -| 10 | LLM adapter + context assembly | FR-19, C-06, NFR-04, NF
+         -R-08 | Standard | Not started |                                
+      15 -| 11 | Repair loop (retries, error feedback, token ceiling, cos
+         -t) | FR-18, FR-20–24 | **CRITICAL** | Not started |            
+      16 -| 12 | Delivery: branch + PR, flagged findings | FR-33–37, C-02
+         - | Standard | Not started |                                    
+      17 -| 13 | Pipeline orchestrator + run records + JSON/HTML export |
+         - FR-38, FR-39, FR-41 | Standard | Not started |                
+      18 -| 14 | Dashboard (5 views, text labels) | UI-01–04, FR-40, FR-4
+         -2 | Standard | Not started |                                   
+      19 -| 15 | 20 frozen scenarios + failing-before check | EV-01, EV-0
+         -2 | **CRITICAL** | Not started |                               
+      20 -| 16 | Evaluation script: B1/B2/B3, results file, generated tab
+         -les | EV-03–09 | **CRITICAL** | Not started |                  
+      21 -| 17 | Deliverables: class diagram, statechart, TypeDoc, accept
+         -ance records AT-01–12 | 7.1 | Standard | Not started |         
+       3 +| Inc | Capability                                             
+         +                                        | SRS refs             
+         +                    | Priority                  | Status      |
+       4 +| --- | -------------------------------------------------------
+         +--------------------------------------- | ---------------------
+         +------------------- | ------------------------- | ----------- |
+       5 +| 01  | Project setup: workspaces, TS, Vitest, lint, Postgres, 
+         +CI, TypeDoc                             | C-05, C-07           
+         +                    | Standard                  | Not started |
+       6 +| 02  | Demo API v1/v2 + specs + migration notes + sample consu
+         +mer repo (tests pass on v1, fail on v2) | 2.2, 5.2             
+         +                    | Standard                  | Not started |
+       7 +| 03  | Database schema + migrations (incl. 4-attempt limit + g
+         +uard-name constraints)                  | DR-01–05             
+         +                    | Standard                  | Not started |
+       8 +| 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, 
+         +failure handling                        | FR-01–05, FR-11, FR-1
+         +2                   | Standard                  | Not started |
+       9 +| 05  | Detect: oasdiff runner + parser + evidence             
+         +                                        | FR-06, FR-08         
+         +                    | Standard                  | Not started |
+      10 +| 06  | Classify + migration-note parsing + mapping confirmatio
+         +n                                       | FR-07, FR-09, FR-10, 
+         +BR-01, BR-04, BR-05 | **CRITICAL**              | Not started |
+      11 +| 07  | Locate: ts-morph call sites + coverage report          
+         +                                        | FR-13–17, BR-02      
+         +                    | Standard                  | Not started |
+      12 +| 08  | Validator: Docker sandbox + output parsing             
+         +                                        | FR-25, FR-26, FR-32, 
+         +NFR-03              | **CRITICAL (checkpoint)** | Not started |
+      13 +| 09  | Cheat guards                                           
+         +                                        | FR-27–31, DR-04      
+         +                    | **CRITICAL**              | Not started |
+      14 +| 10  | LLM adapter + context assembly                         
+         +                                        | FR-19, C-06, NFR-04, 
+         +NFR-08              | Standard                  | Not started |
+      15 +| 11  | Repair loop (retries, error feedback, token ceiling, co
+         +st)                                     | FR-18, FR-20–24      
+         +                    | **CRITICAL**              | Not started |
+      16 +| 12  | Delivery: branch + PR, flagged findings                
+         +                                        | FR-33–37, C-02       
+         +                    | Standard                  | Not started |
+      17 +| 13  | Pipeline orchestrator + run records + JSON/HTML export 
+         +                                        | FR-38, FR-39, FR-41  
+         +                    | Standard                  | Not started |
+      18 +| 14  | Dashboard (5 views, text labels)                       
+         +                                        | UI-01–04, FR-40, FR-4
+         +2                   | Standard                  | Not started |
+      19 +| 15  | 20 frozen scenarios + failing-before check             
+         +                                        | EV-01, EV-02         
+         +                    | **CRITICAL**              | Not started |
+      20 +| 16  | Evaluation script: B1/B2/B3, results file, generated ta
+         +bles                                    | EV-03–09             
+         +                    | **CRITICAL**              | Not started |
+      21 +| 17  | Deliverables: class diagram, statechart, TypeDoc, accep
+         +tance records AT-01–12                  | 7.1                  
+         +                    | Standard                  | Not started |
+
+⏺ All checks pass. Next I'll check Postgres with a local .env (gitignored) that
+  has a random password.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Postgres is up and healthy. Next I'll check that drizzle-kit loads its config
+  and reads the empty schema.
+
+⏺ Bash(cd ~/Desktop/self_maintaining_api/apps/server && npx drizzle-kit generate
+      2>&1 | tail -5; ls drizzle 2>/dev/null || echo "no drizzle dir created")
+  ⎿  Reading config file '/Users/turbo/Desktop/self_maintaining_api/apps/se
+     rver/drizzle.config.ts'
+     0 tables
+     … +4 lines (ctrl+o to expand)
+  ⎿  Created apps/server/drizzle/meta/_journal.json (+1 -0)
+      1 +{"version":"7","dialect":"postgresql","entries":[]}             
+
+⏺ Bash(cd ~/Desktop/self_maintaining_api && find apps/server/drizzle -type f; rm
+      -rf apps/server/drizzle)
+  ⎿  apps/server/drizzle/meta/_journal.json
+  ⎿  Deleted apps/server/drizzle/meta/_journal.json (+0 -1)
+      1 -{"version":"7","dialect":"postgresql","entries":[]}             
+
+⏺ Next, the README, the decisions log, and progress.
+
+⏺ Write(README.md)
+  ⎿  Wrote 49 lines to README.md
+      1 # Self-Maintaining APIs
+      2 
+      3 When a REST API provider changes its OpenAPI spec in a breaking w
+        ay, this system detects the change, finds the affected call sites
+         in a TypeScript consumer repo, asks an LLM agent for a fix, vali
+        dates that fix in an isolated Docker sandbox, and opens a pull re
+        quest for human review. It also measures how often the agent repa
+        irs breaking changes correctly, and where it fails. (CS 4398, Gro
+        up 13. Requirements: `docs/SRS.pdf`.)
+      4 
+     … +45 lines (ctrl+o to expand)
+
+⏺ Write(docs/DECISIONS.md)
+  ⎿  Added 19 lines, removed 2 lines
+       1  # Decisions Log
+       2  
+       3 -| Date | Increment | Decision | Why |                          
+       4 -| ---- | --------- | -------- | --- |                          
+       3 +| Date       | Increment | Decision | Why |                    
+       4 +| ---------- | --------- | -------- | --- |                    
+       5 +| 2026-11-01 | 00 | `PROGRESS.md` uses separate **Priority** (S
+         +tandard/CRITICAL) and **Status** columns. | Section 9's "Status
+         +" column holds priority; progress tracking needs its own column
+         +. |                                                            
+       6 +| 2026-11-01 | 01 | Made an initial commit on `main` (Prompt 00
+         + files) before creating `feat/inc01-project-setup`. | The repo 
+         +had no commits, so there was no `main` to branch from. |       
+       7 +| 2026-11-01 | 01 | TypeScript pinned to **6.0.3**, not the lat
+         +est 7.0.2. | typescript-eslint 8.72.1 accepts `<6.1.0` and Type
+         +Doc 0.28.20 accepts up to 6.0.x; TS 7 would break lint and docs
+         +. |                                                            
+       8 +| 2026-11-01 | 01 | jsdom pinned to **29.1.1**, not 30.x. | jsd
+         +om 30 needs Node ≥ 22.22; the dev machine runs 22.19, and 29.1.
+         +1 supports ≥ 22.13. |                                          
+       9 +| 2026-11-01 | 01 | `engines.node` = `>=22.13.0 <23.0.0`; `.npm
+         +rc` sets `engine-strict=true`. | Node 22 LTS only; 22.13 is the
+         + lowest version all tools (ESLint 10, Vitest 5, Vite 8) support
+         +. Range written without `^`/`~` to satisfy C-07 checks. |      
+      10 +| 2026-11-01 | 01 | `@types/node` pinned to the 22.x line (22.2
+         +0.5). | Typings should match the Node 22 runtime, not Node 26. 
+         +|                                                              
+      11 +| 2026-11-01 | 01 | `tsconfig.base.json` sets `"types": []`; wo
+         +rkspaces opt in (`node` for server, `vite/client` for web). | E
+         +xplicit ambient types; keeps `packages/core` free of Node globa
+         +ls (supports C-05). |                                          
+      12 +| 2026-11-01 | 01 | `apps/web` overrides `module: ESNext` + `mo
+         +duleResolution: Bundler`. | Vite bundles the web app; NodeNext 
+         +resolution is for Node packages only. |                        
+      13 +| 2026-11-01 | 01 | Tests run per workspace (`npm test --worksp
+         +aces --if-present`), not one root Vitest config. | Each workspa
+         +ce keeps its own environment (jsdom for web, node elsewhere) an
+         +d stays independently runnable. |                              
+      14 +| 2026-11-01 | 01 | ESLint bans `@ts-ignore`, `@ts-nocheck` **a
+         +nd** `@ts-expect-error`; also `no-explicit-any` and empty `catc
+         +h`. | Same rules our cheat guards (FR-29) apply to generated pa
+         +tches. Holding our own code to them is consistent. |           
+      15 +| 2026-11-01 | 01 | `.env.example` adds `POSTGRES_USER/PASSWORD
+         +/DB/PORT` alongside the five required variables. | docker-compo
+         +se must take DB credentials only from `.env` (no hard-coded cre
+         +dentials). |                                                   
+      16 +| 2026-11-01 | 01 | Postgres port bound to `127.0.0.1` only. | 
+         +The DB should not be reachable from the network. |             
+      17 +| 2026-11-01 | 01 | `pg` + `@types/pg` added with Drizzle; `dri
+         +zzle.config.ts` loads the repo-root `.env` via `process.loadEnv
+         +File` (no dotenv dependency). | drizzle-kit needs a Postgres dr
+         +iver; Node 22 has built-in `.env` loading. |                   
+      18 +| 2026-11-01 | 01 | TypeDoc uses the `packages` strategy with a
+         + per-workspace `typedoc.json` (core: `src/index.ts`, server: `s
+         +rc/app.ts`). | Each package documents its own public API; outpu
+         +t is merged into `docs/api/`. |                                
+      19 +| 2026-11-01 | 01 | Package scope `@sma/*` (core, server, web, 
+         +demo-api, demo-consumer, eval). | Short, consistent workspace n
+         +ames. |                                                        
+      20 +| 2026-11-01 | 01 | `prompts/` and `CLAUDE.md` are excluded fro
+         +m Prettier. | They must stay verbatim copies. |                
+      21 +| 2026-11-01 | 01 | CI uses `actions/checkout@v4` / `actions/se
+         +tup-node@v4` with `node-version-file: .nvmrc`. | Stable major v
+         +ersions; the Node version has one source of truth. |           
+
+⏺ Update(docs/PROGRESS.md)
+  ⎿  Added 1 line, removed 1 line
+      2  
+      3  | Inc | Capability                                              
+                                                | SRS refs               
+                           | Priority                  | Status      |
+      4  | --- | --------------------------------------------------------
+         -------------------------------------- | -----------------------
+         ----------------- | ------------------------- | ----------- |
+      5 -| 01  | Project setup: workspaces, TS, Vitest, lint, Postgres, C
+        -I, TypeDoc                             | C-05, C-07             
+        -                  | Standard                  | Not started |   
+      5 +| 01  | Project setup: workspaces, TS, Vitest, lint, Postgres, C
+        +I, TypeDoc                             | C-05, C-07             
+        +                  | Standard                  | Done        |   
+      6  | 02  | Demo API v1/v2 + specs + migration notes + sample consum
+         er repo (tests pass on v1, fail on v2) | 2.2, 5.2               
+                           | Standard                  | Not started |
+      7  | 03  | Database schema + migrations (incl. 4-attempt limit + gu
+         ard-name constraints)                  | DR-01–05               
+                           | Standard                  | Not started |
+      8  | 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, f
+         ailure handling                        | FR-01–05, FR-11, FR-12 
+                           | Standard                  | Not started |
+
+⏺ Next I'll do a clean npm ci and rerun every check.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I'm glad I ran the clean-install check: the lockfile didn't record the nested
+  esbuild 0.25 that drizzle-kit needs. I'll regenerate the lockfile from scratch
+  and run npm ci again.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Regenerating didn't fix it. I'll find which packages need which esbuild
+  version.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The hoisted esbuild is 0.25, which drizzle-kit uses, but Vite and tsx need
+  0.27 or 0.28, likely an npm hoisting bug. I'm pinning esbuild 0.28.2 at the
+  root so drizzle-kit gets its own nested copy.
+
+⏺ Bash(cd ~/Desktop/self_maintaining_api && sed -n '3005,3008p'
+      package-lock.json && npm install -D -E esbuild@0.28.2 2>&1 | grep -E
+      '^added|^changed|error'; rm -rf no…)
+  ⎿      "node_modules/esbuild": {
+           "version": "0.25.12",
+           "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.25.1
+     … +8 lines (ctrl+o to expand)
+  ⎿  Updated package.json (+1 -0)
+      26    "devDependencies": {
+      27      "@eslint/js": "10.0.1",
+      28      "@types/node": "22.20.5",
+      29 +    "esbuild": "0.28.2",                                       
+      30      "eslint": "10.14.0",
+      31      "eslint-config-prettier": "10.1.8",
+      32      "globals": "17.14.0",
+  ⎿  … 1 more file changed
+  ⎿  (timeout 10m)
+
+⏺ npm ci now succeeds from a clean state. Rerunning every check:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Everything passes. Next I'll log the esbuild decision and commit in logical
+  steps.
+
+⏺ Bash(cd ~/Desktop/self_maintaining_api && cat >> docs/DECISIONS.md <<'EOF'
+      | 2026-11-01 | 01 | Root devDependency `esbuild` pinned to 0.28.2. |
+      Without it npm hoiste…)
+  ⎿  c1fabfc docs: log increment 01 decisions and mark it done
+     ab46786 ci: GitHub Actions checks; TypeDoc config and README
+     71ccb2a chore(db): PostgreSQL 16 via docker-compose, pinned by digest,
+     … +12 lines (ctrl+o to expand)
+  ⎿  Updated docs/DECISIONS.md (+20 -19)
+       1  # Decisions Log
+       2  
+       3 -| Date       | Increment | Decision                            
+         -                                                               
+         -                                     | Why                     
+         -                                                               
+         -                                                              |
+       4 -| ---------- | --------- | ------------------------------------
+         ----------------------------------------------------------------
+         ------------------------------------- | ------------------------
+         ----------------------------------------------------------------
+         -------------------------------------------------------------- |
+       5 -| 2026-11-01 | 00        | `PROGRESS.md` uses separate **Priori
+         -ty** (Standard/CRITICAL) and **Status** columns.               
+         -                                     | Section 9's "Status" col
+         -umn holds priority; progress tracking needs its own column.    
+         -                                                              |
+       6 -| 2026-11-01 | 01        | Made an initial commit on `main` (Pr
+         -ompt 00 files) before creating `feat/inc01-project-setup`.     
+         -                                     | The repo had no commits,
+         - so there was no `main` to branch from.                        
+         -                                                              |
+       7 -| 2026-11-01 | 01        | TypeScript pinned to **6.0.3**, not 
+         -the latest 7.0.2.                                              
+         -                                     | typescript-eslint 8.72.1
+         - accepts `<6.1.0` and TypeDoc 0.28.20 accepts up to 6.0.x; TS 7
+         - would break lint and docs.                                   |
+       8 -| 2026-11-01 | 01        | jsdom pinned to **29.1.1**, not 30.x
+         -.                                                              
+         -                                     | jsdom 30 needs Node ≥ 22
+         -.22; the dev machine runs 22.19, and 29.1.1 supports ≥ 22.13.  
+         -                                                              |
+       9 -| 2026-11-01 | 01        | `engines.node` = `>=22.13.0 <23.0.0`
+         -; `.npmrc` sets `engine-strict=true`.                          
+         -                                     | Node 22 LTS only; 22.13 
+         -is the lowest version all tools (ESLint 10, Vitest 5, Vite 8) s
+         -upport. Range written without `^`/`~` to satisfy C-07 checks. |
+      10 -| 2026-11-01 | 01        | `@types/node` pinned to the 22.x lin
+         -e (22.20.5).                                                   
+         -                                     | Typings should match the
+         - Node 22 runtime, not Node 26.                                 
+         -                                                              |
+      11 -| 2026-11-01 | 01        | `tsconfig.base.json` sets `"types": 
+         -[]`; workspaces opt in (`node` for server, `vite/client` for we
+         -b).                                  | Explicit ambient types; 
+         -keeps `packages/core` free of Node globals (supports C-05).    
+         -                                                              |
+      12 -| 2026-11-01 | 01        | `apps/web` overrides `module: ESNext
+         -` + `moduleResolution: Bundler`.                               
+         -                                     | Vite bundles the web app
+         -; NodeNext resolution is for Node packages only.               
+         -                                                              |
+      13 -| 2026-11-01 | 01        | Tests run per workspace (`npm test -
+         --workspaces --if-present`), not one root Vitest config.        
+         -                                     | Each workspace keeps its
+         - own environment (jsdom for web, node elsewhere) and stays inde
+         -pendently runnable.                                           |
+      14 -| 2026-11-01 | 01        | ESLint bans `@ts-ignore`, `@ts-noche
+         -ck` **and** `@ts-expect-error`; also `no-explicit-any` and empt
+         -y `catch`.                           | Same rules our cheat gua
+         -rds (FR-29) apply to generated patches. Holding our own code to
+         - them is consistent.                                          |
+      15 -| 2026-11-01 | 01        | `.env.example` adds `POSTGRES_USER/P
+         -ASSWORD/DB/PORT` alongside the five required variables.        
+         -                                     | docker-compose must take
+         - DB credentials only from `.env` (no hard-coded credentials).  
+         -                                                              |
+      16 -| 2026-11-01 | 01        | Postgres port bound to `127.0.0.1` o
+         -nly.                                                           
+         -                                     | The DB should not be rea
+         -chable from the network.                                       
+         -                                                              |
+      17 -| 2026-11-01 | 01        | `pg` + `@types/pg` added with Drizzl
+         -e; `drizzle.config.ts` loads the repo-root `.env` via `process.
+         -loadEnvFile` (no dotenv dependency). | drizzle-kit needs a Post
+         -gres driver; Node 22 has built-in `.env` loading.              
+         -                                                              |
+      18 -| 2026-11-01 | 01        | TypeDoc uses the `packages` strategy
+         - with a per-workspace `typedoc.json` (core: `src/index.ts`, ser
+         -ver: `src/app.ts`).                  | Each package documents i
+         -ts own public API; output is merged into `docs/api/`.          
+         -                                                              |
+      19 -| 2026-11-01 | 01        | Package scope `@sma/*` (core, server
+         -, web, demo-api, demo-consumer, eval).                         
+         -                                     | Short, consistent worksp
+         -ace names.                                                     
+         -                                                              |
+      20 -| 2026-11-01 | 01        | `prompts/` and `CLAUDE.md` are exclu
+         -ded from Prettier.                                             
+         -                                     | They must stay verbatim 
+         -copies.                                                        
+         -                                                              |
+      21 -| 2026-11-01 | 01        | CI uses `actions/checkout@v4` / `act
+         -ions/setup-node@v4` with `node-version-file: .nvmrc`.          
+         -                                     | Stable major versions; t
+         -he Node version has one source of truth.                       
+         -                                                              |
+       3 +| Date       | Increment | Decision                            
+         +                                                               
+         +                                     | Why                     
+         +                                                               
+         +                                                               
+         +                                                               
+         +     |                                                         
+       4 +| ---------- | --------- | ------------------------------------
+         +---------------------------------------------------------------
+         +------------------------------------ | ------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---- |                                                         
+       5 +| 2026-11-01 | 00        | `PROGRESS.md` uses separate **Priori
+         +ty** (Standard/CRITICAL) and **Status** columns.               
+         +                                     | Section 9's "Status" col
+         +umn holds priority; progress tracking needs its own column.    
+         +                                                               
+         +                                                               
+         +     |                                                         
+       6 +| 2026-11-01 | 01        | Made an initial commit on `main` (Pr
+         +ompt 00 files) before creating `feat/inc01-project-setup`.     
+         +                                     | The repo had no commits,
+         + so there was no `main` to branch from.                        
+         +                                                               
+         +                                                               
+         +     |                                                         
+       7 +| 2026-11-01 | 01        | TypeScript pinned to **6.0.3**, not 
+         +the latest 7.0.2.                                              
+         +                                     | typescript-eslint 8.72.1
+         + accepts `<6.1.0` and TypeDoc 0.28.20 accepts up to 6.0.x; TS 7
+         + would break lint and docs.                                    
+         +                                                               
+         +     |                                                         
+       8 +| 2026-11-01 | 01        | jsdom pinned to **29.1.1**, not 30.x
+         +.                                                              
+         +                                     | jsdom 30 needs Node ≥ 22
+         +.22; the dev machine runs 22.19, and 29.1.1 supports ≥ 22.13.  
+         +                                                               
+         +                                                               
+         +     |                                                         
+       9 +| 2026-11-01 | 01        | `engines.node` = `>=22.13.0 <23.0.0`
+         +; `.npmrc` sets `engine-strict=true`.                          
+         +                                     | Node 22 LTS only; 22.13 
+         +is the lowest version all tools (ESLint 10, Vitest 5, Vite 8) s
+         +upport. Range written without `^`/`~` to satisfy C-07 checks.  
+         +                                                               
+         +     |                                                         
+      10 +| 2026-11-01 | 01        | `@types/node` pinned to the 22.x lin
+         +e (22.20.5).                                                   
+         +                                     | Typings should match the
+         + Node 22 runtime, not Node 26.                                 
+         +                                                               
+         +                                                               
+         +     |                                                         
+      11 +| 2026-11-01 | 01        | `tsconfig.base.json` sets `"types": 
+         +[]`; workspaces opt in (`node` for server, `vite/client` for we
+         +b).                                  | Explicit ambient types; 
+         +keeps `packages/core` free of Node globals (supports C-05).    
+         +                                                               
+         +                                                               
+         +     |                                                         
+      12 +| 2026-11-01 | 01        | `apps/web` overrides `module: ESNext
+         +` + `moduleResolution: Bundler`.                               
+         +                                     | Vite bundles the web app
+         +; NodeNext resolution is for Node packages only.               
+         +                                                               
+         +                                                               
+         +     |                                                         
+      13 +| 2026-11-01 | 01        | Tests run per workspace (`npm test -
+         +-workspaces --if-present`), not one root Vitest config.        
+         +                                     | Each workspace keeps its
+         + own environment (jsdom for web, node elsewhere) and stays inde
+         +pendently runnable.                                            
+         +                                                               
+         +     |                                                         
+      14 +| 2026-11-01 | 01        | ESLint bans `@ts-ignore`, `@ts-noche
+         +ck` **and** `@ts-expect-error`; also `no-explicit-any` and empt
+         +y `catch`.                           | Same rules our cheat gua
+         +rds (FR-29) apply to generated patches. Holding our own code to
+         + them is consistent.                                           
+         +                                                               
+         +     |                                                         
+      15 +| 2026-11-01 | 01        | `.env.example` adds `POSTGRES_USER/P
+         +ASSWORD/DB/PORT` alongside the five required variables.        
+         +                                     | docker-compose must take
+         + DB credentials only from `.env` (no hard-coded credentials).  
+         +                                                               
+         +                                                               
+         +     |                                                         
+      16 +| 2026-11-01 | 01        | Postgres port bound to `127.0.0.1` o
+         +nly.                                                           
+         +                                     | The DB should not be rea
+         +chable from the network.                                       
+         +                                                               
+         +                                                               
+         +     |                                                         
+      17 +| 2026-11-01 | 01        | `pg` + `@types/pg` added with Drizzl
+         +e; `drizzle.config.ts` loads the repo-root `.env` via `process.
+         +loadEnvFile` (no dotenv dependency). | drizzle-kit needs a Post
+         +gres driver; Node 22 has built-in `.env` loading.              
+         +                                                               
+         +                                                               
+         +     |                                                         
+      18 +| 2026-11-01 | 01        | TypeDoc uses the `packages` strategy
+         + with a per-workspace `typedoc.json` (core: `src/index.ts`, ser
+         +ver: `src/app.ts`).                  | Each package documents i
+         +ts own public API; output is merged into `docs/api/`.          
+         +                                                               
+         +                                                               
+         +     |                                                         
+      19 +| 2026-11-01 | 01        | Package scope `@sma/*` (core, server
+         +, web, demo-api, demo-consumer, eval).                         
+         +                                     | Short, consistent worksp
+         +ace names.                                                     
+         +                                                               
+         +                                                               
+         +     |                                                         
+      20 +| 2026-11-01 | 01        | `prompts/` and `CLAUDE.md` are exclu
+         +ded from Prettier.                                             
+         +                                     | They must stay verbatim 
+         +copies.                                                        
+         +                                                               
+         +                                                               
+         +     |                                                         
+      21 +| 2026-11-01 | 01        | CI uses `actions/checkout@v4` / `act
+         +ions/setup-node@v4` with `node-version-file: .nvmrc`.          
+         +                                     | Stable major versions; t
+         +he Node version has one source of truth.                       
+         +                                                               
+         +                                                               
+         +     |                                                         
+     … 1 more lines (ctrl+o to expand)
+⏺ The working tree is clean. Before merging I'll confirm no .env or secrets are
+  tracked, then merge into main with --no-ff and push.
+
+  Pushed to main (ctrl+o to expand)
+
+⏺ Both branches are pushed. I'll check the CI run on GitHub.
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+⏺ INCREMENT 01 REPORT
+  Status: DONE
+  Built:
+  - npm workspaces monorepo (packages/*, apps/*, demo/*, eval) with root scripts
+  typecheck, lint, format, test, docs, db:up, db:down; .nvmrc = 22, engines 
+  set, .npmrc save-exact + engine-strict
+  - tsconfig.base.json (strict, noUncheckedIndexedAccess, ES2022, NodeNext) 
+  extended by each workspace
+  - ESLint flat config + Prettier; bans @ts-ignore / @ts-nocheck / 
+  @ts-expect-error, explicit any and empty catch
+  - packages/core: `version` + `Result<T,E>` (ok / err / isOk / isErr), with 
+  TSDoc, no imports from apps/*
+  - apps/server: Fastify `buildApp()` factory with GET /health → {status:"ok"}; 
+  empty src/http, src/infra, src/pipeline; Drizzle ORM + drizzle-kit config + 
+  empty schema
+  - apps/web: React + Vite page showing "Self-Maintaining APIs" and the /health 
+  result as a text label
+  - demo/api, demo/consumer, eval: placeholder package.json + README naming the 
+  increment that fills each
+  - docker-compose.yml: postgres:16 pinned by digest, named volume, healthcheck,
+  credentials only from .env, bound to 127.0.0.1
+  - .github/workflows/ci.yml (Node 22 → npm ci → typecheck → lint → test); 
+  typedoc.json → docs/api/ (gitignored); README; .gitignore; .env.example with 
+  placeholders only
+  Tests: 7/7 (core 3, server 2, web 2), typecheck: ok, lint: ok
+  Commands to verify:
+  - npm ci
+  - npm run typecheck && npm run lint && npm test
+  - npm run docs   (opens at docs/api/index.html)
+  - cp .env.example .env && npm run db:up   (waits for "Healthy")
+  - npm run dev -w @sma/server, then curl http://127.0.0.1:3000/health
+  - GitHub Actions run 41339771470 on main: success
+  Decisions logged:
+  - TypeScript 6.0.3, not 7.x: typescript-eslint and TypeDoc only support up to 
+  6.0
+  - jsdom 29.1.1, not 30.x: 30 needs Node ≥ 22.22 and this machine has 22.19
+  - esbuild 0.28.2 pinned at root to work around an npm lockfile bug that broke 
+  `npm ci`
+  - engines `>=22.13.0 <23.0.0`; @types/node on the 22.x line
+  - "types": [] in the base tsconfig; web uses Bundler resolution
+  - tests run per workspace
+  - ESLint holds our code to the same rules as the FR-29 cheat guard
+  - POSTGRES_* variables added to .env.example; Postgres bound to localhost only
+  - pg driver added; drizzle config loads .env with Node's built-in loader
+  - TypeDoc "packages" strategy; @sma/* package names
+  - prompts/ and CLAUDE.md excluded from Prettier
+  - initial commit on main made before branching
+  SRS requirements covered: C-05, C-07 (plus groundwork for NFR-04: .env 
+  gitignored, placeholders-only .env.example)
+  Problems / things the human must do:
+  - Prerequisites found: node v22.19.0, npm 11.7.0, Docker 29.9.2, git 2.56.0, 
+  oasdiff 1.35.0. All present.
+  - docs/SRS.pdf exists.
+  - Consider upgrading local Node to the latest 22.x (≥ 22.22) so jsdom can 
+  later move to 30.x.
+  - npm audit reports 17 moderate-severity issues in dev dependencies. I did not
+  run `audit fix`, because it would change exact pins.
+  - A local .env with a random DB password was created (gitignored). Postgres is
+  still running; stop it with `npm run db:down`.
+
+✻ Worked for 7m 29s · done 1:04 PM
