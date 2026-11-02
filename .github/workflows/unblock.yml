@@ -1,0 +1,62 @@
+name: Unblock issues
+
+# When an issue is closed (e.g. by a merged PR with "Closes #n"), find open `blocked` issues whose
+# "Depends on:" line now lists only closed issues, swap `blocked` → `ready`, and comment "Now ready."
+# Merged increments without an issue are written as "Increment NN (merged)" and are ignored.
+
+on:
+  issues:
+    types: [closed]
+  workflow_dispatch: # manual re-check
+
+permissions:
+  issues: write
+
+concurrency:
+  group: unblock-issues
+  cancel-in-progress: false
+
+jobs:
+  unblock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Swap blocked → ready where all dependencies are closed
+        # actions/github-script v9.0.0, pinned to its full commit SHA
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            const blocked = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', labels: 'blocked', per_page: 100,
+            });
+
+            const stateCache = new Map();
+            async function isClosed(number) {
+              if (!stateCache.has(number)) {
+                const { data } = await github.rest.issues.get({ owner, repo, issue_number: number });
+                stateCache.set(number, data.state === 'closed');
+              }
+              return stateCache.get(number);
+            }
+
+            for (const issue of blocked) {
+              if (issue.pull_request) continue;
+              const line = (issue.body ?? '').match(/^Depends on:(.*)$/im);
+              if (!line) {
+                core.info(`#${issue.number}: no "Depends on:" line, skipped`);
+                continue;
+              }
+              const deps = [...line[1].matchAll(/#(\d+)/g)].map((m) => Number(m[1]));
+              const open = [];
+              for (const dep of deps) if (!(await isClosed(dep))) open.push(dep);
+              if (open.length > 0) {
+                core.info(`#${issue.number}: still waiting on ${open.map((n) => '#' + n).join(', ')}`);
+                continue;
+              }
+
+              await github.rest.issues.removeLabel({ owner, repo, issue_number: issue.number, name: 'blocked' });
+              await github.rest.issues.addLabels({ owner, repo, issue_number: issue.number, labels: ['ready'] });
+              await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body: 'Now ready.' });
+              core.info(`#${issue.number}: unblocked`);
+            }
