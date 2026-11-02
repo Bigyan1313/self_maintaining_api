@@ -7,6 +7,24 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Same image digest as docker-compose.yml (postgres:16, C-07).
+        image: postgres@sha256:5db6dac2ef5dcff512f4f00a009c3c332b9f2f28f24277175bf3e4a3d02ef83a
+        env:
+          POSTGRES_USER: sma
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: sma
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sma -d sma"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Throwaway credentials for the CI-only service container; tests derive `sma_test` from this.
+      DATABASE_URL: postgres://sma:ci-only-password@localhost:5432/sma
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,6 +38,8 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
+      # Migrations must also apply cleanly to a normal (non-test) database.
+      - run: npm run db:migrate
       # Standalone sample consumer repo: must typecheck and pass against v1.
       # (consumer:test:v2 is expected to FAIL by design — failing-before rule, EV-02 — so it is not run here.)
       - run: npm run consumer:install
