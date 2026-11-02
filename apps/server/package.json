@@ -6,14 +6,23 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "build:core": "npm run build -w @sma/core",
     "dev": "tsx watch src/main.ts",
+    "predev": "npm run build:core",
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit",
+    "pretypecheck": "npm run build:core",
     "test": "vitest run",
+    "pretest": "npm run build:core",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "predb:generate": "npm run build:core",
+    "db:migrate": "drizzle-kit migrate",
+    "predb:migrate": "npm run build:core",
+    "db:reset:test": "tsx src/infra/db/reset-test-db.ts",
+    "predb:reset:test": "npm run build:core"
   },
   "dependencies": {
+    "@sma/core": "0.1.0",
     "drizzle-orm": "0.45.4",
     "fastify": "5.12.7",
     "pg": "8.23.1"

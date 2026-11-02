@@ -19,7 +19,11 @@ nvm use                 # Node 22
 npm ci                  # install exact, locked dependencies
 cp .env.example .env    # then fill in real values (never commit .env)
 npm run db:up           # start PostgreSQL 16 and wait until healthy
+npm run db:migrate      # apply the SQL migrations in apps/server/drizzle/ to the dev database
 ```
+
+`npm test` needs PostgreSQL running (`npm run db:up`): the server's database tests drop, recreate
+and migrate a separate `sma_test` database before the suite. They never touch the dev database.
 
 ## Common commands
 
@@ -30,6 +34,8 @@ npm run format          # Prettier
 npm test                # Vitest in every workspace
 npm run docs            # TypeDoc → docs/api/
 npm run db:down         # stop PostgreSQL (data kept in a named volume)
+npm run db:generate     # generate a migration after editing apps/server/src/infra/db/schema.ts
+npm run db:reset:test   # drop, recreate and migrate the sma_test database
 
 npm run dev -w @sma/server   # API on http://127.0.0.1:3000 (GET /health)
 npm run dev -w @sma/web      # dashboard on http://localhost:5173
