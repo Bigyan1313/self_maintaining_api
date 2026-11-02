@@ -38,7 +38,7 @@ A working npm-workspaces monorepo where `npm ci`, `npm run typecheck`, `npm run 
 5. **Docs**
    - `typedoc.json` covering `packages/core` and `apps/server`, output to `docs/api/` (gitignored).
    - `README.md`: what the project is (2–3 lines), prerequisites (Node 22, Docker, git, oasdiff), and setup commands.
-   - Check that `docs/SRS.pdf` exists. If it does not, note it under "things the human must do".
+   - Check that `docs/SRS.docx` exists. If it does not, note it under "things the human must do".
 
 6. **Prerequisite check** — run and report the versions of `node`, `npm`, `docker`, `git`, and `oasdiff`. If any is missing, say how to install it on this OS and continue with everything else.
 

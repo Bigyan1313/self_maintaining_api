@@ -9,3 +9,4 @@ docs/*.pdf
 apps/server/drizzle
 CLAUDE.md
 demo/consumer
+docs/SRS.md

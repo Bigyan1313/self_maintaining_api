@@ -1,6 +1,6 @@
 # Self-Maintaining APIs
 
-When a REST API provider changes its OpenAPI spec in a breaking way, this system detects the change, finds the affected call sites in a TypeScript consumer repo, asks an LLM agent for a fix, validates that fix in an isolated Docker sandbox, and opens a pull request for human review. It also measures how often the agent repairs breaking changes correctly, and where it fails. (CS 4398, Group 13. Requirements: `docs/SRS.pdf`.)
+When a REST API provider changes its OpenAPI spec in a breaking way, this system detects the change, finds the affected call sites in a TypeScript consumer repo, asks an LLM agent for a fix, validates that fix in an isolated Docker sandbox, and opens a pull request for human review. It also measures how often the agent repairs breaking changes correctly, and where it fails. (CS 4398, Group 13. Requirements: `docs/SRS.docx`, with a Markdown copy in `docs/SRS.md`.)
 
 ## Prerequisites
 
