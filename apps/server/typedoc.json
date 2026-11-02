@@ -1,5 +1,15 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["src/app.ts", "src/infra/db/index.ts"],
+  "entryPoints": [
+    "src/app.ts",
+    "src/infra/db/index.ts",
+    "src/http/ingest-routes.ts",
+    "src/pipeline/ingest.ts",
+    "src/pipeline/config-validate.ts",
+    "src/pipeline/poller.ts",
+    "src/infra/repo/reader.ts",
+    "src/infra/spec-source/retrieve.ts",
+    "src/infra/spec-source/security.ts"
+  ],
   "tsconfig": "tsconfig.build.json"
 }
