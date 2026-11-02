@@ -8,7 +8,7 @@ its own line here in its own PR only (see Working Rules in `CLAUDE.md`).
 | 01  | Project setup: workspaces, TS, Vitest, lint, Postgres, CI, TypeDoc                             | C-05, C-07                               | Standard                  | Done        | —     |
 | 02  | Demo API v1/v2 + specs + migration notes + sample consumer repo (tests pass on v1, fail on v2) | 2.2, 5.2                                 | Standard                  | Done        | —     |
 | 03  | Database schema + migrations (incl. 4-attempt limit + guard-name constraints)                  | DR-01–05                                 | Standard                  | Done        | —     |
-| 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, failure handling                        | FR-01–05, FR-11, FR-12                   | Standard                  | Not started | #1    |
+| 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, failure handling                        | FR-01–05, FR-11, FR-12                   | Standard                  | Done        | #1    |
 | 05  | Detect: oasdiff runner + parser + evidence                                                     | FR-06, FR-08                             | Standard                  | Not started | #2    |
 | 06  | Classify + migration-note parsing + mapping confirmation                                       | FR-07, FR-09, FR-10, BR-01, BR-04, BR-05 | **CRITICAL**              | Not started | #3    |
 | 07  | Locate: ts-morph call sites + coverage report                                                  | FR-13–17, BR-02                          | Standard                  | Not started | #4    |
