@@ -10,11 +10,20 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./api/contract": {
+      "types": "./dist/api/contract.d.ts",
+      "default": "./dist/api/contract.js"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@seriousme/openapi-schema-validator": "2.11.0",
+    "yaml": "2.9.1",
+    "zod": "4.6.7"
   }
 }

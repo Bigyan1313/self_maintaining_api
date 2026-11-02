@@ -59,3 +59,48 @@ eval/           evaluation script + results
 prompts/        Module-of-Thought prompts, saved verbatim
 docs/           SRS, progress, decisions, diagrams, acceptance records
 ```
+
+## Ingest API (Increment 04)
+
+Start the server with `npm run dev -w @sma/server`; it loads the root `.env`.
+Use Node 22 (`nvm use`, or on Homebrew: `export PATH="/opt/homebrew/opt/node@22/bin:$PATH"`).
+
+- `GET/POST /api/repositories`: register `{ owner, name, defaultBranch, localPath, credentialRef? }`.
+  The path must be a Git repository root with the named local branch. Credentials are environment
+  variable **names**, never token values. Source limits are 200 selected TS/TSX files and 20,000 lines.
+- `GET/POST /api/apis`: register `{ name, specSourceUrl?, specText?, filename?, pollIntervalSeconds? }`.
+  Supply a URL or uploaded spec text. An uploaded registration establishes its baseline atomically.
+- `POST /api/apis/:id/specs`: raw JSON/YAML body, up to 5 MiB. Use `application/json`,
+  `application/yaml`, `application/x-yaml`, `text/yaml`, `text/plain`, or `application/octet-stream`.
+- `POST /api/apis/:id/check`: retrieve the configured URL (empty body or `{}`).
+- `GET /api/apis/:id/checks`: persisted history, including failed checks.
+
+```bash
+curl -H 'Content-Type: application/json' \
+  -d '{"name":"demo-shop","specSourceUrl":"http://localhost:4001/openapi.yaml"}' \
+  http://127.0.0.1:3000/api/apis
+# Replace API_ID with the returned id; manual upload works without a spec HTTP server.
+curl -H 'Content-Type: application/yaml' --data-binary @demo/api/specs/v1.yaml \
+  http://127.0.0.1:3000/api/apis/API_ID/specs
+```
+
+The demo REST app does not currently publish an `/openapi.yaml` route. For URL retrieval, point
+`specSourceUrl` at a server that actually serves a spec; the acceptance test serves the checked-in
+v2 document on a test route of the demo app. Uploaded copies are labeled `uploaded`; the internal
+`ingest(..., { mode: 'fixture', version: 'v1' })` option explicitly labels disk-loaded demo fixtures.
+
+Uploads/checks return `{ check, baselineVersionId, sourceMode }`, with outcome/source values and
+text labels. Failed checks return HTTP 422 (413 for oversized uploads), remain in history, and
+preserve the baseline. Invalid registration returns HTTP 400 with `{ field, message }[]` and
+creates no check. Duplicate registration returns 409. Missing APIs return 404; storage failures
+return 500 without exposing database details. No change list or repair run is created in this increment.
+
+Polling is off unless `pollIntervalSeconds >= 60` is configured. In this single-process server,
+manual and scheduled checks share a queue. Failed checks can be retried; changed specifications
+never advance the baseline automatically. The future orchestrator must explicitly call
+`advanceBaseline` after classification.
+
+The full shared contract is `packages/core/src/api/contract.ts`; dashboard code should import
+`@sma/core/api/contract` to avoid Node-only ingestion imports. Later endpoint contracts are declared
+but their routes are not implemented yet. Increment 07 should reuse `countRepoSize` and
+`repoSkipReason` with the server's `fileSystemRepoReader` instead of adding a second file selector.

@@ -11,3 +11,6 @@ export { version } from './version.js';
 export { ok, err, isOk, isErr } from './result.js';
 export type { Result, Ok, Err } from './result.js';
 export * from './domain/enums.js';
+export * from './api/contract.js';
+export * from './ingest/spec.js';
+export * from './repo/limits.js';
