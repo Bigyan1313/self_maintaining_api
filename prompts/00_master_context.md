@@ -21,7 +21,7 @@ Applications call external REST APIs. Providers change their **OpenAPI** specs: 
 
 **Our system joins the whole path** (spec history → validated fix in the consumer's code → pull request) **and measures** how often an LLM agent repairs a breaking change correctly, and where it fails.
 
-The full requirements are in `docs/SRS.pdf` (Group 13 SRS v1.0). **Requirement IDs (FR-xx, NFR-xx, DR-xx, BR-xx, C-xx, EV-xx, AT-xx) refer to that document.** When a prompt cites an ID, read that part of the SRS.
+The full requirements are in `docs/SRS.docx` (Group 13 SRS v1.0). **Requirement IDs (FR-xx, NFR-xx, DR-xx, BR-xx, C-xx, EV-xx, AT-xx) refer to that document.** When a prompt cites an ID, read that part of the SRS.
 
 ## 2. System architecture — 7-stage pipeline
 
@@ -69,7 +69,7 @@ self-maintaining-apis/
   CLAUDE.md
   prompts/                 # every MoT prompt, saved verbatim (course deliverable #1)
   docs/
-    SRS.pdf  PROGRESS.md  DECISIONS.md
+    SRS.docx  PROGRESS.md  DECISIONS.md
     diagrams/              # class diagram + pipeline statechart (Mermaid/PlantUML)
     acceptance/            # AT-01..AT-12 execution records + screenshots
   packages/core/           # PURE domain logic: ingest, detect-parse, classify, locate, guards, types
