@@ -125,3 +125,31 @@ The full shared contract is `packages/core/src/api/contract.ts`; dashboard code 
 `@sma/core/api/contract` to avoid Node-only ingestion imports. Later endpoint contracts are declared
 but their routes are not implemented yet. Increment 07 should reuse `countRepoSize` and
 `repoSkipReason` with the server's `fileSystemRepoReader` instead of adding a second file selector.
+
+## Classification and mapping confirmation
+
+Increment 06 implements the [classification rules](docs/classification-rules.md).
+Upload a migration note before calling `detectAndClassify` for its version pair:
+
+```text
+POST /api/apis/<api-id>/migration-notes
+Content-Type: application/json
+
+{"fromVersionId":"<old-uuid>","toVersionId":"<new-uuid>","rawYaml":"<migration-note YAML>"}
+```
+
+List labeled findings with `GET /api/changes?apiId=<api-id>`. To explicitly confirm
+an unconfirmed rename, use the mapping shape from the demo migration note:
+
+```text
+POST /api/changes/<change-id>/confirm-mapping
+Content-Type: application/json
+
+{"mapping":{"kind":"field_renamed","method":"GET","path":"/customers/{id}","location":"response","old":"customer_name","new":"full_name"},"confirmedBy":"reviewer-name"}
+```
+
+The server rejects nonexistent targets (400) and already-confirmed mappings (409).
+`confirmedBy` records the supplied reviewer identity; authentication remains outside
+this increment. Without explicit note or human authority, findings stay unconfirmed
+and cannot authorize repair. Classifier checks run with `npm test -w @sma/core`;
+HTTP/database checks run with `npm test -w @sma/server`.
