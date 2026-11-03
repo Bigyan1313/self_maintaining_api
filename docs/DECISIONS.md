@@ -9,7 +9,7 @@ Each file is a table with columns: Date | Increment | Decision | Why.
 | 02 Demo API and consumer             | [docs/decisions/inc02.md](decisions/inc02.md)   |
 | 03 Database schema                   | [docs/decisions/inc03.md](decisions/inc03.md)   |
 | 03b Team workflow                    | [docs/decisions/inc03b.md](decisions/inc03b.md) |
-
-| 04 Ingest | [docs/decisions/inc04.md](decisions/inc04.md) |
+| 04 Ingest                            | [docs/decisions/inc04.md](decisions/inc04.md)   |
+| 05 Detect                            | [docs/decisions/inc05.md](decisions/inc05.md)   |
 
 New increments add `docs/decisions/incNN.md` in their own PR and add one row here.
