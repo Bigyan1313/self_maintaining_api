@@ -1,6 +1,6 @@
 # CLAUDE.md — Self-Maintaining APIs (CS 4398, Group 13)
 
-Before any work, read `prompts/00_master_context.md` and `docs/PROGRESS.md`. Follow the Working Rules in the master context.
+Before any work, read `AGENTS.md`, `prompts/00_master_context.md` and `docs/PROGRESS.md`. Follow the Working Rules in the master context.
 
 ## 7. Working rules for every increment (MANDATORY)
 
