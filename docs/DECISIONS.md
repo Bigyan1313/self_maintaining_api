@@ -14,4 +14,6 @@ Each file is a table with columns: Date | Increment | Decision | Why.
 
 | 06 Classify and mapping confirmation | [docs/decisions/inc06.md](decisions/inc06.md) |
 
+| 07 Locate and coverage | [docs/decisions/inc07.md](decisions/inc07.md) |
+
 New increments add `docs/decisions/incNN.md` in their own PR and add one row here.

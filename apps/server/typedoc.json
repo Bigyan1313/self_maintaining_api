@@ -14,7 +14,8 @@
     "src/infra/oasdiff/runner.ts",
     "src/infra/oasdiff/version.ts",
     "src/pipeline/classify.ts",
-    "src/http/classify-routes.ts"
+    "src/http/classify-routes.ts",
+    "src/pipeline/locate.ts"
   ],
   "tsconfig": "tsconfig.build.json"
 }
