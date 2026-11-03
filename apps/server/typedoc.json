@@ -12,7 +12,9 @@
     "src/infra/spec-source/security.ts",
     "src/pipeline/detect.ts",
     "src/infra/oasdiff/runner.ts",
-    "src/infra/oasdiff/version.ts"
+    "src/infra/oasdiff/version.ts",
+    "src/pipeline/classify.ts",
+    "src/http/classify-routes.ts"
   ],
   "tsconfig": "tsconfig.build.json"
 }
