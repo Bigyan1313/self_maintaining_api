@@ -11,7 +11,7 @@ Each file is a table with columns: Date | Increment | Decision | Why.
 | 03b Team workflow                    | [docs/decisions/inc03b.md](decisions/inc03b.md) |
 | 04 Ingest                            | [docs/decisions/inc04.md](decisions/inc04.md)   |
 | 05 Detect                            | [docs/decisions/inc05.md](decisions/inc05.md)   |
-
-| 06 Classify and mapping confirmation | [docs/decisions/inc06.md](decisions/inc06.md) |
+| 06 Classify and mapping confirmation | [docs/decisions/inc06.md](decisions/inc06.md)   |
+| 08 Validator (Docker sandbox)        | [docs/decisions/inc08.md](decisions/inc08.md)   |
 
 New increments add `docs/decisions/incNN.md` in their own PR and add one row here.

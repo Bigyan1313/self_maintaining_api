@@ -50,7 +50,14 @@ jobs:
           "$HOME/.local/bin/oasdiff" --version
       - run: npm run typecheck
       - run: npm run lint
+      # Includes the Docker validator integration tests (AT-11); the runner has Docker.
       - run: npm test
+      # The validator must leave the developer's repo and Docker clean (FR-20, NFR-06).
+      - name: Validator left no changes or containers behind
+        run: |
+          git status --porcelain -- demo/consumer apps/server/test/fixtures
+          test -z "$(git status --porcelain -- demo/consumer apps/server/test/fixtures)"
+          test -z "$(docker ps --all --quiet --filter label=sma.validator=1)"
       # Migrations must also apply cleanly to a normal (non-test) database.
       - run: npm run db:migrate
       # Standalone sample consumer repo: must typecheck and pass against v1.

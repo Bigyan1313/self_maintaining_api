@@ -14,7 +14,13 @@
     "src/infra/oasdiff/runner.ts",
     "src/infra/oasdiff/version.ts",
     "src/pipeline/classify.ts",
-    "src/http/classify-routes.ts"
+    "src/http/classify-routes.ts",
+    "src/pipeline/validate.ts",
+    "src/infra/process.ts",
+    "src/infra/validator/image.ts",
+    "src/infra/validator/docker.ts",
+    "src/infra/validator/sandbox.ts",
+    "src/infra/workcopy/index.ts"
   ],
   "tsconfig": "tsconfig.build.json"
 }
