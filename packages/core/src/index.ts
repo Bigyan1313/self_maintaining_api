@@ -21,3 +21,8 @@ export * from './migration-note/parse.js';
 export * from './migration-note/validate.js';
 export * from './classify/rules.js';
 export * from './classify/classify.js';
+export * from './validate/types.js';
+export * from './validate/tsc.js';
+export * from './validate/vitest.js';
+export * from './validate/result.js';
+export * from './validate/patch.js';

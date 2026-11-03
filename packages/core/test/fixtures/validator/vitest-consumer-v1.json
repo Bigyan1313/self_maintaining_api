@@ -1,0 +1,232 @@
+{
+  "numTotalTestSuites": 10,
+  "numPassedTestSuites": 10,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 12,
+  "numPassedTests": 12,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1793725199249,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "admin"
+          ],
+          "fullName": "admin cancelling order 2 succeeds",
+          "status": "passed",
+          "title": "cancelling order 2 succeeds",
+          "duration": 14.692875000000015,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "admin"
+          ],
+          "fullName": "admin cancelling an unknown order rejects",
+          "status": "passed",
+          "title": "cancelling an unknown order rejects",
+          "duration": 5.535541000000023,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793725200080,
+      "endTime": 1793725200100.5356,
+      "status": "passed",
+      "message": "",
+      "name": "/work/test/admin.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "customers"
+          ],
+          "fullName": "customers display name for customer 1 is \"Ada Lovelace\"",
+          "status": "passed",
+          "title": "display name for customer 1 is \"Ada Lovelace\"",
+          "duration": 17.93670799999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "customers"
+          ],
+          "fullName": "customers display name for customer 3 is \"Grace Hopper\"",
+          "status": "passed",
+          "title": "display name for customer 3 is \"Grace Hopper\"",
+          "duration": 2.622833000000014,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "customers"
+          ],
+          "fullName": "customers rejects for an unknown customer",
+          "status": "passed",
+          "title": "rejects for an unknown customer",
+          "duration": 2.7771669999999915,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793725199737,
+      "endTime": 1793725199760.777,
+      "status": "passed",
+      "message": "",
+      "name": "/work/test/customers.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "invoices"
+          ],
+          "fullName": "invoices amount due on order 1 is 19.99",
+          "status": "passed",
+          "title": "amount due on order 1 is 19.99",
+          "duration": 19.209333000000015,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "invoices"
+          ],
+          "fullName": "invoices invoice label for order 2 is \"INV-0002 (due 0.00)\"",
+          "status": "passed",
+          "title": "invoice label for order 2 is \"INV-0002 (due 0.00)\"",
+          "duration": 4.36141600000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793725199889,
+      "endTime": 1793725199912.3613,
+      "status": "passed",
+      "message": "",
+      "name": "/work/test/invoices.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "orders"
+          ],
+          "fullName": "orders order 1 total with shipping is 24.99",
+          "status": "passed",
+          "title": "order 1 total with shipping is 24.99",
+          "duration": 17.982708000000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "orders"
+          ],
+          "fullName": "orders order 4 total with shipping is 105",
+          "status": "passed",
+          "title": "order 4 total with shipping is 105",
+          "duration": 2.8729589999999803,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "orders"
+          ],
+          "fullName": "orders rejects for an unknown order",
+          "status": "passed",
+          "title": "rejects for an unknown order",
+          "duration": 3.8785000000000025,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "orders"
+          ],
+          "fullName": "orders open orders are 1 and 3",
+          "status": "passed",
+          "title": "open orders are 1 and 3",
+          "duration": 2.344374999999985,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793725199457,
+      "endTime": 1793725199483.3445,
+      "status": "passed",
+      "message": "",
+      "name": "/work/test/orders.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "unsupported call patterns"
+          ],
+          "fullName": "unsupported call patterns modules load and export functions",
+          "status": "passed",
+          "title": "modules load and export functions",
+          "duration": 0.5836249999999978,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793725199613,
+      "endTime": 1793725199613.5837,
+      "status": "passed",
+      "message": "",
+      "name": "/work/test/unsupported.test.ts"
+    }
+  ]
+}
