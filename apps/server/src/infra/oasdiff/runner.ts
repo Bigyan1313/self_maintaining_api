@@ -71,13 +71,8 @@ function failure(outcome: ExecOutcome, binary: string, timeoutMs: number): Oasdi
   if (e?.killed || e?.signal === 'SIGKILL')
     return { code: 'timeout', message: `oasdiff did not finish within ${timeoutMs} ms` };
   const exit = typeof e?.code === 'number' ? e.code : 'unknown';
-  // Only the first line of stderr: oasdiff errors name files/positions, not spec contents.
-  const reason =
-    outcome.stderr
-      .split('\n')
-      .find((l) => l.trim())
-      ?.slice(0, 300) ?? 'no message';
-  return { code: 'bad_output', message: `oasdiff exited with code ${exit}: ${reason}` };
+  // stderr can contain untrusted spec values, URLs and credentials; never return it.
+  return { code: 'bad_output', message: `oasdiff exited with code ${exit}` };
 }
 
 /**

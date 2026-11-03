@@ -83,7 +83,7 @@ describe.skipIf(!realAvailable)('runOasdiff with the real pinned binary', () => 
     };
     const result = await runOasdiff(spec, spec);
     expect(result).toMatchObject({ ok: false, error: { code: 'bad_output' } });
-    if (!result.ok) expect(result.error.message).toContain('disallowed external reference');
+    if (!result.ok) expect(result.error.message).not.toContain('127.0.0.1');
   });
 });
 
@@ -127,11 +127,11 @@ describe('runOasdiff typed failures (fake binaries)', () => {
     });
   });
 
-  it('non-zero exit → bad_output with the first stderr line', async () => {
-    const binary = await fake(`${version}\necho "Error: failed to load base spec" >&2\nexit 102`);
+  it('non-zero exit → bad_output without exposing stderr', async () => {
+    const binary = await fake(`${version}\necho "Error: secret-token-in-spec" >&2\nexit 102`);
     const result = await runOasdiff({}, {}, { binary });
     expect(result).toMatchObject({ ok: false, error: { code: 'bad_output' } });
-    if (!result.ok) expect(result.error.message).toContain('failed to load base spec');
+    if (!result.ok) expect(result.error.message).toBe('oasdiff exited with code 102');
   });
 
   it('passes the expected arguments and only PATH in the environment', async () => {

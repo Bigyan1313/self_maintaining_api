@@ -206,7 +206,8 @@ function walkSchema(doc: unknown, schema: Located, propertyPath: string[]): Loca
 function mediaTypes(content: Located, preferred?: string): string[] {
   if (!isRecord(content.value)) return [];
   const keys = Object.keys(content.value).sort();
-  const first = [preferred, 'application/json'].filter((k): k is string => !!k && keys.includes(k));
+  if (preferred !== undefined) return keys.includes(preferred) ? [preferred] : [];
+  const first = ['application/json'].filter((k): k is string => !!k && keys.includes(k));
   return [...new Set([...first, ...keys])];
 }
 

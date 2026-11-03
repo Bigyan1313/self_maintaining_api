@@ -142,3 +142,35 @@ describe('locateInSpec', () => {
     });
   });
 });
+
+describe('explicit media type evidence', () => {
+  const doc = {
+    paths: {
+      '/x': {
+        get: {
+          responses: {
+            '200': {
+              content: {
+                'application/json': { schema: { properties: { name: { type: 'string' } } } },
+                'application/xml': { schema: { properties: {} } },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  it('does not borrow a property from another media type when removed or absent', () => {
+    for (const mediaType of ['application/xml', 'text/plain']) {
+      expect(
+        resolveAnchor(doc, '/x', 'GET', {
+          kind: 'response-property',
+          status: '200',
+          propertyPath: ['name'],
+          mediaType,
+        }),
+      ).toBeNull();
+    }
+  });
+});
