@@ -1,0 +1,1393 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.317
+           Opus 5.5 · Claude Pro
+ ▘▘   ▝▝   ~/Desktop/self_maintaining_api
+
+
+❯ /clear                                                                        
+
+❯ /restart 
+  ⎿  Successfully updated from 2.1.316 to version 2.1.317
+
+❯ start the 05 issue                                                            
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ I stopped before starting Increment 05. Its GitHub issue, #2 ("Increment 05:
+  Detect (oasdiff runner + parser)"), has no one assigned, and the project's
+  working rules say to stop unless the issue is assigned to you (Bigyan1313).
+
+  The issue is labelled ready, and its instructions say to take it by assigning
+  yourself. No one else has claimed it. You can assign it yourself:
+
+  ! gh issue edit 2 --add-assignee @me
+
+  Or tell me to do it. Once it's assigned I'll run the setup: switch to main and
+  pull, then run npm ci, npm run consumer:install and npm run db:migrate. Then
+  I'll create the feat/inc05-detect branch and follow prompts/05_detect.md,
+  which is already saved.
+
+✻ Sautéed for 12s · done Monday 11:36 PM
+
+❯ yes it is assignmed to me                                                     
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Confirmed. Starting setup.
+
+⏺ Bash(git checkout main && git pull && npm ci 2>&1 | tail -3 && npm run
+      consumer:install 2>&1 | tail -3 && npm run db:migrate 2>&1 | tail -5 &&
+      git checkout -b feat/i…)
+  ⎿  Switched to branch 'main'
+     Your branch is up to date with 'origin/main'.
+     From https://github.com/Bigyan1313/self_maintaining_api
+     … +86 lines (ctrl+o to expand)
+  ⎿  Updated README.md (+45 -0)
+  ⎿  Updated apps/server/package.json (+1 -0)
+  ⎿  Updated apps/server/src/app.ts (+22 -3)
+  ⎿  Created apps/server/src/http/ingest-routes.ts (+193 -0)
+  ⎿  Created apps/server/src/infra/repo/reader.ts (+32 -0)
+  ⎿  … 24 more files changed
+  ⎿  (a git step in this command can move the working tree, so these may be
+     its changes, not edits) (ctrl+o to expand)
+  ⎿  (timeout 5m)
+
+⏺ Setup done. Now exploring the codebase.
+
+  Listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+⏺ Now let me see the real oasdiff output and the schema for changes.
+
+  Searched for 1 pattern, ran 3 shell commands (ctrl+o to expand)
+
+⏺ Let me get the release checksum for CI and check the oasdiff flags behave.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Checksum verified. Recording the fixture and writing the core parser.
+
+⏺ Bash(mkdir -p packages/core/test/fixtures packages/core/src/detect
+      apps/server/src/infra/oasdiff && oasdiff changelog demo/api/specs/v1.yaml
+      demo/api/specs/v2.yaml -…)
+  ⎿       159 packages/core/test/fixtures/oasdiff-demo-v1-v2.json
+     node_modules
+     dist
+     … +10 lines (ctrl+o to expand)
+  ⎿  Created packages/core/test/fixtures/oasdiff-demo-v1-v2.json (+159 -0)
+        1 +[                                                             
+        2 +  {                                                           
+        3 +    "id": "response-required-property-removed",               
+        4 +    "text": "removed the required property `customer_name` fro
+          +m the response with the `200` status",                        
+        5 +    "level": 3,                                               
+        6 +    "operation": "GET",                                       
+        7 +    "operationId": "getCustomer",                             
+        8 +    "path": "/customers/{id}",                                
+        9 +    "section": "paths",                                       
+       10 +    "baseSource": {                                           
+       11 +      "file": "demo/api/specs/v1.yaml",                       
+       12 +      "line": 115,                                            
+       13 +      "column": 9,                                            
+       14 +      "endLine": 116,                                         
+       15 +      "endColumn": 23                                         
+       16 +    },                                                        
+       17 +    "fingerprint": "dbcdbdf72eb5"                             
+       18 +  },                                                          
+       19 +  {                                                           
+       20 +    "id": "request-parameter-became-required",                
+       21 +    "text": "the `query` request parameter `status` became req
+          +uired",                                                       
+       22 +    "level": 3,                                               
+       23 +    "operation": "GET",                                       
+       24 +    "operationId": "listOrders",                              
+       25 +    "path": "/orders",                                        
+       26 +    "section": "paths",                                       
+       27 +    "baseSource": {                                           
+       28 +      "file": "demo/api/specs/v1.yaml",                       
+       29 +      "line": 31,                                             
+       30 +      "column": 11                                            
+       31 +    },                                                        
+       32 +    "revisionSource": {                                       
+       33 +      "file": "demo/api/specs/v2.yaml",                       
+       34 +      "line": 31,                                             
+       35 +      "column": 11                                            
+       36 +    },                                                        
+       37 +    "fingerprint": "36429942de7a"                             
+       38 +  },                                                          
+       39 +  {                                                           
+       40 +    "id": "api-removed-without-deprecation",                  
+     … 119 more lines (ctrl+o to expand)
+
+⏺ Write(packages/core/src/detect/types.ts)
+  ⎿  Wrote 52 lines to packages/core/src/detect/types.ts
+      1 /**
+      2  * Detect-stage types (FR-06, FR-08). Detection only reports *wha
+        t is different*; it never
+      3  * decides breaking/safe (Increment 06) and never claims consumer
+         code is broken (BR-01).
+      4  */
+      5 
+      6 /** HTTP methods an OpenAPI operation can use. */
+      7 export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELE
+        TE', 'HEAD', 'OPTIONS'] as const;
+     … +45 lines (ctrl+o to expand)
+
+⏺ Write(packages/core/src/detect/pointer.ts)
+  ⎿  Wrote 268 lines to packages/core/src/detect/pointer.ts
+       1 /**
+       2  * Pure RFC 6901 JSON Pointer helpers plus a resolver that maps 
+         a difference's "anchor" (an
+       3  * operation, a parameter, a response property…) to the pointer 
+         where that item actually lives,
+       4  * following local `$ref`s. No I/O.
+       5  */
+       6 
+       7 const MAX_REF_HOPS = 32;
+       8 const MAX_COMBINATOR_DEPTH = 8;
+     … +260 lines (ctrl+o to expand)
+
+⏺ Write(packages/core/src/detect/parse.ts)
+  ⎿  Wrote 287 lines to packages/core/src/detect/parse.ts
+       1 import { createHash } from 'node:crypto';
+       2 import { err, ok, type Result } from '../result.js';
+       3 import {
+       4   buildJsonPointer,
+       5   extractEvidence,
+       6   resolveAnchor,
+       7   type DifferenceAnchor,
+       8 } from './pointer.js';
+       9 import {
+      10   HTTP_METHODS,
+     … +277 lines (ctrl+o to expand)
+
+⏺ Bash(cat >> packages/core/src/index.ts <<'EOF'
+      export * from './detect/types.js';…)
+  ⎿  > @sma/core@0.1.0 build
+     > tsc -p tsconfig.build.json
+     … +312 lines (ctrl+o to expand)
+  ⎿  Updated packages/core/src/index.ts (+3 -0)
+      14  export * from './api/contract.js';
+      15  export * from './ingest/spec.js';
+      16  export * from './repo/limits.js';
+      17 +export * from './detect/types.js';                             
+      18 +export * from './detect/pointer.js';                           
+      19 +export * from './detect/parse.js';                             
+
+⏺ Parser output looks right for all 9 entries. Now the core tests.
+
+⏺ Write(packages/core/src/detect/parse.test.ts)
+  ⎿  Wrote 279 lines to packages/core/src/detect/parse.test.ts
+       1 import { readFileSync } from 'node:fs';
+       2 import { describe, expect, it } from 'vitest';
+       3 import { parse } from 'yaml';
+       4 import {
+       5   anchorFor,
+       6   differenceId,
+       7   extractDetails,
+       8   mapOasdiffLevel,
+       9   parseOasdiffChangelog,
+      10 } from './parse.js';
+     … +269 lines (ctrl+o to expand)
+
+⏺ Write(packages/core/src/detect/pointer.test.ts)
+  ⎿  Wrote 119 lines to packages/core/src/detect/pointer.test.ts
+       1 import { describe, expect, it } from 'vitest';
+       2 import {
+       3   buildJsonPointer,
+       4   escapePointerSegment,
+       5   extractEvidence,
+       6   parseJsonPointer,
+       7   resolveAnchor,
+       8 } from './pointer.js';
+       9 
+      10 describe('RFC 6901 helpers', () => {
+     … +109 lines (ctrl+o to expand)
+
+⏺ Write(packages/core/src/boundaries.test.ts)
+  ⎿  Wrote 35 lines to packages/core/src/boundaries.test.ts
+       1 import { readdirSync, readFileSync } from 'node:fs';
+       2 import { join } from 'node:path';
+       3 import { fileURLToPath } from 'node:url';
+       4 import { describe, expect, it } from 'vitest';
+       5 
+       6 /** C-05 / NFR-08: core stays pure — no process spawning, networ
+         k, Docker, LLM, or apps/* imports. */
+       7 const FORBIDDEN = [
+       8   /^(node:)?child_process$/,
+       9   /^(node:)?(net|http|https|http2|dgram|tls|dns)$/,
+     … +26 lines (ctrl+o to expand)
+
+⏺ Bash(npx prettier --write packages/core/src/detect
+      packages/core/src/boundaries.test.ts >/dev/null && npm test -w @sma/core
+      2>&1 | tail -25 && npm run typecheck -w @…)  ⎿    }
+
+      ❯ src/detect/parse.test.ts:209:39
+     … +26 lines (ctrl+o to expand)
+  ⎿  Updated packages/core/src/detect/parse.test.ts (+12 -3)
+      210    });
+      211  
+      212    it('rejects output that is not a JSON array of objects', () 
+           => {
+      213 -    expect(parseOasdiffChangelog('not json')).toMatchObject({ 
+          -ok: false, error: { code: 'bad_output' } });                  
+      214 -    expect(parseOasdiffChangelog({ a: 1 })).toMatchObject({ ok
+          -: false, error: { code: 'bad_output' } });                    
+      213 +    expect(parseOasdiffChangelog('not json')).toMatchObject({ 
+      214 +      ok: false,                                              
+      215 +      error: { code: 'bad_output' },                          
+      216 +    });                                                       
+      217 +    expect(parseOasdiffChangelog({ a: 1 })).toMatchObject({   
+      218 +      ok: false,                                              
+      219 +      error: { code: 'bad_output' },                          
+      220 +    });                                                       
+      221      expect(parseOasdiffChangelog([1])).toMatchObject({ ok: fal
+           se, error: { code: 'bad_output' } });
+      222    });
+      223  
+     ...
+      231  describe('extractDetails', () => {
+      232    it('reads parameter location and name', () => {
+      233      expect(
+      228 -      extractDetails('new-required-request-parameter', 'added 
+          -the new required `header` request parameter `X-Key`'),        
+      234 +      extractDetails(                                         
+      235 +        'new-required-request-parameter',                     
+      236 +        'added the new required `header` request parameter `X-
+          +Key`',                                                        
+      237 +      ),                                                      
+      238      ).toMatchObject({ paramIn: 'header', paramName: 'X-Key' })
+           ;
+      239    });
+      240  
+  ⎿  Updated packages/core/src/detect/pointer.test.ts (+11 -3)
+      39        post: {
+      40          requestBody: { $ref: '#/components/requestBodies/NewIte
+          m' },
+      41          responses: {
+      42 -          '201': { content: { 'application/json': { schema: { $
+         -ref: '#/components/schemas/Item' } } } },                      
+      42 +          '201': {                                             
+      43 +            content: { 'application/json': { schema: { $ref: '#
+         +/components/schemas/Item' } } },                               
+      44 +          },                                                   
+      45            default: { description: 'err' },
+      46          },
+      47        },
+     ...
+      60    },
+      61    components: {
+      62      requestBodies: {
+      61 -      NewItem: { content: { 'application/json': { schema: { $re
+         -f: '#/components/schemas/Base' } } } },                        
+      63 +      NewItem: {                                               
+      64 +        content: { 'application/json': { schema: { $ref: '#/com
+         +ponents/schemas/Base' } } },                                   
+      65 +      },                                                       
+      66      },
+      67      schemas: {
+      68        Base: { properties: { name: { type: 'string' } } },
+     ...
+       94    it('handles arrays with or without an explicit items step', 
+           () => {
+       95      for (const propertyPath of [['items', 'name'], ['name']])
+       96        expect(
+       93 -        resolveAnchor(spec, '/items', 'GET', { kind: 'response
+          --property', status: null, propertyPath }),                    
+       97 +        resolveAnchor(spec, '/items', 'GET', {                
+       98 +          kind: 'response-property',                          
+       99 +          status: null,                                       
+      100 +          propertyPath,                                       
+      101 +        }),                                                   
+      102        ).toBe('/components/schemas/Base/properties/name');
+      103    });
+      104  
+  ⎿  Updated packages/core/src/detect/pointer.ts (+14 -6)
+      81    | { kind: 'request-body' }
+      82    | { kind: 'request-property'; propertyPath: string[]; mediaTy
+          pe?: string }
+      83    | { kind: 'response'; status: string | null }
+      84 -  | { kind: 'response-property'; status: string | null; propert
+         -yPath: string[]; mediaType?: string };                         
+      84 +  | {                                                          
+      85 +      kind: 'response-property';                               
+      86 +      status: string | null;                                   
+      87 +      propertyPath: string[];                                  
+      88 +      mediaType?: string;                                      
+      89 +    };                                                         
+      90  
+      91  interface Located {
+      92    pointer: string;
+     ...
+      196  function mediaTypes(content: Located, preferred?: string): str
+           ing[] {
+      197    if (!isRecord(content.value)) return [];
+      198    const keys = Object.keys(content.value).sort();
+      194 -  const first = [preferred, 'application/json'].filter(       
+      195 -    (k): k is string => !!k && keys.includes(k),              
+      196 -  );                                                          
+      199 +  const first = [preferred, 'application/json'].filter((k): k 
+          +is string => !!k && keys.includes(k));                        
+      200    return [...new Set([...first, ...keys])];
+      201  }
+      202  
+     ...
+      221    const keys = Object.keys(responses.value);
+      222    if (status !== null) return keys.includes(status) ? [status]
+            : [];
+      223    // No status given: success responses first, then the rest, 
+           in a fixed order.
+      221 -  return keys.sort((a, b) => Number(!a.startsWith('2')) - Numb
+          -er(!b.startsWith('2')) || (a < b ? -1 : 1));                  
+      224 +  return keys.sort(                                           
+      225 +    (a, b) => Number(!a.startsWith('2')) - Number(!b.startsWit
+          +h('2')) || (a < b ? -1 : 1),                                  
+      226 +  );                                                          
+      227  }
+      228  
+      229  /**
+     ...
+      254        return child(doc, op.pointer, 'requestBody')?.pointer ??
+            null;
+      255      case 'request-property': {
+      256        const body = child(doc, op.pointer, 'requestBody');
+      252 -      return (body && propertyInContent(doc, body, anchor.prop
+          -ertyPath, anchor.mediaType))?.pointer ?? null;                
+      257 +      return (                                                
+      258 +        (body && propertyInContent(doc, body, anchor.propertyP
+          +ath, anchor.mediaType))?.pointer ??                           
+      259 +        null                                                  
+     … 4 more lines (ctrl+o to expand)
+
+⏺ Bash(python3 - <<'EOF'
+      p='packages/core/src/detect/parse.ts'…)
+  ⎿   Test Files  8 passed (8)
+           Tests  116 passed (116)
+  ⎿  Updated packages/core/src/detect/parse.ts (+2 -1)
+      194    specs: DetectSpecs = {},
+      195  ): Result<SpecDifference[], DetectParseError> {
+      196    let data = json;
+      197 +  if (typeof data === 'string' && data.trim() === '') data = n
+          +ull;                                                          
+      198    if (typeof data === 'string') {
+      199      try {
+      200        data = JSON.parse(data) as unknown;
+     ...
+      202        return err({ code: 'bad_output', message: 'oasdiff outpu
+           t is not valid JSON' });
+      203      }
+      204    }
+      204 -  if (data === null || data === '') data = []; // oasdiff prin
+          -ts `null` / nothing when specs are identical                  
+      205 +  if (data === null) data = []; // oasdiff prints `null` / not
+          +hing when specs are identical                                 
+      206    if (!Array.isArray(data))
+      207      return err({ code: 'bad_output', message: 'oasdiff output 
+           is not a JSON array' });
+      208  
+
+  Ran 1 shell command (ctrl+o to expand)
+  ⎿  PostToolUse:Bash says: Tip: Run /ultrareview before you push to catch bugs 
+     with a cloud-based multi-agent review — 3 free reviews left.
+
+⏺ Now the runner in server infra.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(apps/server/src/infra/oasdiff/version.ts)
+  ⎿  Wrote 5 lines to apps/server/src/infra/oasdiff/version.ts
+      1 /**
+      2  * The oasdiff release this project is pinned to (C-07). The runn
+        er refuses any other version.
+      3  * Keep in sync with the README prerequisites table and `.github/
+        workflows/ci.yml`.
+      4  */
+      5 export const OASDIFF_VERSION = '1.35.0';
+
+⏺ Write(apps/server/src/infra/oasdiff/runner.ts)
+  ⎿  Wrote 148 lines to apps/server/src/infra/oasdiff/runner.ts
+      1 import { execFile } from 'node:child_process';
+      2 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+      3 import { tmpdir } from 'node:os';
+      4 import { join } from 'node:path';
+      5 import { err, ok, type Result } from '@sma/core';
+      6 import { OASDIFF_VERSION } from './version.js';
+      7 
+      8 /** Typed runner failures; callers never see a raw child-process 
+        exception. */
+      9 export type OasdiffErrorCode = 'binary_missing' | 'version_mismat
+     … +140 lines (~5 KB) (ctrl+o to expand)
+
+  Searched for 2 patterns (ctrl+o to expand)
+
+⏺ Inc06 will write its changes rows through my helper, which I'm extending to
+  accept mapping fields and to stay idempotent per (from, to). I'm also tracking
+  a logical pointer into the operation next to the resolvable one, since FR-06
+  asks for it.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ I'll rewrite the resolver section to carry the logical (through-the-operation)
+  pointer as well.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Bash(head -90 packages/core/src/detect/pointer.ts >
+      /private/tmp/claude-501/-Users-turbo-Desktop-self-maintaining-api/f5e99662
+      -b179-4c38-bb1c-fea4b2973ed7/scratchpad…)
+  ⎿  7:const MAX_REF_HOPS = 32;
+     8:const MAX_COMBINATOR_DEPTH = 8;
+  ⎿  Updated packages/core/src/detect/pointer.ts (+85 -48)
+       88        mediaType?: string;
+       89      };
+       90  
+       91 +/**                                                           
+       92 + * Where an anchored item was found in one spec.              
+       93 + * - `pointer`: RFC 6901 pointer to the real location (local `
+          +$ref`s followed), so a plain lookup                           
+       94 + *   resolves it.                                             
+       95 + * - `operationPointer`: the same item addressed through the p
+          +ath/operation (FR-06 "pointer into                            
+       96 + *   the operation"); it resolves only when `$ref`s along the 
+          +way are followed.                                             
+       97 + */                                                           
+       98 +export interface AnchorLocation {                             
+       99 +  pointer: string;                                            
+      100 +  operationPointer: string;                                   
+      101 +}                                                             
+      102 +                                                              
+      103  interface Located {
+      104    pointer: string;
+      105 +  logical: string;                                            
+      106    value: unknown;
+      107  }
+      108  
+      109 +const ROOT: Omit<Located, 'value'> = { pointer: '', logical: '
+          +' };                                                          
+      110 +                                                              
+      111  /** Follows local `$ref`s (`#/...`) from `pointer` until a non
+           -reference node is reached. */
+       97 -function deref(doc: unknown, pointer: string): Located | null 
+          -{                                                             
+      112 +function deref(doc: unknown, pointer: string, logical: string)
+          +: Located | null {                                            
+      113    let current = pointer;
+      114    for (let hop = 0; hop <= MAX_REF_HOPS; hop++) {
+      115      const { found, value } = lookup(doc, current);
+      116      if (!found) return null;
+      117      if (isRecord(value) && typeof value.$ref === 'string') {
+      118        const ref = value.$ref;
+      104 -      if (!ref.startsWith('#')) return { pointer: current, val
+          -ue }; // external refs are not followed                       
+      119 +      if (!ref.startsWith('#')) return { pointer: current, log
+          +ical, value }; // external: not followed                      
+      120        try {
+      121          current = decodeURIComponent(ref.slice(1));
+      122        } catch {
+     ...
+      124        }
+      125        continue;
+      126      }
+     … 190 more lines (ctrl+o to expand)
+
+⏺ Now wire operationPointer into the parser's locate.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Bash(python3 - <<'EOF'
+      p='packages/core/src/detect/parse.ts'…)
+  ⎿   Test Files  8 passed (8)
+           Tests  118 passed (118)
+  ⎿  Updated packages/core/src/detect/parse.test.ts (+12 -0)
+      286      expect(mapOasdiffLevel(7)).toBeNull();
+      287    });
+      288  });
+      289 +                                                              
+      290 +describe('operationPointer (FR-06: pointer into the operation)
+          +', () => {                                                    
+      291 +  it('addresses $ref-ed items through the path and operation',
+          + () => {                                                      
+      292 +    const diffs = parseDemo();                                
+      293 +    const total = find(diffs, 'response-property-type-changed'
+          +, 'GET', '/orders/{id}');                                     
+      294 +    expect(total.details.operationPointer).toBe(              
+      295 +      '/paths/~1orders~1{id}/get/responses/200/content/applica
+          +tion~1json/schema/properties/total',                          
+      296 +    );                                                        
+      297 +    const status = find(diffs, 'request-parameter-became-requi
+          +red', 'GET', '/orders');                                      
+      298 +    expect(status.details.operationPointer).toBe(status.jsonPo
+          +inter);                                                       
+      299 +  });                                                         
+      300 +});                                                           
+  ⎿  Updated packages/core/src/detect/parse.ts (+13 -4)
+      3  import {
+      4    buildJsonPointer,
+      5    extractEvidence,
+      6 -  resolveAnchor,                                                
+      6 +  locateInSpec,                                                 
+      7    type DifferenceAnchor,
+      8  } from './pointer.js';
+      9  import {
+     ...
+      139  interface Located {
+      140    jsonPointer: string;
+      141    pointerAfter: string | null;
+      142 +  operationPointer: string;                                   
+      143    precision: string;
+      144    evidenceBefore: unknown | null;
+      145    evidenceAfter: unknown | null;
+     ...
+      156    if (method && anchor.kind !== 'operation') tries.push({ kind
+           : 'operation' });
+      157    if (anchor.kind !== 'path') tries.push({ kind: 'path' });
+      158    for (const attempt of tries) {
+      158 -    const before = resolveAnchor(specs.before, path, method, a
+          -ttempt);                                                      
+      159 -    const after = resolveAnchor(specs.after, path, method, att
+          -empt);                                                        
+      159 +    const hitBefore = locateInSpec(specs.before, path, method,
+          + attempt);                                                    
+      160 +    const hitAfter = locateInSpec(specs.after, path, method, a
+          +ttempt);                                                      
+      161 +    const before = hitBefore?.pointer ?? null;                
+      162 +    const after = hitAfter?.pointer ?? null;                  
+      163      if (before === null && after === null) continue;
+      164      return {
+      165        jsonPointer: (before ?? after)!,
+      166        pointerAfter: after,
+      167 +      operationPointer: (hitBefore ?? hitAfter)!.operationPoin
+          +ter,                                                          
+      168        precision: attempt.kind,
+      169        evidenceBefore: before === null ? null : extractEvidence
+           (specs.before, before),
+      170        evidenceAfter: after === null ? null : extractEvidence(s
+           pecs.after, after),
+      171      };
+      172    }
+      173    // Not found in either spec (or no specs supplied): a nomina
+           l pointer to the operation/path.
+      174 +  const nominal = buildJsonPointer(                           
+      175 +    method ? ['paths', path, method.toLowerCase()] : ['paths',
+          + path],                                                       
+      176 +  );                                                          
+      177    return {
+      171 -    jsonPointer: buildJsonPointer(method ? ['paths', path, met
+          -hod.toLowerCase()] : ['paths', path]),                        
+     … 13 more lines (ctrl+o to expand)
+  ⎿  Updated packages/core/src/detect/pointer.test.ts (+17 -0)
+      3    buildJsonPointer,
+      4    escapePointerSegment,
+      5    extractEvidence,
+      6 +  locateInSpec,                                                 
+      7    parseJsonPointer,
+      8    resolveAnchor,
+      9  } from './pointer.js';
+     ...
+      126      expect(resolveAnchor(undefined, '/items', 'GET', { kind: '
+           operation' })).toBeNull();
+      127    });
+      128  });
+      129 +                                                              
+      130 +describe('locateInSpec', () => {                              
+      131 +  it('returns the resolvable pointer and the through-the-opera
+          +tion pointer', () => {                                        
+      132 +    expect(                                                   
+      133 +      locateInSpec(spec, '/items', 'POST', {                  
+      134 +        kind: 'response-property',                            
+      135 +        status: '201',                                        
+      136 +        propertyPath: ['name'],                               
+      137 +      }),                                                     
+      138 +    ).toEqual({                                               
+      139 +      pointer: '/components/schemas/Base/properties/name',    
+      140 +      operationPointer:                                       
+      141 +        '/paths/~1items/post/responses/201/content/application
+          +~1json/schema/allOf/0/properties/name',                       
+      142 +    });                                                       
+      143 +  });                                                         
+      144 +});                                                           
+  ⎿  Updated packages/core/src/detect/pointer.ts (+1 -5)
+      129    return null; // reference cycle
+      130  }
+      131  
+      132 -function child(                                               
+      133 -  doc: unknown,                                               
+      134 -  parent: Omit<Located, 'value'>,                             
+      135 -  ...tokens: string[]                                         
+      136 -): Located | null {                                           
+      132 +function child(doc: unknown, parent: Omit<Located, 'value'>, .
+          +..tokens: string[]): Located | null {                         
+      133    const suffix = buildJsonPointer(tokens);
+      134    return deref(doc, parent.pointer + suffix, parent.logical + 
+           suffix);
+      135  }
+  ⎿  Updated packages/core/src/detect/types.ts (+6 -1)
+      25    path: string;
+      26    /** HTTP method, or `null` when the difference is not tied to
+           one operation. */
+      27    method: HttpMethod | null;
+      28 -  /** RFC 6901 pointer into the spec document for the changed i
+         -tem; `""` when unattributed. */                                
+      28 +  /**                                                          
+      29 +   * RFC 6901 pointer into the spec document for the changed it
+         +em; `""` when unattributed.                                    
+      30 +   * Local `$ref`s are already followed, so a plain lookup reso
+         +lves it (e.g. a `$ref`'d response                              
+      31 +   * schema property points into `/components/schemas/...`). Th
+         +e same item addressed through the                              
+      32 +   * operation is in `details.operationPointer` (FR-06).       
+      33 +   */                                                          
+      34    jsonPointer: string;
+      35    /** oasdiff's text. */
+      36    description: string;
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now the pipeline stage and its persistence helper.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(apps/server/src/pipeline/detect.ts)
+  ⎿  Wrote 152 lines to apps/server/src/pipeline/detect.ts
+       1 import { and, eq } from 'drizzle-orm';
+       2 import {
+       3   err,
+       4   ok,
+       5   parseOasdiffChangelog,
+       6   type ChangeCategory,
+       7   type Classification,
+       8   type DetectParseError,
+       9   type MappingSource,
+      10   type Result,
+     … +142 lines (ctrl+o to expand)
+
+⏺ Bash(python3 - <<'EOF'
+      p='apps/server/src/pipeline/detect.ts'…)
+  ⎿  136:    normalized: jsonb('normalized').$type<unknown>().notNull(),
+  ⎿  Updated apps/server/src/pipeline/detect.ts (+2 -2)
+      1 -import { and, eq } from 'drizzle-orm';                          
+      1 +import { eq } from 'drizzle-orm';                               
+      2  import {
+      3    err,
+      4    ok,
+     ...
+      114      const owned = await tx
+      115        .select({ id: specVersions.id })
+      116        .from(specVersions)
+      117 -      .where(and(eq(specVersions.apiId, apiId)));             
+      117 +      .where(eq(specVersions.apiId, apiId));                  
+      118      const ids = new Set(owned.map((r) => r.id));
+      119      if (!ids.has(fromVersionId) || !ids.has(toVersionId))
+      120        throw new Error('Both spec versions must belong to this 
+           API');
+
+⏺ Now the server tests: runner (real + fake binaries) and detect/persist with
+  the DB.
+
+⏺ Write(apps/server/test/oasdiff-runner.test.ts)
+  ⎿  Wrote 146 lines to apps/server/test/oasdiff-runner.test.ts
+       1 import { execFileSync } from 'node:child_process';
+       2 import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs
+         /promises';
+       3 import { tmpdir } from 'node:os';
+       4 import { join } from 'node:path';
+       5 import { afterAll, describe, expect, it } from 'vitest';
+       6 import { normalizeSpec, parseOasdiffChangelog, parseSpec, type S
+         pecDifference } from '@sma/core';
+       7 import { checkOasdiffVersion, runOasdiff } from '../src/infra/oa
+         sdiff/runner.js';
+     … +139 lines (ctrl+o to expand)
+
+⏺ Write(apps/server/test/detect.test.ts)
+  ⎿  Wrote 159 lines to apps/server/test/detect.test.ts
+       1 import { readFile } from 'node:fs/promises';
+       2 import { afterAll, describe, expect, it } from 'vitest';
+       3 import { hashSpec, normalizeSpec, parseSpec, type SpecDifference
+          } from '@sma/core';
+       4 import { insertApi, insertSpecVersion, listChangesForVersions } 
+         from '../src/infra/db/index.js';
+       5 import type { OasdiffRunner } from '../src/infra/oasdiff/runner.
+         js';
+       6 import { detectChanges, persistClassifiedChanges } from '../src/
+         pipeline/detect.js';
+     … +153 lines (ctrl+o to expand)
+
+⏺ Bash(npx prettier --write apps/server/src/pipeline/detect.ts
+      apps/server/src/infra/oasdiff apps/server/test/detect.test.ts
+      apps/server/test/oasdiff-runner.test.ts >/…)
+  ⎿  src/infra/oasdiff/runner.ts(59,72): error TS2322: Type 'ExecFileExcept
+     ion | undefined' is not assignable to type '(ErrnoException & { killed
+     ?: boolean | undefined; signal?: string | null | undefined; }) | undef
+     … +29 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/infra/oasdiff/runner.ts (+6 -3)
+      56          env: { PATH: process.env.PATH ?? '' },
+      57          windowsHide: true,
+      58        },
+      59 -      (error, stdout, stderr) =>                               
+      60 -        resolve({ ok: !error, stdout, stderr, error: error ?? u
+         -ndefined }),                                                   
+      59 +      (error, stdout, stderr) => resolve({ ok: !error, stdout, 
+         +stderr, error: error ?? undefined }),                          
+      60      );
+      61    });
+      62  }
+     ...
+      72      return { code: 'timeout', message: `oasdiff did not finish 
+          within ${timeoutMs} ms` };
+      73    const exit = typeof e?.code === 'number' ? e.code : 'unknown'
+          ;
+      74    // Only the first line of stderr: oasdiff errors name files/p
+          ositions, not spec contents.
+      76 -  const reason = outcome.stderr.split('\n').find((l) => l.trim(
+         -))?.slice(0, 300) ?? 'no message';                             
+      75 +  const reason =                                               
+      76 +    outcome.stderr                                             
+      77 +      .split('\n')                                             
+      78 +      .find((l) => l.trim())                                   
+      79 +      ?.slice(0, 300) ?? 'no message';                         
+      80    return { code: 'bad_output', message: `oasdiff exited with co
+          de ${exit}: ${reason}` };
+      81  }
+      82  
+  ⎿  Updated apps/server/src/pipeline/detect.ts (+5 -1)
+      109    items: readonly ClassifiedDifference[],
+      110  ): Promise<Change[]> {
+      111    return db.transaction(async (tx) => {
+      112 -    const locked = await tx.select({ id: apis.id }).from(apis)
+          -.where(eq(apis.id, apiId)).for('update');                     
+      112 +    const locked = await tx                                   
+      113 +      .select({ id: apis.id })                                
+      114 +      .from(apis)                                             
+      115 +      .where(eq(apis.id, apiId))                              
+      116 +      .for('update');                                         
+      117      if (!locked[0]) throw new Error('API not found');
+      118      const owned = await tx
+      119        .select({ id: specVersions.id })
+  ⎿  Updated apps/server/test/detect.test.ts (+21 -3)
+      113  
+      114    it('stores path, method, pointer and evidence for every diff
+           erence', async () => {
+      115      const { api, v1, v2, diffs } = await detected();
+      116 -    const rows = await persistClassifiedChanges(client.db, api
+          -.id, v1.id, v2.id, diffs.map(classify));                      
+      116 +    const rows = await persistClassifiedChanges(              
+      117 +      client.db,                                              
+      118 +      api.id,                                                 
+      119 +      v1.id,                                                  
+      120 +      v2.id,                                                  
+      121 +      diffs.map(classify),                                    
+      122 +    );                                                        
+      123      expect(rows).toHaveLength(diffs.length);
+      124      for (const [i, row] of rows.entries()) {
+      125        const d = diffs[i]!;
+     ...
+      138  
+      139    it('is idempotent per version pair', async () => {
+      140      const { api, v1, v2, diffs } = await detected();
+      135 -    const first = await persistClassifiedChanges(client.db, ap
+          -i.id, v1.id, v2.id, diffs.map(classify));                     
+      136 -    const second = await persistClassifiedChanges(client.db, a
+          -pi.id, v1.id, v2.id, diffs.map(classify));                    
+      141 +    const first = await persistClassifiedChanges(             
+      142 +      client.db,                                              
+      143 +      api.id,                                                 
+      144 +      v1.id,                                                  
+      145 +      v2.id,                                                  
+      146 +      diffs.map(classify),                                    
+      147 +    );                                                        
+      148 +    const second = await persistClassifiedChanges(            
+      149 +      client.db,                                              
+      150 +      api.id,                                                 
+      151 +      v1.id,                                                  
+      152 +      v2.id,                                                  
+      153 +      diffs.map(classify),                                    
+      154 +    );                                                        
+      155      expect(second.map((r) => r.id).sort()).toEqual(first.map((
+           r) => r.id).sort());
+      156      expect(await listChangesForVersions(client.db, v1.id, v2.i
+           d)).toHaveLength(diffs.length);
+      157    });
+  ⎿  (timeout 3m)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Bash(python3 - <<'EOF'
+      p='apps/server/test/oasdiff-runner.test.ts'…)
+  ⎿  41:  error?: ExecFileException;
+     [error] apps/server/test/oasdiff-runner.test.ts: SyntaxError: Declarat
+     ion or statement expected. (89:1)
+     … +15 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/infra/oasdiff/runner.ts (+2 -2)
+      1 -import { execFile } from 'node:child_process';                  
+      1 +import { execFile, type ExecFileException } from 'node:child_pro
+        +cess';                                                          
+      2  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+      3  import { tmpdir } from 'node:os';
+      4  import { join } from 'node:path';
+     ...
+      38    ok: boolean;
+      39    stdout: string;
+      40    stderr: string;
+      41 -  error?: NodeJS.ErrnoException & { killed?: boolean; signal?: 
+         -string | null };                                               
+      41 +  error?: ExecFileException;                                   
+      42  }
+      43  
+      44  function run(binary: string, args: string[], cwd: string, timeo
+          utMs: number): Promise<ExecOutcome> {
+  ⎿  Updated apps/server/test/oasdiff-runner.test.ts (+9 -2)
+      75      expect(await runOasdiff(v1, v1)).toEqual({ ok: true, value:
+           [] });
+      76    });
+      77  
+      78 -  it('invalid spec input → bad_output, not a crash', async () =
+         -> {                                                            
+      79 -    const result = await runOasdiff({ not: 'a spec' }, await lo
+         -adSpec('v1'));                                                 
+      78 +  it('external $refs are refused (no SSRF) → bad_output, not a 
+         +crash', async () => {                                          
+      79 +    const spec = {                                             
+      80 +      openapi: '3.0.0',                                        
+      81 +      info: { title: 't', version: '1' },                      
+      82 +      paths: { '/x': { $ref: 'http://127.0.0.1:9/x.json' } },  
+      83 +    };                                                         
+      84 +    const result = await runOasdiff(spec, spec);               
+      85      expect(result).toMatchObject({ ok: false, error: { code: 'b
+          ad_output' } });
+      86 +    if (!result.ok) expect(result.error.message).toContain('dis
+         +allowed external reference');                                  
+      87 +  });                                                          
+      88    });
+      89  });
+      90  
+
+  Read 1 file (ctrl+o to expand)
+⏺ Update(apps/server/test/oasdiff-runner.test.ts)
+  ⎿  Removed 1 line
+      85      expect(result).toMatchObject({ ok: false, error: { code: 'b
+          ad_output' } });
+      86      if (!result.ok) expect(result.error.message).toContain('dis
+          allowed external reference');
+      87    });
+      88 -  });                                                          
+      88  });
+      89  
+      90  describe('runOasdiff typed failures (fake binaries)', () => {
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Bash(sed -i '' "/^  ok,$/d" apps/server/src/pipeline/detect.ts && npx eslint
+      apps/server/src/pipeline/detect.ts && cd apps/server && npx vitest run
+      test/ingest.test.…)
+  ⎿        Tests  11 passed (11)
+  ⎿  Updated apps/server/src/pipeline/detect.ts (+0 -1)
+      1  import { eq } from 'drizzle-orm';
+      2  import {
+      3    err,
+      4 -  ok,                                                           
+      4    parseOasdiffChangelog,
+      5    type ChangeCategory,
+      6    type Classification,
+
+⏺ Core parser, runner, and detect stage are written; all new tests pass. One
+  ingest test failed in the full run but passes alone, so I'm checking whether
+  it's flaky.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Two full runs pass, so that failure was intermittent. I'll capture the error
+  if it shows up again in the final run. Next: CI, README, and decisions.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api && python3 - <<'EOF'
+      p='.github/workflows/ci.yml'…)
+  ⎿  964ad2c0331768c4515fc49779827094bc89a65b1d309dac28886d1c3faf305c  oasd
+     iff_1.35.0_darwin_all.tar.gz
+  ⎿  Updated .github/workflows/ci.yml (+13 -0)
+      35              package-lock.json
+      36              demo/consumer/package-lock.json
+      37        - run: npm ci
+      38 +      # oasdiff, pinned by exact release + SHA-256 (must match 
+         +apps/server/src/infra/oasdiff/version.ts).                     
+      39 +      - name: Install oasdiff 1.35.0                           
+      40 +        env:                                                   
+      41 +          OASDIFF_VERSION: 1.35.0                              
+      42 +          OASDIFF_SHA256: a8023002fcb2eaa7f5758148a9303cb63d33b
+         +939886df312268bc0fc7b939140                                    
+      43 +        run: |                                                 
+      44 +          curl -fsSL -o /tmp/oasdiff.tar.gz \                  
+      45 +            "https://github.com/oasdiff/oasdiff/releases/downlo
+         +ad/v${OASDIFF_VERSION}/oasdiff_${OASDIFF_VERSION}_linux_amd64.t
+         +ar.gz"                                                         
+      46 +          echo "${OASDIFF_SHA256}  /tmp/oasdiff.tar.gz" | sha25
+         +6sum --check --strict                                          
+      47 +          mkdir -p "$HOME/.local/bin"                          
+      48 +          tar -xzf /tmp/oasdiff.tar.gz -C "$HOME/.local/bin" oa
+         +sdiff                                                          
+      49 +          echo "$HOME/.local/bin" >> "$GITHUB_PATH"            
+      50 +          "$HOME/.local/bin/oasdiff" --version                 
+      51        - run: npm run typecheck
+      52        - run: npm run lint
+      53        - run: npm test
+  ⎿  Updated README.md (+22 -1)
+      10  | npm     | 10+ (ships with Node)                | workspaces +
+           `save-exact`                                         |
+      11  | Docker  | Docker Desktop / Engine with Compose | PostgreSQL n
+          ow; sandboxed validation later                        |
+      12  | git     | any recent version                   |             
+                                                                |
+      13 -| oasdiff | 1.35.0 (pinned)                      | `brew instal
+         -l oasdiff` or see github.com/oasdiff/oasdiff/releases |        
+      13 +| oasdiff | 1.35.0 (pinned, exact)               | see [Install
+         +ing oasdiff](#installing-oasdiff)                     |        
+      14 +                                                               
+      15 +## Installing oasdiff                                          
+      16 +                                                               
+      17 +Detection (Increment 05) runs the `oasdiff` binary, pinned to *
+         +*1.35.0**                                                      
+      18 +(`apps/server/src/infra/oasdiff/version.ts`). Any other version
+         + is refused with a                                             
+      19 +`version_mismatch` error. Install that exact release:          
+      20 +                                                               
+      21 +```bash                                                        
+      22 +# Linux x86_64 (same as CI; checksum from the release's checksu
+         +ms.txt)                                                        
+      23 +curl -fsSL -o /tmp/oasdiff.tar.gz \                            
+      24 +  https://github.com/oasdiff/oasdiff/releases/download/v1.35.0/
+         +oasdiff_1.35.0_linux_amd64.tar.gz                              
+      25 +echo "a8023002fcb2eaa7f5758148a9303cb63d33b939886df312268bc0fc7
+         +b939140  /tmp/oasdiff.tar.gz" | sha256sum --check              
+      26 +tar -xzf /tmp/oasdiff.tar.gz -C ~/.local/bin oasdiff           
+      27 +                                                               
+      28 +# macOS: download oasdiff_1.35.0_darwin_all.tar.gz from the sam
+         +e release page and verify it                                   
+      29 +# against checksums.txt (`shasum -a 256`), or `brew install oas
+         +diff` if Homebrew ships 1.35.0.                                
+      30 +oasdiff --version        # → oasdiff version 1.35.0            
+      31 +```                                                            
+      32 +                                                               
+      33 +Set `OASDIFF_BIN` to use a binary that is not on `PATH`. Withou
+         +t oasdiff, the runner's real-binary                            
+      34 +tests are skipped locally with a message; they always run in CI
+         +.                                                              
+      35  
+      36  ## Setup
+      37  
+
+⏺ Bash(python3 - <<'EOF'
+      import json…)
+  ⎿  10:| 03  | Database schema + migrations (incl. 4-attempt limit + guard
+     -name constraints)                  | DR-01–05
+              | Standard                  | Done        | —     |
+     … +19 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/typedoc.json (+4 -1)
+       9      "src/pipeline/poller.ts",
+      10      "src/infra/repo/reader.ts",
+      11      "src/infra/spec-source/retrieve.ts",
+      12 -    "src/infra/spec-source/security.ts"                        
+      12 +    "src/infra/spec-source/security.ts",                       
+      13 +    "src/pipeline/detect.ts",                                  
+      14 +    "src/infra/oasdiff/runner.ts",                             
+      15 +    "src/infra/oasdiff/version.ts"                             
+      16    ],
+      17    "tsconfig": "tsconfig.build.json"
+      18  }
+  ⎿  Updated docs/PROGRESS.md (+1 -1)
+       9  | 02  | Demo API v1/v2 + specs + migration notes + sample consu
+          mer repo (tests pass on v1, fail on v2) | 2.2, 5.2             
+                              | Standard                  | Done        |
+           —     |
+      10  | 03  | Database schema + migrations (incl. 4-attempt limit + g
+          uard-name constraints)                  | DR-01–05             
+                              | Standard                  | Done        |
+           —     |
+      11  | 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, 
+          failure handling                        | FR-01–05, FR-11, FR-1
+          2                   | Standard                  | Done        |
+           #1    |
+      12 -| 05  | Detect: oasdiff runner + parser + evidence             
+         -                                        | FR-06, FR-08         
+         -                    | Standard                  | Not started |
+         - #2    |                                                       
+      12 +| 05  | Detect: oasdiff runner + parser + evidence             
+         +                                        | FR-06, FR-08         
+         +                    | Standard                  | In review   |
+         + #2    |                                                       
+      13  | 06  | Classify + migration-note parsing + mapping confirmatio
+          n                                       | FR-07, FR-09, FR-10, 
+          BR-01, BR-04, BR-05 | **CRITICAL**              | Not started |
+           #3    |
+      14  | 07  | Locate: ts-morph call sites + coverage report          
+                                                  | FR-13–17, BR-02      
+                              | Standard                  | Not started |
+           #4    |
+      15  | 08  | Validator: Docker sandbox + output parsing             
+                                                  | FR-25, FR-26, FR-32, 
+          NFR-03              | **CRITICAL (checkpoint)** | Not started |
+           #5    |
+
+⏺ Bash(sed -i '' 's/| Standard                  | In review   | #2    |/|
+      Standard                  | Done        | #2    |/' docs/PROGRESS.md &&
+      python3 - <<'EOF'
+      p='…)
+  ⎿  Checking formatting...
+     All matched files use Prettier code style!
+     > eslint .
+     … +4 lines (ctrl+o to expand)
+  ⎿  Updated README.md (+7 -7)
+       4  
+       5  ## Prerequisites
+       6  
+       7 -| Tool    | Version                              | Notes       
+         -                                                      |        
+       8 -| ------- | ------------------------------------ | ------------
+         ------------------------------------------------------ |        
+       9 -| Node.js | 22 LTS (≥ 22.13, see `.nvmrc`)       | `nvm use`   
+         -                                                      |        
+      10 -| npm     | 10+ (ships with Node)                | workspaces +
+         - `save-exact`                                         |        
+      11 -| Docker  | Docker Desktop / Engine with Compose | PostgreSQL n
+         -ow; sandboxed validation later                        |        
+      12 -| git     | any recent version                   |             
+         -                                                      |        
+      13 -| oasdiff | 1.35.0 (pinned, exact)               | see [Install
+         -ing oasdiff](#installing-oasdiff)                     |        
+       7 +| Tool    | Version                              | Notes       
+         +                                  |                            
+       8 +| ------- | ------------------------------------ | ------------
+         +--------------------------------- |                            
+       9 +| Node.js | 22 LTS (≥ 22.13, see `.nvmrc`)       | `nvm use`   
+         +                                  |                            
+      10 +| npm     | 10+ (ships with Node)                | workspaces +
+         + `save-exact`                     |                            
+      11 +| Docker  | Docker Desktop / Engine with Compose | PostgreSQL n
+         +ow; sandboxed validation later    |                            
+      12 +| git     | any recent version                   |             
+         +                                  |                            
+      13 +| oasdiff | 1.35.0 (pinned, exact)               | see [Install
+         +ing oasdiff](#installing-oasdiff) |                            
+      14  
+      15  ## Installing oasdiff
+      16  
+  ⎿  Updated docs/DECISIONS.md (+2 -2)
+       9  | 02 Demo API and consumer             | [docs/decisions/inc02.
+          md](decisions/inc02.md)   |
+      10  | 03 Database schema                   | [docs/decisions/inc03.
+          md](decisions/inc03.md)   |
+      11  | 03b Team workflow                    | [docs/decisions/inc03b
+          .md](decisions/inc03b.md) |
+      12 -                                                               
+      13 -| 04 Ingest | [docs/decisions/inc04.md](decisions/inc04.md) |  
+      12 +| 04 Ingest                            | [docs/decisions/inc04.
+         +md](decisions/inc04.md)   |                                    
+      13 +| 05 Detect                            | [docs/decisions/inc05.
+         +md](decisions/inc05.md)   |                                    
+      14  
+      15  New increments add `docs/decisions/incNN.md` in their own PR an
+          d add one row here.
+  ⎿  Updated docs/PROGRESS.md (+1 -1)
+       9  | 02  | Demo API v1/v2 + specs + migration notes + sample consu
+          mer repo (tests pass on v1, fail on v2) | 2.2, 5.2             
+                              | Standard                  | Done        |
+           —     |
+      10  | 03  | Database schema + migrations (incl. 4-attempt limit + g
+          uard-name constraints)                  | DR-01–05             
+                              | Standard                  | Done        |
+           —     |
+      11  | 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, 
+          failure handling                        | FR-01–05, FR-11, FR-1
+          2                   | Standard                  | Done        |
+           #1    |
+      12 -| 05  | Detect: oasdiff runner + parser + evidence             
+         -                                        | FR-06, FR-08         
+         -                    | Standard                  | In review   |
+         - #2    |                                                       
+      12 +| 05  | Detect: oasdiff runner + parser + evidence             
+         +                                        | FR-06, FR-08         
+         +                    | Standard                  | Done        |
+         + #2    |                                                       
+      13  | 06  | Classify + migration-note parsing + mapping confirmatio
+          n                                       | FR-07, FR-09, FR-10, 
+          BR-01, BR-04, BR-05 | **CRITICAL**              | Not started |
+           #3    |
+      14  | 07  | Locate: ts-morph call sites + coverage report          
+                                                  | FR-13–17, BR-02      
+                              | Standard                  | Not started |
+           #4    |
+      15  | 08  | Validator: Docker sandbox + output parsing             
+                                                  | FR-25, FR-26, FR-32, 
+          NFR-03              | **CRITICAL (checkpoint)** | Not started |
+           #5    |
+  ⎿  Created docs/decisions/inc05.md (+18 -0)
+       1 +# Decisions — Increment 05: Detect                             
+       2 +                                                               
+       3 +| Date       | Increment | Decision                            
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                    | Why      
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +             |                                                 
+       4 +| ---------- | --------- | ------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +--------------------------------------------------- | ---------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +------------ |                                                 
+       5 +| 2026-11-02 | 05        | `SpecDifference.jsonPointer` is the 
+         +**resolvable** RFC 6901 pointer: local `$ref`s are followed, so
+         + a `$ref`'d schema property points into `/components/schemas/..
+         +.`. The same item addressed through the operation (FR-06 "point
+         +er into the operation") is kept in `details.operationPointer`; 
+         +path + method columns tie the row to the operation. | The promp
+         +t requires the pointer to resolve in the right spec with a plai
+         +n lookup. Through-the-operation pointers only resolve if `$ref`
+         +s are followed. Keeping both satisfies FR-06 and the acceptance
+         + check.                                                        
+         +             |                                                 
+       6 +| 2026-11-02 | 05        | `parseOasdiffChangelog(json, { befor
+         +e, after })` takes the two specs as an optional 2nd argument. W
+         +ithout specs it still returns differences with a nominal operat
+         +ion pointer and null evidence.                                 
+         +                                                               
+         +                                                    | Evidence 
+         +(FR-08) and real pointers need the specs; the parser stays pure
+         +.                                                              
+         +                                                               
+         +                                                               
+         +             |                                                 
+       7 +| 2026-11-02 | 05        | Pointer resolution tries the rule's 
+         +anchor (parameter / request or response property / response / r
+         +equest body), then the operation, then the path item. `details.
+         +pointerPrecision` records which one matched. A pointer that dif
+         +fers in the AFTER spec is kept as `details.jsonPointerAfter`.  
+         +                                                    | An unknow
+         +n or unusual rule is never dropped. It gets the most specific p
+         +ointer that actually exists, and the fallback is visible to Inc
+         +rement 06.                                                     
+         +                                                               
+         +             |                                                 
+       8 +| 2026-11-02 | 05        | Property paths from oasdiff text are
+         + split on `/`. The walker looks through `properties`, `items`, 
+         +and `allOf`/`oneOf`/`anyOf`, and also tries an array's item sch
+         +ema implicitly. Media type order: the one named in the text, th
+         +en `application/json`, then the rest alphabetically. Missing st
+         +atus: 2xx first.                                    | This cove
+         +rs nested and array properties and composed schemas determinist
+         +ically, without guessing beyond the spec.                      
+         +                                                               
+         +                                                               
+         +             |                                                 
+       9 +| 2026-11-02 | 05        | An unrecognised oasdiff level is kep
+         +t as `warning`, with `details.unknownLevel = true` and `details
+         +.rawLevel`. A missing rule id becomes `unknown`, with `details.
+         +missingRuleId`.                                                
+         +                                                               
+         +                                                    | "Unknown 
+         +differences are never dropped." The raw value stays visible ins
+         +tead of being silently lost.                                   
+         +                                                               
+         +                                                               
+         +             |                                                 
+      10 +| 2026-11-02 | 05        | Differences are sorted by (path, met
+         +hod, ruleId, pointer, text). If two share the same rule/method/
+         +path/pointer, the later ones hash `pointer#n`.                 
+         +                                                               
+         +                                                               
+         +                                                    | Same inpu
+         +t gives the same ids and order every run, even if oasdiff outpu
+         +t order changes.                                               
+         +                                                               
+         +                                                               
+         +             |                                                 
+      11 +| 2026-11-02 | 05        | Details are parsed from oasdiff's En
+         +glish text with targeted regexes. Every backtick-quoted token i
+         +s always kept in `details.quoted`.                             
+         +                                                               
+         +                                                               
+         +                                                    | oasdiff 1
+         +.35.0 JSON has no structured property/type fields. `quoted` gua
+         +rantees no information is lost when a phrase is not recognised.
+         +                                                               
+         +                                                               
+         +             |                                                 
+      12 +| 2026-11-02 | 05        | The runner calls `oasdiff changelog 
+         +base.json revision.json --format json --allow-external-refs=fal
+         +se` with `execFile` in a fresh temp dir. The child gets only `P
+         +ATH`, and `SIGKILL` on the 30 s timeout. A non-zero exit maps t
+         +o `bad_output`, with only the first stderr line.               
+         +                                                    | Specs are
+         + untrusted (NFR-04): no SSRF through external `$ref`s, no crede
+         +ntials or `OASDIFF_CONFIG` passed to the child, and no `.oasdif
+         +f.*` config picked up from the repo. The 4 typed errors are the
+         + ones the prompt lists.                                        
+         +             |                                                 
+      13 +| 2026-11-02 | 05        | The version is checked on every run 
+         +(`oasdiff --version` must contain `1.35.0`). `OASDIFF_BIN` over
+         +rides the binary path.                                         
+         +                                                               
+         +                                                               
+         +                                                    | Pinning (
+         +C-07). One extra process start is cheap compared with a diff.  
+         +                                                               
+         +                                                               
+         +                                                               
+         +             |                                                 
+      14 +| 2026-11-02 | 05        | CI downloads `oasdiff_1.35.0_linux_a
+         +md64.tar.gz` and verifies SHA-256 `a8023002…9140` (from the rel
+         +ease `checksums.txt`, re-verified locally). The real-binary tes
+         +ts throw in CI if oasdiff is missing, rather than skipping.    
+         +                                                               
+         +                                                    | The integ
+         +ration test must really run in CI.                             
+         +                                                               
+         +                                                               
+         +                                                               
+         +             |                                                 
+      15 +| 2026-11-02 | 05        | The fixture was recorded with `oasdi
+         +ff changelog demo/api/specs/v1.yaml demo/api/specs/v2.yaml --fo
+         +rmat json --allow-external-refs=false` from the repo root (pret
+         +ty-printed). The integration test compares parsed results (id, 
+         +rule, level, path, method, pointer, text, evidence), not raw JS
+         +ON.                                                 | Raw outpu
+         +t contains temp-dir source locations and key order that differ 
+         +between runs.                                                  
+         +                                                               
+         +                                                               
+         +             |                                                 
+      16 +| 2026-11-02 | 05        | `persistClassifiedChanges` (for Incr
+         +ement 06) inserts one `changes` row per classified difference i
+         +n a transaction, holding the API row lock. It is idempotent per
+         + (from, to): if rows exist, it returns them. It optionally take
+         +s the mapping confirmation (note/human). `detectChanges` writes
+         + nothing.                                           | Detection
+         + stays pure. No fake classifications are written. Inc06's "re-r
+         +unning doesn't duplicate rows" is handled once, in one place.  
+         +                                                               
+         +                                                               
+         +             |                                                 
+      17 +| 2026-11-02 | 05        | No schema migration. `level`, `descr
+         +iption`, and `details` are not stored in `changes`.            
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                    | The `chan
+         +ges` columns from inc03 cover what FR-06/FR-08 require (path, m
+         +ethod, pointer, rule id, evidence). `details` can be re-derived
+         + deterministically by re-running the parser on the stored versi
+         +ons. Adding columns would collide with parallel migrations for 
+         +little gain. |                                                 
+      18 +| 2026-11-02 | 05        | Added a core boundary test that scan
+         +s `packages/core/src` (non-test files) for `child_process`, `fs
+         +`, network modules, `fetch(`, `apps/*`, and SDK imports.       
+         +                                                               
+         +                                                               
+         +                                                    | Acceptanc
+         +e check: core has no process, network, or app imports (C-05, NF
+         +R-08).                                                         
+         +                                                               
+         +                                                               
+         +             |                                                 
+  ⎿  (timeout 5m)
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Main is unchanged. Final full check before pushing:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ All 278 tests pass. Pushing and opening the PR.
+
+  Created PR #17, ran 2 shell commands (ctrl+o to expand)
+
+⏺ CI is green. Checking that CI actually ran the real oasdiff tests rather than
+  skipping them:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Increment 05 is done and open for review as PR #17:
+  https://github.com/Bigyan1313/self_maintaining_api/pull/17
+
+  CI passed. It installed oasdiff 1.35.0 after verifying the download's
+  checksum, and all 10 tests against the real oasdiff binary ran there; none
+  were skipped.
+
+  INCREMENT 05 REPORT
+  Status: DONE
+  Built:
+  - packages/core/src/detect: SpecDifference types; a pure parser, 
+  parseOasdiffChangelog(json, {before, after}); JSON-pointer helpers 
+  (buildJsonPointer, extractEvidence); a resolver that follows $refs inside the 
+  spec; detail extraction from oasdiff's text (property, old/new type, 
+  parameter, status); stable ids
+  - Fixture packages/core/test/fixtures/oasdiff-demo-v1-v2.json: real oasdiff 
+  1.35.0 output for demo v1→v2
+  - apps/server/src/infra/oasdiff: runner (execFile, 30 s timeout, only PATH 
+  passed to oasdiff, external $refs disabled) pinned to 1.35.0; typed errors 
+  binary_missing / version_mismatch / timeout / bad_output
+  - apps/server/src/pipeline/detect.ts: detectChanges (writes nothing) and 
+  persistClassifiedChanges for inc06 (running it twice on the same version pair 
+  creates no duplicate rows)
+  - CI installs oasdiff 1.35.0 from the exact release and checks its SHA-256; 
+  README has an install section
+  - A test that fails if packages/core imports child_process, fs, network 
+  modules or apps/*
+  Tests: 278/278 (core 118, server 118, web 2, demo-api 40), typecheck: ok, 
+  lint: ok
+  Commands to verify:
+  - npm test -w @sma/core   (parser runs on the fixture, no oasdiff needed)
+  - npm test -w @sma/server (real-oasdiff tests skip with a message locally if 
+  oasdiff is missing; CI requires them)
+  - oasdiff --version  → 1.35.0
+  Decisions logged (docs/decisions/inc05.md):
+  - jsonPointer is the pointer that resolves directly in the spec, with $refs 
+  followed (e.g. /components/schemas/Order/properties/total). The pointer 
+  through the operation, which FR-06 asks for, is in details.operationPointer
+  - If the exact item can't be found, the pointer falls back to the operation, 
+  then the path. Unknown rule ids and levels are kept and flagged
+  - Output is sorted the same way every run, so ids are stable
+  - Runner hardening: no external $refs, only PATH passed to oasdiff, hard kill 
+  on timeout
+  - No database migration: details are not stored in the changes table, but 
+  re-running the parser on the stored versions gives them back
+  SRS requirements covered: FR-06, FR-08 (detection part of AT-03); C-05, C-07, 
+  NFR-04, NFR-08
+  Problems / things the human must do:
+  - Run /export docs/chat-logs/inc05-bigyan.txt, then commit and push it to 
+  feat/inc05-detect
+  - A teammate merges PR #17 with "Create a merge commit"
+  - One run of the full test suite had a single failure in the existing 
+  test/ingest.test.ts (Increment 04). It passed when run alone and in 3 later 
+  full runs. This PR doesn't touch it
+
+  Detection lists customer_name removed and full_name added as two separate
+  differences. Treating them as one rename is Increment 06's job, and only when
+  the migration note confirms it.
+
+✻ Cooked for 12m 0s · done Monday 11:50 PM
+
+※ recap: Increment 05 (Detect) is finished and open for review as PR #17, and CI passed. Next, run /export docs/chat-logs/inc05-bigyan.txt and commit it to the branch so a teammate can merge. (disable recaps in /config)
+
+❯ Run /export docs/chat-logs/inc05-bigyan.txt, then commit and push it to       
+  feat/inc05-detect.                                                            
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I can't run /export myself. It's a built-in Claude Code command, so only you
+  can type it. I checked, and docs/chat-logs/inc05-bigyan.txt doesn't exist yet.
+
+  Type this at the prompt:
+
+  /export docs/chat-logs/inc05-bigyan.txt
+
+  Then tell me it's done, and I'll commit the file and push it to
+  feat/inc05-detect. That adds it to PR #17. You're already on that branch, and
+  there are no other uncommitted changes.
+
+✻ Sautéed for 5s · done Monday 11:54 PM

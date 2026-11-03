@@ -35,6 +35,19 @@ jobs:
             package-lock.json
             demo/consumer/package-lock.json
       - run: npm ci
+      # oasdiff, pinned by exact release + SHA-256 (must match apps/server/src/infra/oasdiff/version.ts).
+      - name: Install oasdiff 1.35.0
+        env:
+          OASDIFF_VERSION: 1.35.0
+          OASDIFF_SHA256: a8023002fcb2eaa7f5758148a9303cb63d33b939886df312268bc0fc7b939140
+        run: |
+          curl -fsSL -o /tmp/oasdiff.tar.gz \
+            "https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/oasdiff_${OASDIFF_VERSION}_linux_amd64.tar.gz"
+          echo "${OASDIFF_SHA256}  /tmp/oasdiff.tar.gz" | sha256sum --check --strict
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf /tmp/oasdiff.tar.gz -C "$HOME/.local/bin" oasdiff
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/oasdiff" --version
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test

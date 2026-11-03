@@ -4,13 +4,34 @@ When a REST API provider changes its OpenAPI spec in a breaking way, this system
 
 ## Prerequisites
 
-| Tool    | Version                              | Notes                                                             |
-| ------- | ------------------------------------ | ----------------------------------------------------------------- |
-| Node.js | 22 LTS (≥ 22.13, see `.nvmrc`)       | `nvm use`                                                         |
-| npm     | 10+ (ships with Node)                | workspaces + `save-exact`                                         |
-| Docker  | Docker Desktop / Engine with Compose | PostgreSQL now; sandboxed validation later                        |
-| git     | any recent version                   |                                                                   |
-| oasdiff | 1.35.0 (pinned)                      | `brew install oasdiff` or see github.com/oasdiff/oasdiff/releases |
+| Tool    | Version                              | Notes                                         |
+| ------- | ------------------------------------ | --------------------------------------------- |
+| Node.js | 22 LTS (≥ 22.13, see `.nvmrc`)       | `nvm use`                                     |
+| npm     | 10+ (ships with Node)                | workspaces + `save-exact`                     |
+| Docker  | Docker Desktop / Engine with Compose | PostgreSQL now; sandboxed validation later    |
+| git     | any recent version                   |                                               |
+| oasdiff | 1.35.0 (pinned, exact)               | see [Installing oasdiff](#installing-oasdiff) |
+
+## Installing oasdiff
+
+Detection (Increment 05) runs the `oasdiff` binary, pinned to **1.35.0**
+(`apps/server/src/infra/oasdiff/version.ts`). Any other version is refused with a
+`version_mismatch` error. Install that exact release:
+
+```bash
+# Linux x86_64 (same as CI; checksum from the release's checksums.txt)
+curl -fsSL -o /tmp/oasdiff.tar.gz \
+  https://github.com/oasdiff/oasdiff/releases/download/v1.35.0/oasdiff_1.35.0_linux_amd64.tar.gz
+echo "a8023002fcb2eaa7f5758148a9303cb63d33b939886df312268bc0fc7b939140  /tmp/oasdiff.tar.gz" | sha256sum --check
+tar -xzf /tmp/oasdiff.tar.gz -C ~/.local/bin oasdiff
+
+# macOS: download oasdiff_1.35.0_darwin_all.tar.gz from the same release page and verify it
+# against checksums.txt (`shasum -a 256`), or `brew install oasdiff` if Homebrew ships 1.35.0.
+oasdiff --version        # → oasdiff version 1.35.0
+```
+
+Set `OASDIFF_BIN` to use a binary that is not on `PATH`. Without oasdiff, the runner's real-binary
+tests are skipped locally with a message; they always run in CI.
 
 ## Setup
 

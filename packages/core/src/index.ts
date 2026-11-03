@@ -14,3 +14,6 @@ export * from './domain/enums.js';
 export * from './api/contract.js';
 export * from './ingest/spec.js';
 export * from './repo/limits.js';
+export * from './detect/types.js';
+export * from './detect/pointer.js';
+export * from './detect/parse.js';

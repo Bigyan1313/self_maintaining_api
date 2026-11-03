@@ -1,0 +1,159 @@
+[
+  {
+    "id": "response-required-property-removed",
+    "text": "removed the required property `customer_name` from the response with the `200` status",
+    "level": 3,
+    "operation": "GET",
+    "operationId": "getCustomer",
+    "path": "/customers/{id}",
+    "section": "paths",
+    "baseSource": {
+      "file": "demo/api/specs/v1.yaml",
+      "line": 115,
+      "column": 9,
+      "endLine": 116,
+      "endColumn": 23
+    },
+    "fingerprint": "dbcdbdf72eb5"
+  },
+  {
+    "id": "request-parameter-became-required",
+    "text": "the `query` request parameter `status` became required",
+    "level": 3,
+    "operation": "GET",
+    "operationId": "listOrders",
+    "path": "/orders",
+    "section": "paths",
+    "baseSource": {
+      "file": "demo/api/specs/v1.yaml",
+      "line": 31,
+      "column": 11
+    },
+    "revisionSource": {
+      "file": "demo/api/specs/v2.yaml",
+      "line": 31,
+      "column": 11
+    },
+    "fingerprint": "36429942de7a"
+  },
+  {
+    "id": "api-removed-without-deprecation",
+    "text": "api removed without deprecation",
+    "level": 3,
+    "operation": "DELETE",
+    "operationId": "deleteOrder",
+    "path": "/orders/{id}",
+    "section": "paths",
+    "baseSource": {
+      "file": "demo/api/specs/v1.yaml",
+      "line": 61,
+      "column": 5,
+      "endLine": 70,
+      "endColumn": 50
+    },
+    "fingerprint": "b97ffe6cdb39"
+  },
+  {
+    "id": "response-property-type-changed",
+    "text": "the `total` response's property `type` changed from `number` to `string` for status `200`",
+    "level": 3,
+    "operation": "GET",
+    "operationId": "getOrder",
+    "path": "/orders/{id}",
+    "section": "paths",
+    "baseSource": {
+      "file": "demo/api/specs/v1.yaml",
+      "line": 132,
+      "column": 11
+    },
+    "revisionSource": {
+      "file": "demo/api/specs/v2.yaml",
+      "line": 129,
+      "column": 11
+    },
+    "fingerprint": "6e437b437c73"
+  },
+  {
+    "id": "api-path-removed-without-deprecation",
+    "text": "api path removed without deprecation",
+    "level": 3,
+    "operation": "GET",
+    "operationId": "getOrderInvoice",
+    "path": "/orders/{id}/invoice",
+    "section": "paths",
+    "baseSource": {
+      "file": "demo/api/specs/v1.yaml",
+      "line": 72,
+      "column": 5,
+      "endLine": 85,
+      "endColumn": 50
+    },
+    "fingerprint": "e653d06c0df7"
+  },
+  {
+    "id": "response-optional-property-added",
+    "text": "added the optional property `phone` to the response with the `200` status",
+    "level": 1,
+    "operation": "GET",
+    "operationId": "getCustomer",
+    "path": "/customers/{id}",
+    "section": "paths",
+    "revisionSource": {
+      "file": "demo/api/specs/v2.yaml",
+      "line": 115,
+      "column": 9,
+      "endLine": 116,
+      "endColumn": 23
+    },
+    "fingerprint": "20c668585ca2"
+  },
+  {
+    "id": "response-required-property-added",
+    "text": "added the required property `full_name` to the response with the `200` status",
+    "level": 1,
+    "operation": "GET",
+    "operationId": "getCustomer",
+    "path": "/customers/{id}",
+    "section": "paths",
+    "revisionSource": {
+      "file": "demo/api/specs/v2.yaml",
+      "line": 110,
+      "column": 9,
+      "endLine": 111,
+      "endColumn": 23
+    },
+    "fingerprint": "d88de210fe1c"
+  },
+  {
+    "id": "endpoint-added",
+    "text": "endpoint added",
+    "level": 1,
+    "operation": "GET",
+    "operationId": "getInvoice",
+    "path": "/invoices/{orderId}",
+    "section": "paths",
+    "revisionSource": {
+      "file": "demo/api/specs/v2.yaml",
+      "line": 62,
+      "column": 5,
+      "endLine": 80,
+      "endColumn": 50
+    },
+    "fingerprint": "40848ebaa5e7"
+  },
+  {
+    "id": "response-property-pattern-added",
+    "text": "the `total` response's property pattern `^-?\\d+\\.\\d{2}$` was added for the status `200`",
+    "level": 1,
+    "operation": "GET",
+    "operationId": "getOrder",
+    "path": "/orders/{id}",
+    "section": "paths",
+    "revisionSource": {
+      "file": "demo/api/specs/v2.yaml",
+      "line": 130,
+      "column": 11
+    },
+    "fingerprint": "2566187e8904"
+  }
+]
