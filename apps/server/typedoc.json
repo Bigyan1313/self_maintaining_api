@@ -20,7 +20,8 @@
     "src/infra/validator/image.ts",
     "src/infra/validator/docker.ts",
     "src/infra/validator/sandbox.ts",
-    "src/infra/workcopy/index.ts"
+    "src/infra/workcopy/index.ts",
+    "src/pipeline/locate.ts"
   ],
   "tsconfig": "tsconfig.build.json"
 }
