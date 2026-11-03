@@ -30,9 +30,7 @@
     {
       "assertionResults": [
         {
-          "ancestorTitles": [
-            "admin"
-          ],
+          "ancestorTitles": ["admin"],
           "fullName": "admin cancelling order 2 succeeds",
           "status": "failed",
           "title": "cancelling order 2 succeeds",
@@ -45,9 +43,7 @@
           "benchmarks": []
         },
         {
-          "ancestorTitles": [
-            "admin"
-          ],
+          "ancestorTitles": ["admin"],
           "fullName": "admin cancelling an unknown order rejects",
           "status": "passed",
           "title": "cancelling an unknown order rejects",
@@ -67,9 +63,7 @@
     {
       "assertionResults": [
         {
-          "ancestorTitles": [
-            "customers"
-          ],
+          "ancestorTitles": ["customers"],
           "fullName": "customers display name for customer 1 is \"Ada Lovelace\"",
           "status": "failed",
           "title": "display name for customer 1 is \"Ada Lovelace\"",
@@ -82,9 +76,7 @@
           "benchmarks": []
         },
         {
-          "ancestorTitles": [
-            "customers"
-          ],
+          "ancestorTitles": ["customers"],
           "fullName": "customers display name for customer 3 is \"Grace Hopper\"",
           "status": "failed",
           "title": "display name for customer 3 is \"Grace Hopper\"",
@@ -97,9 +89,7 @@
           "benchmarks": []
         },
         {
-          "ancestorTitles": [
-            "customers"
-          ],
+          "ancestorTitles": ["customers"],
           "fullName": "customers rejects for an unknown customer",
           "status": "passed",
           "title": "rejects for an unknown customer",
@@ -119,9 +109,7 @@
     {
       "assertionResults": [
         {
-          "ancestorTitles": [
-            "invoices"
-          ],
+          "ancestorTitles": ["invoices"],
           "fullName": "invoices amount due on order 1 is 19.99",
           "status": "failed",
           "title": "amount due on order 1 is 19.99",
@@ -134,9 +122,7 @@
           "benchmarks": []
         },
         {
-          "ancestorTitles": [
-            "invoices"
-          ],
+          "ancestorTitles": ["invoices"],
           "fullName": "invoices invoice label for order 2 is \"INV-0002 (due 0.00)\"",
           "status": "failed",
           "title": "invoice label for order 2 is \"INV-0002 (due 0.00)\"",
@@ -158,9 +144,7 @@
     {
       "assertionResults": [
         {
-          "ancestorTitles": [
-            "orders"
-          ],
+          "ancestorTitles": ["orders"],
           "fullName": "orders order 1 total with shipping is 24.99",
           "status": "failed",
           "title": "order 1 total with shipping is 24.99",
@@ -173,9 +157,7 @@
           "benchmarks": []
         },
         {
-          "ancestorTitles": [
-            "orders"
-          ],
+          "ancestorTitles": ["orders"],
           "fullName": "orders order 4 total with shipping is 105",
           "status": "failed",
           "title": "order 4 total with shipping is 105",
@@ -188,9 +170,7 @@
           "benchmarks": []
         },
         {
-          "ancestorTitles": [
-            "orders"
-          ],
+          "ancestorTitles": ["orders"],
           "fullName": "orders rejects for an unknown order",
           "status": "passed",
           "title": "rejects for an unknown order",
@@ -201,9 +181,7 @@
           "benchmarks": []
         },
         {
-          "ancestorTitles": [
-            "orders"
-          ],
+          "ancestorTitles": ["orders"],
           "fullName": "orders open orders are 1 and 3",
           "status": "failed",
           "title": "open orders are 1 and 3",
@@ -225,9 +203,7 @@
     {
       "assertionResults": [
         {
-          "ancestorTitles": [
-            "unsupported call patterns"
-          ],
+          "ancestorTitles": ["unsupported call patterns"],
           "fullName": "unsupported call patterns modules load and export functions",
           "status": "passed",
           "title": "modules load and export functions",
