@@ -9,7 +9,10 @@
     "src/pipeline/poller.ts",
     "src/infra/repo/reader.ts",
     "src/infra/spec-source/retrieve.ts",
-    "src/infra/spec-source/security.ts"
+    "src/infra/spec-source/security.ts",
+    "src/pipeline/detect.ts",
+    "src/infra/oasdiff/runner.ts",
+    "src/infra/oasdiff/version.ts"
   ],
   "tsconfig": "tsconfig.build.json"
 }
