@@ -153,3 +153,28 @@ The server rejects nonexistent targets (400) and already-confirmed mappings (409
 this increment. Without explicit note or human authority, findings stay unconfirmed
 and cannot authorize repair. Classifier checks run with `npm test -w @sma/core`;
 HTTP/database checks run with `npm test -w @sma/server`.
+
+## Locate (Increment 07)
+
+`locateCallSites(repoPath, target, reader)` from `@sma/core` inspects selected TypeScript source
+with ts-morph. It returns supported call sites, one-based positions, excerpts, file coverage,
+unsupported usage and a plain-language outcome. It handles direct fetch, static/configured
+axios (including directly imported instances), and generated-client imports matched by the
+operation ID. A field target is context, not a claim of field-level data-flow analysis.
+
+Use `fileSystemRepoReader` on the server. Selection reuses registration's 200-file / 20,000-line
+limits and exclusions. Source is read once into a snapshot, never executed; the parser cannot
+read target configuration or follow imports outside that snapshot. Excluded directories have
+a directory-level coverage entry. Symlinks are not followed. Dynamic paths, wrappers, aliases,
+unknown clients/methods, parse errors and unreadable source prevent a "Not affected" verdict.
+When supported calls are found, the result is "Affected" and still lists every coverage limit.
+
+`locate(db, runId, repoPath, target)` in `apps/server/src/pipeline/locate.ts` accepts an unfinished
+run for the registered repository. The target must be clean; its HEAD is recorded and rechecked.
+Call sites, coverage and the full result (including unsupported usage) are stored atomically.
+Repeating the same run/target returns the existing stage result; use a new run for reanalysis.
+No new HTTP route is added: run creation and orchestration belong to Increment 13.
+
+Verification: `npm test -w @sma/core`, `npm test -w @sma/server` (PostgreSQL required),
+`npm run typecheck`, and `npm run lint`. The core suite includes all five demo operations,
+coverage boundaries and a 200-file / 20,000-line performance check.
