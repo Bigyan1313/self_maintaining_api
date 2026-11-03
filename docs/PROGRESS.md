@@ -10,7 +10,7 @@ its own line here in its own PR only (see Working Rules in `CLAUDE.md`).
 | 03  | Database schema + migrations (incl. 4-attempt limit + guard-name constraints)                  | DR-01–05                                 | Standard                  | Done        | —     |
 | 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, failure handling                        | FR-01–05, FR-11, FR-12                   | Standard                  | Done        | #1    |
 | 05  | Detect: oasdiff runner + parser + evidence                                                     | FR-06, FR-08                             | Standard                  | Done        | #2    |
-| 06  | Classify + migration-note parsing + mapping confirmation                                       | FR-07, FR-09, FR-10, BR-01, BR-04, BR-05 | **CRITICAL**              | Not started | #3    |
+| 06  | Classify + migration-note parsing + mapping confirmation                                       | FR-07, FR-09, FR-10, BR-01, BR-04, BR-05 | **CRITICAL**              | Done        | #3    |
 | 07  | Locate: ts-morph call sites + coverage report                                                  | FR-13–17, BR-02                          | Standard                  | Not started | #4    |
 | 08  | Validator: Docker sandbox + output parsing                                                     | FR-25, FR-26, FR-32, NFR-03              | **CRITICAL (checkpoint)** | Not started | #5    |
 | 09  | Cheat guards                                                                                   | FR-27–31, DR-04                          | **CRITICAL**              | Not started | #6    |

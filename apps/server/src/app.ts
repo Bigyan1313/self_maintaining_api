@@ -1,3 +1,4 @@
+import { registerClassifyRoutes } from './http/classify-routes.js';
 /**
  * HTTP application factory for the Self-Maintaining APIs server.
  *
@@ -40,6 +41,9 @@ export function buildApp(
 
   app.get('/health', async (): Promise<HealthResponse> => ({ status: 'ok' }));
 
-  if (deps) void app.register(registerIngestRoutes, deps);
+  if (deps) {
+    void app.register(registerIngestRoutes, deps);
+    void app.register(registerClassifyRoutes, { db: deps.db });
+  }
   return app;
 }

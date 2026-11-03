@@ -17,3 +17,7 @@ export * from './repo/limits.js';
 export * from './detect/types.js';
 export * from './detect/pointer.js';
 export * from './detect/parse.js';
+export * from './migration-note/parse.js';
+export * from './migration-note/validate.js';
+export * from './classify/rules.js';
+export * from './classify/classify.js';
