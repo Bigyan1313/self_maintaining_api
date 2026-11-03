@@ -1,0 +1,224 @@
+{
+  "numTotalTestSuites": 10,
+  "numPassedTestSuites": 2,
+  "numFailedTestSuites": 8,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 12,
+  "numPassedTests": 4,
+  "numFailedTests": 8,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1793725204700,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["admin"],
+          "fullName": "admin cancelling order 2 succeeds",
+          "status": "failed",
+          "title": "cancelling order 2 succeeds",
+          "duration": 17.837874999999997,
+          "failureMessages": [
+            "AxiosError: Request failed with status code 404\n    at settle (file:///work/node_modules/axios/lib/core/settle.js:19:12)\n    at IncomingMessage.handleStreamEnd (file:///work/node_modules/axios/lib/adapters/http.js:1437:13)\n    at IncomingMessage.emit (node:events:531:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)\n    at Axios.request (file:///work/node_modules/axios/lib/core/Axios.js:80:43)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at cancelOrder (/work/src/admin.ts:6:15)\n    at /work/test/admin.test.ts:6:12\n    at async file:///work/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["admin"],
+          "fullName": "admin cancelling an unknown order rejects",
+          "status": "passed",
+          "title": "cancelling an unknown order rejects",
+          "duration": 4.030583000000007,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793725205643,
+      "endTime": 1793725205665.0305,
+      "status": "failed",
+      "message": "",
+      "name": "/work/test/admin.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["customers"],
+          "fullName": "customers display name for customer 1 is \"Ada Lovelace\"",
+          "status": "failed",
+          "title": "display name for customer 1 is \"Ada Lovelace\"",
+          "duration": 44.86962500000001,
+          "failureMessages": [
+            "AssertionError: expected undefined to be 'Ada Lovelace' // Object.is equality\n    at /work/test/customers.test.ts:6:45\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async file:///work/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["customers"],
+          "fullName": "customers display name for customer 3 is \"Grace Hopper\"",
+          "status": "failed",
+          "title": "display name for customer 3 is \"Grace Hopper\"",
+          "duration": 4.177875,
+          "failureMessages": [
+            "AssertionError: expected undefined to be 'Grace Hopper' // Object.is equality\n    at /work/test/customers.test.ts:10:45\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async file:///work/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["customers"],
+          "fullName": "customers rejects for an unknown customer",
+          "status": "passed",
+          "title": "rejects for an unknown customer",
+          "duration": 6.688542000000012,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793725205232,
+      "endTime": 1793725205288.6885,
+      "status": "failed",
+      "message": "",
+      "name": "/work/test/customers.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["invoices"],
+          "fullName": "invoices amount due on order 1 is 19.99",
+          "status": "failed",
+          "title": "amount due on order 1 is 19.99",
+          "duration": 19.21270800000002,
+          "failureMessages": [
+            "ApiError: GET /orders/1/invoice failed with status 404\n    at request (/work/src/generated/apiClient.ts:34:22)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at getAmountDue (/work/src/invoices.ts:5:19)\n    at /work/test/invoices.test.ts:6:12\n    at async file:///work/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["invoices"],
+          "fullName": "invoices invoice label for order 2 is \"INV-0002 (due 0.00)\"",
+          "status": "failed",
+          "title": "invoice label for order 2 is \"INV-0002 (due 0.00)\"",
+          "duration": 2.9685409999999877,
+          "failureMessages": [
+            "ApiError: GET /orders/2/invoice failed with status 404\n    at request (/work/src/generated/apiClient.ts:34:22)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at getInvoiceLabel (/work/src/invoices.ts:11:19)\n    at /work/test/invoices.test.ts:10:12\n    at async file:///work/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793725205444,
+      "endTime": 1793725205465.9685,
+      "status": "failed",
+      "message": "",
+      "name": "/work/test/invoices.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["orders"],
+          "fullName": "orders order 1 total with shipping is 24.99",
+          "status": "failed",
+          "title": "order 1 total with shipping is 24.99",
+          "duration": 18.445749999999975,
+          "failureMessages": [
+            "AssertionError: expected 20 to be 24.99 // Object.is equality\n    at /work/test/orders.test.ts:6:48\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async file:///work/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["orders"],
+          "fullName": "orders order 4 total with shipping is 105",
+          "status": "failed",
+          "title": "order 4 total with shipping is 105",
+          "duration": 2.825292000000019,
+          "failureMessages": [
+            "AssertionError: expected 100.01 to be 105 // Object.is equality\n    at /work/test/orders.test.ts:10:48\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async file:///work/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["orders"],
+          "fullName": "orders rejects for an unknown order",
+          "status": "passed",
+          "title": "rejects for an unknown order",
+          "duration": 3.6541249999999934,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["orders"],
+          "fullName": "orders open orders are 1 and 3",
+          "status": "failed",
+          "title": "open orders are 1 and 3",
+          "duration": 2.8824160000000063,
+          "failureMessages": [
+            "AxiosError: Request failed with status code 400\n    at settle (file:///work/node_modules/axios/lib/core/settle.js:19:12)\n    at IncomingMessage.handleStreamEnd (file:///work/node_modules/axios/lib/adapters/http.js:1437:13)\n    at IncomingMessage.emit (node:events:531:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)\n    at Axios.request (file:///work/node_modules/axios/lib/core/Axios.js:80:43)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at listOpenOrders (/work/src/orders.ts:33:20)\n    at /work/test/orders.test.ts:18:12\n    at async file:///work/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793725204909,
+      "endTime": 1793725204936.8823,
+      "status": "failed",
+      "message": "",
+      "name": "/work/test/orders.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["unsupported call patterns"],
+          "fullName": "unsupported call patterns modules load and export functions",
+          "status": "passed",
+          "title": "modules load and export functions",
+          "duration": 0.6149170000000055,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793725205074,
+      "endTime": 1793725205074.615,
+      "status": "passed",
+      "message": "",
+      "name": "/work/test/unsupported.test.ts"
+    }
+  ]
+}

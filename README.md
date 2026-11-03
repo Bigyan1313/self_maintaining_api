@@ -8,7 +8,7 @@ When a REST API provider changes its OpenAPI spec in a breaking way, this system
 | ------- | ------------------------------------ | --------------------------------------------- |
 | Node.js | 22 LTS (≥ 22.13, see `.nvmrc`)       | `nvm use`                                     |
 | npm     | 10+ (ships with Node)                | workspaces + `save-exact`                     |
-| Docker  | Docker Desktop / Engine with Compose | PostgreSQL now; sandboxed validation later    |
+| Docker  | Docker Desktop / Engine with Compose | PostgreSQL + the validation sandbox (running) |
 | git     | any recent version                   |                                               |
 | oasdiff | 1.35.0 (pinned, exact)               | see [Installing oasdiff](#installing-oasdiff) |
 
@@ -178,3 +178,29 @@ No new HTTP route is added: run creation and orchestration belong to Increment 1
 Verification: `npm test -w @sma/core`, `npm test -w @sma/server` (PostgreSQL required),
 `npm run typecheck`, and `npm run lint`. The core suite includes all five demo operations,
 coverage boundaries and a 200-file / 20,000-line performance check.
+
+## Validation sandbox (Increment 08)
+
+The validate stage (`apps/server/src/pipeline/validate.ts`) runs a repository's **own**
+`npm run typecheck` and `npm test` inside Docker, never on the host (FR-25, FR-32, C-03):
+
+1. **Working copy**: `.work/<uuid>/` (gitignored). A git repository root is cloned with
+   `git clone --no-hardlinks` at the requested commit. Any other folder (for example
+   `demo/consumer`) is copied without `node_modules`/`.git`, and gets a baseline commit.
+   The developer's repository is never written to.
+2. **Install**: `npm ci --ignore-scripts` in a container **with** network, before any patch.
+3. **Validate**: `--network none`, non-root host uid (1000 if the host is root),
+   `--memory 2g --cpus 2 --pids-limit 256 --cap-drop ALL --security-opt no-new-privileges`,
+   a read-only root filesystem, a tmpfs `/tmp`, only `/work` mounted, only allow-listed env
+   vars (`API_VERSION`, `NODE_ENV`, `TZ`, plus `CI=true`), and a 10-minute wall clock.
+
+The image is pinned by digest in `apps/server/src/infra/validator/image.ts`:
+
+```text
+node:22-bookworm-slim@sha256:4b150b48b4116e2a22f2c39cc27025fbf4f153e2078fd3b14d159fdb5c7279da
+```
+
+To update it, run `docker buildx imagetools inspect node:22-bookworm-slim`, copy the
+top-level index `Digest:`, update `image.ts` and this line, then re-run
+`npm test -w @sma/server`. The Docker integration tests (`test/validator.integration.test.ts`)
+skip locally if Docker is not running, and are required in CI.

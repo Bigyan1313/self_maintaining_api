@@ -1,0 +1,14 @@
+{
+  "name": "sma-sandbox-probe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Throwaway repo for validator isolation checks (inc08). Never installed or run on the host.",
+  "type": "module",
+  "scripts": {
+    "typecheck": "node --version",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "5.0.5"
+  }
+}

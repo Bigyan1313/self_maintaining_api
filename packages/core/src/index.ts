@@ -23,3 +23,8 @@ export * from './classify/rules.js';
 export * from './classify/classify.js';
 export * from './locate/types.js';
 export * from './locate/locate.js';
+export * from './validate/types.js';
+export * from './validate/tsc.js';
+export * from './validate/vitest.js';
+export * from './validate/result.js';
+export * from './validate/patch.js';

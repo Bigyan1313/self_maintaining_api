@@ -1,0 +1,12 @@
+diff --git a/src/orders.ts b/src/orders.ts
+--- a/src/orders.ts
++++ b/src/orders.ts
+@@ -2,7 +2,7 @@ import axios from 'axios';
+ import { apiBaseUrl } from './config.js';
+ 
+ /** Flat shipping fee added to every order, in the shop currency. */
+-export const SHIPPING_FEE = 5;
++export const SHIPPING_FEE: number = '5';
+ 
+ /** Order as returned by GET /orders/{id}. */
+ interface OrderResponse {
