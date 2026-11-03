@@ -3,6 +3,7 @@ import {
   buildJsonPointer,
   escapePointerSegment,
   extractEvidence,
+  locateInSpec,
   parseJsonPointer,
   resolveAnchor,
 } from './pointer.js';
@@ -123,5 +124,21 @@ describe('resolveAnchor', () => {
     const cyclic = { paths: { '/x': { $ref: '#/paths/~1x' } } };
     expect(resolveAnchor(cyclic, '/x', 'GET', { kind: 'path' })).toBeNull();
     expect(resolveAnchor(undefined, '/items', 'GET', { kind: 'operation' })).toBeNull();
+  });
+});
+
+describe('locateInSpec', () => {
+  it('returns the resolvable pointer and the through-the-operation pointer', () => {
+    expect(
+      locateInSpec(spec, '/items', 'POST', {
+        kind: 'response-property',
+        status: '201',
+        propertyPath: ['name'],
+      }),
+    ).toEqual({
+      pointer: '/components/schemas/Base/properties/name',
+      operationPointer:
+        '/paths/~1items/post/responses/201/content/application~1json/schema/allOf/0/properties/name',
+    });
   });
 });

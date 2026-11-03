@@ -286,3 +286,15 @@ describe('anchorFor / mapOasdiffLevel', () => {
     expect(mapOasdiffLevel(7)).toBeNull();
   });
 });
+
+describe('operationPointer (FR-06: pointer into the operation)', () => {
+  it('addresses $ref-ed items through the path and operation', () => {
+    const diffs = parseDemo();
+    const total = find(diffs, 'response-property-type-changed', 'GET', '/orders/{id}');
+    expect(total.details.operationPointer).toBe(
+      '/paths/~1orders~1{id}/get/responses/200/content/application~1json/schema/properties/total',
+    );
+    const status = find(diffs, 'request-parameter-became-required', 'GET', '/orders');
+    expect(status.details.operationPointer).toBe(status.jsonPointer);
+  });
+});

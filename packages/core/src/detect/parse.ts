@@ -3,7 +3,7 @@ import { err, ok, type Result } from '../result.js';
 import {
   buildJsonPointer,
   extractEvidence,
-  resolveAnchor,
+  locateInSpec,
   type DifferenceAnchor,
 } from './pointer.js';
 import {
@@ -139,6 +139,7 @@ function toMethod(raw: unknown): HttpMethod | null {
 interface Located {
   jsonPointer: string;
   pointerAfter: string | null;
+  operationPointer: string;
   precision: string;
   evidenceBefore: unknown | null;
   evidenceAfter: unknown | null;
@@ -155,21 +156,28 @@ function locate(
   if (method && anchor.kind !== 'operation') tries.push({ kind: 'operation' });
   if (anchor.kind !== 'path') tries.push({ kind: 'path' });
   for (const attempt of tries) {
-    const before = resolveAnchor(specs.before, path, method, attempt);
-    const after = resolveAnchor(specs.after, path, method, attempt);
+    const hitBefore = locateInSpec(specs.before, path, method, attempt);
+    const hitAfter = locateInSpec(specs.after, path, method, attempt);
+    const before = hitBefore?.pointer ?? null;
+    const after = hitAfter?.pointer ?? null;
     if (before === null && after === null) continue;
     return {
       jsonPointer: (before ?? after)!,
       pointerAfter: after,
+      operationPointer: (hitBefore ?? hitAfter)!.operationPointer,
       precision: attempt.kind,
       evidenceBefore: before === null ? null : extractEvidence(specs.before, before),
       evidenceAfter: after === null ? null : extractEvidence(specs.after, after),
     };
   }
   // Not found in either spec (or no specs supplied): a nominal pointer to the operation/path.
+  const nominal = buildJsonPointer(
+    method ? ['paths', path, method.toLowerCase()] : ['paths', path],
+  );
   return {
-    jsonPointer: buildJsonPointer(method ? ['paths', path, method.toLowerCase()] : ['paths', path]),
+    jsonPointer: nominal,
     pointerAfter: null,
+    operationPointer: nominal,
     precision: 'nominal',
     evidenceBefore: null,
     evidenceAfter: null,
@@ -248,6 +256,7 @@ export function parseOasdiffChangelog(
     const anchor = anchorFor(ruleId, method, details);
     const found = locate(specs, path, method, anchor);
     details.pointerPrecision = found.precision;
+    details.operationPointer = found.operationPointer;
     if (found.pointerAfter !== null && found.pointerAfter !== found.jsonPointer)
       details.jsonPointerAfter = found.pointerAfter;
     differences.push({

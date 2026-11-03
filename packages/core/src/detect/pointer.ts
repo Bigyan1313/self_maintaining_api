@@ -88,20 +88,35 @@ export type DifferenceAnchor =
       mediaType?: string;
     };
 
+/**
+ * Where an anchored item was found in one spec.
+ * - `pointer`: RFC 6901 pointer to the real location (local `$ref`s followed), so a plain lookup
+ *   resolves it.
+ * - `operationPointer`: the same item addressed through the path/operation (FR-06 "pointer into
+ *   the operation"); it resolves only when `$ref`s along the way are followed.
+ */
+export interface AnchorLocation {
+  pointer: string;
+  operationPointer: string;
+}
+
 interface Located {
   pointer: string;
+  logical: string;
   value: unknown;
 }
 
+const ROOT: Omit<Located, 'value'> = { pointer: '', logical: '' };
+
 /** Follows local `$ref`s (`#/...`) from `pointer` until a non-reference node is reached. */
-function deref(doc: unknown, pointer: string): Located | null {
+function deref(doc: unknown, pointer: string, logical: string): Located | null {
   let current = pointer;
   for (let hop = 0; hop <= MAX_REF_HOPS; hop++) {
     const { found, value } = lookup(doc, current);
     if (!found) return null;
     if (isRecord(value) && typeof value.$ref === 'string') {
       const ref = value.$ref;
-      if (!ref.startsWith('#')) return { pointer: current, value }; // external refs are not followed
+      if (!ref.startsWith('#')) return { pointer: current, logical, value }; // external: not followed
       try {
         current = decodeURIComponent(ref.slice(1));
       } catch {
@@ -109,19 +124,14 @@ function deref(doc: unknown, pointer: string): Located | null {
       }
       continue;
     }
-    return { pointer: current, value };
+    return { pointer: current, logical, value };
   }
   return null; // reference cycle
 }
 
-function child(doc: unknown, parent: string, ...tokens: string[]): Located | null {
-  return deref(doc, parent + buildJsonPointer(tokens));
-}
-
-function operation(doc: unknown, path: string, method: string): Located | null {
-  const item = child(doc, '', 'paths', path);
-  if (!item) return null;
-  return child(doc, item.pointer, method.toLowerCase());
+function child(doc: unknown, parent: Omit<Located, 'value'>, ...tokens: string[]): Located | null {
+  const suffix = buildJsonPointer(tokens);
+  return deref(doc, parent.pointer + suffix, parent.logical + suffix);
 }
 
 function findParameter(
@@ -131,19 +141,19 @@ function findParameter(
   where: string,
   name: string,
 ): Located | null {
-  const item = child(doc, '', 'paths', path);
+  const item = child(doc, ROOT, 'paths', path);
   if (!item) return null;
-  const containers: string[] = [];
+  const containers: Located[] = [];
   if (method) {
-    const op = child(doc, item.pointer, method.toLowerCase());
-    if (op) containers.push(op.pointer);
+    const op = child(doc, item, method.toLowerCase());
+    if (op) containers.push(op);
   }
-  containers.push(item.pointer); // path-level parameters apply to every operation
+  containers.push(item); // path-level parameters apply to every operation
   for (const container of containers) {
     const list = child(doc, container, 'parameters');
     if (!list || !Array.isArray(list.value)) continue;
     for (let i = 0; i < list.value.length; i++) {
-      const param = child(doc, list.pointer, String(i));
+      const param = child(doc, list, String(i));
       if (
         param &&
         isRecord(param.value) &&
@@ -162,19 +172,19 @@ function findProperty(doc: unknown, schema: Located, name: string, depth = 0): L
   if (depth > MAX_COMBINATOR_DEPTH || !isRecord(schema.value)) return null;
   const props = schema.value.properties;
   if (isRecord(props) && Object.prototype.hasOwnProperty.call(props, name))
-    return child(doc, schema.pointer, 'properties', name);
+    return child(doc, schema, 'properties', name);
   for (const key of ['allOf', 'oneOf', 'anyOf']) {
     const members = schema.value[key];
     if (!Array.isArray(members)) continue;
     for (let i = 0; i < members.length; i++) {
-      const member = child(doc, schema.pointer, key, String(i));
+      const member = child(doc, schema, key, String(i));
       const hit = member && findProperty(doc, member, name, depth + 1);
       if (hit) return hit;
     }
   }
   if (name !== 'items' && schema.value.items !== undefined) {
     // oasdiff sometimes omits the array step; try the item schema.
-    const items = child(doc, schema.pointer, 'items');
+    const items = child(doc, schema, 'items');
     if (items) return findProperty(doc, items, name, depth + 1);
   }
   return null;
@@ -187,7 +197,7 @@ function walkSchema(doc: unknown, schema: Located, propertyPath: string[]): Loca
     const prop = findProperty(doc, current, segment);
     if (prop) current = prop;
     else if (segment === 'items' && isRecord(current.value) && current.value.items !== undefined)
-      current = child(doc, current.pointer, 'items');
+      current = child(doc, current, 'items');
     else return null;
   }
   return current;
@@ -206,10 +216,10 @@ function propertyInContent(
   propertyPath: string[],
   mediaType?: string,
 ): Located | null {
-  const content = child(doc, holder.pointer, 'content');
+  const content = child(doc, holder, 'content');
   if (!content) return null;
   for (const mt of mediaTypes(content, mediaType)) {
-    const schema = child(doc, content.pointer, mt, 'schema');
+    const schema = child(doc, content, mt, 'schema');
     const hit = schema && walkSchema(doc, schema, propertyPath);
     if (hit) return hit;
   }
@@ -226,9 +236,64 @@ function responseStatuses(responses: Located, status: string | null): string[] {
   );
 }
 
+function locateAnchor(
+  doc: unknown,
+  path: string,
+  method: string | null,
+  anchor: DifferenceAnchor,
+): Located | null {
+  if (doc === undefined || doc === null || !path) return null;
+  if (anchor.kind === 'path') return child(doc, ROOT, 'paths', path);
+  if (anchor.kind === 'parameter') return findParameter(doc, path, method, anchor.in, anchor.name);
+  if (!method) return null;
+  const item = child(doc, ROOT, 'paths', path);
+  const op = item && child(doc, item, method.toLowerCase());
+  if (!op) return null;
+  switch (anchor.kind) {
+    case 'operation':
+      return op;
+    case 'request-body':
+      return child(doc, op, 'requestBody');
+    case 'request-property': {
+      const body = child(doc, op, 'requestBody');
+      return body && propertyInContent(doc, body, anchor.propertyPath, anchor.mediaType);
+    }
+    case 'response':
+    case 'response-property': {
+      const responses = child(doc, op, 'responses');
+      if (!responses) return null;
+      for (const status of responseStatuses(responses, anchor.status)) {
+        const response = child(doc, responses, status);
+        if (!response) continue;
+        if (anchor.kind === 'response') return response;
+        const hit = propertyInContent(doc, response, anchor.propertyPath, anchor.mediaType);
+        if (hit) return hit;
+      }
+      return null;
+    }
+  }
+}
+
 /**
- * Finds where an anchored item lives in one spec, following local `$ref`s, and returns the
- * RFC 6901 pointer of that location (or `null` if the spec does not contain it).
+ * Finds where an anchored item lives in one spec, following local `$ref`s.
+ * @param doc - Spec document.
+ * @param path - OpenAPI path.
+ * @param method - HTTP method, or `null`.
+ * @param anchor - What the difference is about.
+ * @returns Both pointers (see {@link AnchorLocation}), or `null` if the spec lacks the item.
+ */
+export function locateInSpec(
+  doc: unknown,
+  path: string,
+  method: string | null,
+  anchor: DifferenceAnchor,
+): AnchorLocation | null {
+  const hit = locateAnchor(doc, path, method, anchor);
+  return hit ? { pointer: hit.pointer, operationPointer: hit.logical } : null;
+}
+
+/**
+ * Like {@link locateInSpec} but returns only the resolvable RFC 6901 pointer.
  * @param doc - Spec document.
  * @param path - OpenAPI path.
  * @param method - HTTP method, or `null`.
@@ -240,37 +305,5 @@ export function resolveAnchor(
   method: string | null,
   anchor: DifferenceAnchor,
 ): string | null {
-  if (doc === undefined || doc === null || !path) return null;
-  if (anchor.kind === 'path') return child(doc, '', 'paths', path)?.pointer ?? null;
-  if (anchor.kind === 'parameter')
-    return findParameter(doc, path, method, anchor.in, anchor.name)?.pointer ?? null;
-  if (!method) return null;
-  const op = operation(doc, path, method);
-  if (!op) return null;
-  switch (anchor.kind) {
-    case 'operation':
-      return op.pointer;
-    case 'request-body':
-      return child(doc, op.pointer, 'requestBody')?.pointer ?? null;
-    case 'request-property': {
-      const body = child(doc, op.pointer, 'requestBody');
-      return (
-        (body && propertyInContent(doc, body, anchor.propertyPath, anchor.mediaType))?.pointer ??
-        null
-      );
-    }
-    case 'response':
-    case 'response-property': {
-      const responses = child(doc, op.pointer, 'responses');
-      if (!responses) return null;
-      for (const status of responseStatuses(responses, anchor.status)) {
-        const response = child(doc, responses.pointer, status);
-        if (!response) continue;
-        if (anchor.kind === 'response') return response.pointer;
-        const hit = propertyInContent(doc, response, anchor.propertyPath, anchor.mediaType);
-        if (hit) return hit.pointer;
-      }
-      return null;
-    }
-  }
+  return locateInSpec(doc, path, method, anchor)?.pointer ?? null;
 }

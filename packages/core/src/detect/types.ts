@@ -25,7 +25,12 @@ export interface SpecDifference {
   path: string;
   /** HTTP method, or `null` when the difference is not tied to one operation. */
   method: HttpMethod | null;
-  /** RFC 6901 pointer into the spec document for the changed item; `""` when unattributed. */
+  /**
+   * RFC 6901 pointer into the spec document for the changed item; `""` when unattributed.
+   * Local `$ref`s are already followed, so a plain lookup resolves it (e.g. a `$ref`'d response
+   * schema property points into `/components/schemas/...`). The same item addressed through the
+   * operation is in `details.operationPointer` (FR-06).
+   */
   jsonPointer: string;
   /** oasdiff's text. */
   description: string;
