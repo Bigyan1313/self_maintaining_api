@@ -21,7 +21,8 @@
     "src/infra/validator/docker.ts",
     "src/infra/validator/sandbox.ts",
     "src/infra/workcopy/index.ts",
-    "src/pipeline/locate.ts"
+    "src/pipeline/locate.ts",
+    "src/pipeline/guarded-validate.ts"
   ],
   "tsconfig": "tsconfig.build.json"
 }

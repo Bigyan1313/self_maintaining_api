@@ -204,3 +204,19 @@ To update it, run `docker buildx imagetools inspect node:22-bookworm-slim`, copy
 top-level index `Digest:`, update `image.ts` and this line, then re-run
 `npm test -w @sma/server`. The Docker integration tests (`test/validator.integration.test.ts`)
 skip locally if Docker is not running, and are required in CI.
+
+## Cheat guards (Increment 09)
+
+`guardedValidate` (`apps/server/src/pipeline/guarded-validate.ts`) wraps the validator with four
+guards, in a fixed order (FR-27 to FR-31). The verdict names the **first** guard that fires, and
+`evidence` keeps every hit. A `cheating` outcome ends the run (`cheatingEndsRun`).
+
+| Order | Guard                | When                 | Rejects                                                                                                                   |
+| ----- | -------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 1     | `test_file_changed`  | before any code runs | changes to test files, fixtures, snapshots or test setup; added `.skip(`/`.only(`/`xit(`…                                 |
+| 2     | `config_changed`     | before any code runs | tsconfig, vitest/vite/jest, package.json, lockfiles, .npmrc, lint/format config, `.github/`                               |
+| 3     | `type_suppression`   | before any code runs | added `@ts-ignore`/`@ts-expect-error`/`@ts-nocheck`/`eslint-disable`, `any`, `as unknown as`, empty `catch` (syntax tree) |
+| 4     | `test_count_changed` | after validation     | total changed, passing went down, or a pre-patch test is missing (file + name)                                            |
+
+A patch that fails guards 1–3 never reaches the container. The pure guards live in
+`packages/core/src/guards/`, and the AT-07 patch fixtures are in `packages/core/test/fixtures/patches/`.
