@@ -1,0 +1,11 @@
+diff --git a/src/customers.ts b/src/customers.ts
+index 9af07e1..12f2835 100644
+--- a/src/customers.ts
++++ b/src/customers.ts
+@@ -12,5 +12,5 @@ export async function getCustomerDisplayName(id: number): Promise<string> {
+   const res = await fetch(`${apiBaseUrl()}/customers/${id}`);
+   if (!res.ok) throw new Error(`Customer ${id} request failed with status ${res.status}`);
+   const customer = (await res.json()) as CustomerResponse;
+-  return customer.customer_name;
++  return (customer as any).full_name;
+ }

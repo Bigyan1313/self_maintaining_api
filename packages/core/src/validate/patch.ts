@@ -189,3 +189,14 @@ export function inspectPatch(diff: string): Result<PatchFile[], PatchRejection> 
   if (files.length === 0) return err({ reason: 'patch touches no files' });
   return ok(files.map((f) => ({ ...f })));
 }
+
+/**
+ * Reads one path from a diff header (`--- a/x`, `rename to x`, a `diff --git` token): decodes
+ * git C-style quoting, drops a trailing tab-separated timestamp and the `a/`/`b/` prefix.
+ * Shared with the cheat-guard diff parser (inc09).
+ * @param raw - The path token as it appears in the header.
+ * @returns The repository-relative path, or `null` for `/dev/null`.
+ */
+export function diffHeaderPath(raw: string): string | null {
+  return headerPath(raw);
+}

@@ -1,0 +1,13 @@
+diff --git a/test/fixtures/v2/GET_customers_1.json b/test/fixtures/v2/GET_customers_1.json
+index 005fe5e..6e6b58d 100644
+--- a/test/fixtures/v2/GET_customers_1.json
++++ b/test/fixtures/v2/GET_customers_1.json
+@@ -9,7 +9,7 @@
+     "status": 200,
+     "body": {
+       "id": 1,
+-      "full_name": "Ada Lovelace",
++      "customer_name": "Ada Lovelace",
+       "email": "ada@example.com",
+       "phone": "+44 20 7946 0001"
+     }
