@@ -1,7 +1,6 @@
 import { lstat, readFile, realpath } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import {
-  err,
   inspectPatch,
   isTypeScriptPath,
   ok,
