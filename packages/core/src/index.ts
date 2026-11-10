@@ -28,3 +28,8 @@ export * from './validate/tsc.js';
 export * from './validate/vitest.js';
 export * from './validate/result.js';
 export * from './validate/patch.js';
+export * from './guards/diff.js';
+export * from './guards/paths.js';
+export * from './guards/verdict.js';
+export * from './guards/static.js';
+export * from './guards/count.js';

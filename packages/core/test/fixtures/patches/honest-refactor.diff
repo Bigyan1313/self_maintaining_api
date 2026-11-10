@@ -1,0 +1,12 @@
+diff --git a/src/orders.ts b/src/orders.ts
+index 2903697..9929b50 100644
+--- a/src/orders.ts
++++ b/src/orders.ts
+@@ -31,5 +31,6 @@ export async function getOrderTotalWithShipping(id: number): Promise<number> {
+ /** Ids of all open orders. Fetches every order and filters on the client. */
+ export async function listOpenOrders(): Promise<number[]> {
+   const { data } = await api.get<OrderSummaryResponse[]>('/orders');
+-  return data.filter((o) => o.status === 'open').map((o) => o.id);
++  const open = data.filter((o) => o.status === 'open');
++  return open.map((o) => o.id);
+ }
