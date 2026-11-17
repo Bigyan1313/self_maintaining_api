@@ -1,0 +1,1153 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.317
+           Opus 5.5 · Claude Pro
+ ▘▘   ▝▝   ~/Desktop/self_maintaining_api
+
+
+❯ /clear                                                                        
+
+❯ hey so pull from the origin and check whats going on                          
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Bash(git checkout main -q && git pull -q && git log --oneline -1 && git show
+      --stat 4fc65b6 a8ce0ef | grep -v '^ *$' | head -50; echo ---; cat
+      docs/PROGRESS.md; echo…)
+  ⎿  28780a8 Merge pull request #23 from Bigyan1313/feat/inc10-llm-adapter
+     commit 4fc65b68b0ce5b68ef239a6e97e178bdca5dd1b5
+     Author: yrq13 <yrq13@txstate.edu>
+     … +84 lines (ctrl+o to expand)
+  ⎿  Updated README.md (+23 -0)
+  ⎿  Updated apps/server/package.json (+4 -1)
+  ⎿  Created apps/server/src/infra/llm/adapter.ts (+135 -0)
+  ⎿  Created apps/server/src/infra/llm/fake.ts (+24 -0)
+  ⎿  Created apps/server/src/infra/llm/types.ts (+29 -0)
+  ⎿  … 16 more files changed
+  ⎿  (a git step in this command can move the working tree, so these may be
+     its changes, not edits) (ctrl+o to expand)
+
+⏺ Pulled. Running the start-of-increment setup and checks on the new main to see
+  if it's healthy:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ You're on main now, synced with origin at 28780a8, and everything passes.
+
+  What changed since you last pulled
+  - Increment 10 (LLM adapter + context assembly) was merged today as PR #23.
+    Sishir (yrq13) wrote it. It adds:
+    - packages/core/src/repair/context.ts and output.ts, which build the repair
+      context with credentials removed and parse the model's output.
+    - apps/server/src/infra/llm/adapter.ts, the provider adapter with limits,
+      plus a fake provider for tests.
+    - config/llm-pricing.json and an ESLint boundary rule.
+    - The decisions file, README section and chat log.
+  - Your inc09 chat-log PR (#22) was merged as well, so the local
+    docs/inc09-chat-log branch can be deleted.
+
+  Health of main
+  - npm ci, the consumer install and db:migrate all succeeded.
+  - Typecheck and lint pass.
+  - Tests: 649/649 passed across all suites (392 + 215 + 2 + 40).
+
+  What's next
+  - Increment 11, the repair loop (#8), is assigned to you. It's marked critical
+    and ready. It covers FR-18 and FR-20–24: retries, feeding errors back to
+    the model, the token ceiling and cost tracking. It builds directly on
+    Sishir's inc10 adapter.
+  - Increments 12, 14 and 15 are marked ready but nobody is assigned. 13, 16 and
+    17 are blocked.
+
+  Should I start Increment 11? That means saving the prompt and creating
+  feat/inc11-repair-loop from main. I'd need the increment prompt, unless it's
+  already in prompts/.
+
+✻ Crunched for 1m 59s · done 3:13 PM
+
+❯ yes start inc 11 now                                                          
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Issue #8 is assigned to you and the prompt is already in prompts/. Creating
+  the branch and reading the code the loop depends on:
+
+  Read 1 file, ran 7 shell commands (ctrl+o to expand)
+
+⏺ I'm on feat/inc11-repair-loop, with the validator, guards, LLM adapter and DB
+  schema read; next I'm checking the test patterns and demo consumer before
+  writing the decisions file and repair.ts.
+
+  Listed 1 directory, ran 3 shell commands (ctrl+o to expand)
+
+⏺ The prompt's "tests 12/12" on demo/consumer with API_VERSION=v2 conflicts with
+  v2's five breaking changes, so the whole suite can't pass from a single
+  repair; I'm keeping the FR-22 definition and checking how the other pipeline
+  stages pass data before building the fixture.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Postgres and Docker are both up, so the real-validator checks can run locally.
+  Last bit to check is how money columns and test DB setup work:
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ I have what I need. Writing the decisions file first (failure signs and the
+  rollback point), as the prompt requires:
+
+⏺ Write(docs/decisions/inc11.md)
+  ⎿  Wrote 37 lines to docs/decisions/inc11.md
+       1 # Decisions — Increment 11: Repair loop
+       2 
+       3 ## Critical checkpoint (written before any code)
+       4 
+       5 **Rollback point:** `28780a8` (Merge pull request #23, increment
+          10), the last merged commit on `main`.
+       6 
+       7 **Failure signs** (each one has a test that fails if it happens)
+         :
+       8 
+     … +29 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now the pure parts in packages/core: precondition check, ceiling check, and
+  turning a validator result into error feedback.
+
+⏺ Write(packages/core/src/repair/loop.ts)
+  ⎿  Wrote 93 lines to packages/core/src/repair/loop.ts
+       1 import type { LocateResult } from '../locate/types.js';
+       2 import type { ValidationResult } from '../validate/types.js';
+       3 import type { RepairContextInput } from './context.js';
+       4 
+       5 /** Maximum repair attempts per run (FR-21, DR-03). */
+       6 export const MAX_REPAIR_ATTEMPTS = 4;
+       7 
+       8 /** Plain reason recorded when four attempts did not pass valida
+         tion (FR-22). */
+       9 export const FOUR_ATTEMPTS_REASON =
+     … +84 lines (ctrl+o to expand)
+
+⏺ Write(packages/core/src/repair/loop.test.ts)
+  ⎿  Wrote 136 lines to packages/core/src/repair/loop.test.ts
+       1 import { describe, expect, it } from 'vitest';
+       2 import type { ValidationResult } from '../validate/types.js';
+       3 import type { RepairContextInput } from './context.js';
+       4 import {
+       5   FOUR_ATTEMPTS_REASON,
+       6   MAX_REPAIR_ATTEMPTS,
+       7   exceedsTokenCeiling,
+       8   repairPreconditionReason,
+       9   unvalidatedFeedback,
+      10   validatorFeedback,
+     … +126 lines (ctrl+o to expand)
+
+⏺ Bash(echo "export * from './repair/loop.js';" >> packages/core/src/index.ts &&
+      cd packages/core && npx vitest run src/repair/loop.test.ts 2>&1 | tail
+      -15)
+  ⎿   RUN  v5.0.5 /Users/turbo/Desktop/self_maintaining_api/packages/core
+     … +4 lines (ctrl+o to expand)
+  ⎿  Updated packages/core/src/index.ts (+1 -0)
+      35  export * from './guards/count.js';
+      36  export * from './repair/context.js';
+      37  export * from './repair/output.js';
+      38 +export * from './repair/loop.js';                              
+
+⏺ Now the small additive adapter change, so tokens spent on an unusable model
+  answer still count toward the ceiling:
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api/apps/server && python3 -
+      <<'EOF'
+      import re…)
+  ⎿      mock.create.mockImplementation(() => new Promise(() => {}));
+         const result = new AnthropicLlmAdapter().generatePatch(ctx, { ...o
+     pts, timeoutMs: 999999 });
+     … +53 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/infra/llm/adapter.ts (+11 -7)
+      102        const text = response.content
+      103          .map((block) => (block.type === 'text' ? block.text : 
+           ''))
+      104          .join('\n');
+      105 -      // Refusals may be redacted; a patch containing secrets 
+          -is refused rather than silently altered.                      
+      106 -      const parsed = parseRepairOutput(text, ctx.includedFiles
+          -);                                                            
+      107 -      if (parsed.kind === 'invalid_output') return error('inva
+          -lid_output', parsed.message);                                 
+      108 -      if (parsed.kind === 'patch' && scrub(parsed.patch) !== p
+          -arsed.patch)                                                  
+      109 -        return error('invalid_output', 'Provider patch contain
+          -s credential-like text');                                     
+      110 -      const usage = {                                         
+      105 +      const billed = {                                        
+      106          tokensIn,
+      107          tokensOut,
+      108          costUsd:
+     ...
+      110              tokensOut * price.outputUsdPerMillionTokens) /
+      111            1_000_000,
+      112          modelId,
+      118 -        durationMs: duration(),                               
+      113        };
+      114 +      const unusable = (message: string): LlmResult => ({     
+      115 +        ...error('invalid_output', message),                  
+      116 +        usage: billed,                                        
+      117 +      } as LlmResult);                                        
+      118 +      // Refusals may be redacted; a patch containing secrets 
+          +is refused rather than silently altered.                      
+      119 +      const parsed = parseRepairOutput(text, ctx.includedFiles
+          +);                                                            
+      120 +      if (parsed.kind === 'invalid_output') return unusable(pa
+          +rsed.message);                                                
+      121 +      if (parsed.kind === 'patch' && scrub(parsed.patch) !== p
+          +arsed.patch)                                                  
+      122 +        return unusable('Provider patch contains credential-li
+          +ke text');                                                    
+      123 +      const usage = { ...billed, durationMs: duration() };    
+      124        return parsed.kind === 'patch'
+      125          ? { ...parsed, ...usage }
+      126          : { ...parsed, reason: scrub(parsed.reason), ...usage 
+           };
+  ⎿  Updated apps/server/src/infra/llm/types.ts (+6 -0)
+      22        errorKind: 'timeout' | 'api_error' | 'invalid_output' | '
+          missing_key';
+      23        message: string;
+      24        durationMs: number;
+      25 +      /**                                                      
+      26 +       * Billed usage when the provider did answer but the answ
+         +er was unusable                                                
+      27 +       * (`invalid_output`), so the repair loop can record it a
+         +nd count it against the                                        
+      28 +       * token ceiling (FR-23, FR-24). Absent when no response 
+         +was received.                                                  
+      29 +       */                                                      
+      30 +      usage?: Omit<LlmUsage, 'durationMs'>;                    
+      31      };
+      32  /** All repair orchestration depends on this interface, never o
+          n a provider SDK. */
+      33  export interface LlmAdapter {
+
+⏺ Truncated answers (stop_reason: max_tokens) also return before usage is read,
+  and those are the most expensive ones. Reordering so usage is captured for
+  them too:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Bash(python3 - <<'EOF'
+      p='src/infra/llm/adapter.ts'…)
+  ⎿  import { afterEach, beforeEach, describe, expect, it, vi } from 'vites
+     t';
+     import { AnthropicLlmAdapter } from '../src/infra/llm/adapter.js';
+     … +57 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/infra/llm/adapter.ts (+15 -13)
+      85          ),
+      86          deadline,
+      87        ]);
+      88 -      if (                                                     
+      89 -        response.stop_reason !== 'end_turn' ||                 
+      90 -        response.model !== modelId ||                          
+      91 -        response.content.some((block) => block.type !== 'text')
+      92 -      )                                                        
+      93 -        return error('invalid_output', 'Provider returned an in
+         -complete or unsupported response');                            
+      88        const tokensIn = response.usage.input_tokens;
+      89        const tokensOut = response.usage.output_tokens;
+      90        if (
+     ...
+       93          response.usage.cache_read_input_tokens
+       94        )
+       95          return error('invalid_output', 'Provider returned unsu
+           pported usage accounting');
+      102 -      const text = response.content                           
+      103 -        .map((block) => (block.type === 'text' ? block.text : 
+          -''))                                                          
+      104 -        .join('\n');                                          
+       96 +      if (response.model !== modelId)                         
+       97 +        return error('invalid_output', 'Provider returned an i
+          +ncomplete or unsupported response');                          
+       98 +      // Usage is known from here on, so every unusable answer
+          + still reports what it cost.                                  
+       99        const billed = {
+      100          tokensIn,
+      101          tokensOut,
+     ...
+      105            1_000_000,
+      106          modelId,
+      107        };
+      114 -      const unusable = (message: string): LlmResult => ({     
+      115 -        ...error('invalid_output', message),                  
+      116 -        usage: billed,                                        
+      117 -      } as LlmResult);                                        
+      108 +      const unusable = (message: string): LlmResult => {      
+      109 +        const failure = error('invalid_output', message);     
+      110 +        return failure.kind === 'error' ? { ...failure, usage:
+          + billed } : failure;                                          
+      111 +      };                                                      
+      112 +      if (                                                    
+      113 +        response.stop_reason !== 'end_turn' ||                
+      114 +        response.content.some((block) => block.type !== 'text'
+          +)                                                             
+      115 +      )                                                       
+      116 +        return unusable('Provider returned an incomplete or un
+          +supported response');                                         
+     … 6 more lines (ctrl+o to expand)
+⏺ Adding adapter tests for the new usage field, then running the LLM suite:
+
+⏺ Bash(python3 - <<'EOF'
+      p='test/llm.test.ts'…)
+  ⎿   Test Files  2 passed (2)
+           Tests  12 passed (12)
+        Start at  15:19:14
+        Duration  516ms (tests 48%, import 38%, transform 13%)
+  ⎿  Updated apps/server/test/llm.test.ts (+25 -0)
+      127      });
+      128      expect(mock.create).not.toHaveBeenCalled();
+      129    });
+      130 +  it('reports billed usage on unusable answers so the repair l
+          +oop can count it (FR-24)', async () => {                      
+      131 +    for (const data of [                                      
+      132 +      response('not a diff'),                                 
+      133 +      { ...response(), stop_reason: 'max_tokens' },           
+      134 +      response(patch.replace('+new', '+test-key-PLANTED')),   
+      135 +    ]) {                                                      
+      136 +      mock.create.mockResolvedValue(data);                    
+      137 +      expect(await new AnthropicLlmAdapter().generatePatch(ctx
+          +, opts)).toMatchObject({                                      
+      138 +        kind: 'error',                                        
+      139 +        errorKind: 'invalid_output',                          
+      140 +        usage: { tokensIn: 1000, tokensOut: 100, costUsd: 0.00
+          +3, modelId: 'claude-sonnet-5-5' },                            
+      141 +      });                                                     
+      142 +    }                                                         
+      143 +  });                                                         
+      144 +  it('reports no usage when the accounting itself is unusable 
+          +or the model differs', async () => {                          
+      145 +    for (const data of [                                      
+      146 +      { ...response(), usage: { input_tokens: -1, output_token
+          +s: 2 } },                                                     
+      147 +      { ...response(), model: 'other-model' },                
+      148 +    ]) {                                                      
+      149 +      mock.create.mockResolvedValue(data);                    
+      150 +      const result = await new AnthropicLlmAdapter().generateP
+          +atch(ctx, opts);                                              
+      151 +      expect(result).toMatchObject({ kind: 'error', errorKind:
+          + 'invalid_output' });                                         
+      152 +      expect(result).not.toHaveProperty('usage');             
+      153 +    }                                                         
+      154 +  });                                                         
+      155    it('rejects out-of-scope and truncated output', async () => 
+           {
+      156      for (const data of [
+      157        response(patch.replaceAll('src/a.ts', 'test/a.ts')),
+
+⏺ Adapter tests pass. Now the loop itself, apps/server/src/pipeline/repair.ts:
+
+⏺ Write(apps/server/src/pipeline/repair.ts)
+  ⎿  Wrote 457 lines to apps/server/src/pipeline/repair.ts
+       1 import { and, eq } from 'drizzle-orm';
+       2 import {
+       3   FOUR_ATTEMPTS_REASON,
+       4   MAX_REPAIR_ATTEMPTS,
+       5   buildRepairContext,
+       6   exceedsTokenCeiling,
+       7   isRepairSourcePath,
+       8   repairPreconditionReason,
+       9   unvalidatedFeedback,
+      10   validatorFeedback,
+     … +447 lines (ctrl+o to expand)
+
+⏺ Bash(npx prettier --write src/pipeline/repair.ts >/dev/null && npm run
+      typecheck 2>&1 | grep -E "error|repair" | head -20; npx eslint
+      src/pipeline/repair.ts 2>&1 | t…)
+  ⎿  Updated apps/server/src/pipeline/repair.ts (+43 -9)
+      40    type GuardedValidateInput,
+      41    type GuardedVerdict,
+      42  } from './guarded-validate.js';
+      43 -import { validate, type ValidateError, type ValidateInput, type
+         - ValidateOutput } from './validate.js';                        
+      43 +import {                                                       
+      44 +  validate,                                                    
+      45 +  type ValidateError,                                          
+      46 +  type ValidateInput,                                          
+      47 +  type ValidateOutput,                                         
+      48 +} from './validate.js';                                        
+      49  import type { Result } from '@sma/core';
+      50  
+      51  /** Default output-token limit for one model call. */
+     ...
+      166    const run = await getRunById(db, runId);
+      167    if (!run) throw new Error('Run not found');
+      168    if (run.finishedAt) throw new Error('Cannot repair a finishe
+           d run');
+      164 -  const earlier = await db.select({ id: attempts.id }).from(at
+          -tempts).where(eq(attempts.runId, runId));                     
+      169 +  const earlier = await db                                    
+      170 +    .select({ id: attempts.id })                              
+      171 +    .from(attempts)                                           
+      172 +    .where(eq(attempts.runId, runId));                        
+      173    const repairRow = await db
+      174      .select({ id: runStageResults.id })
+      175      .from(runStageResults)
+     ...
+      221      totals.costUsd += usage.costUsd;
+      222      if (usage.modelId !== UNAVAILABLE_MODEL_ID) totals.modelId
+            = usage.modelId;
+      223      await updateRunProgress(db, runId, {
+      216 -      stageReached: fields.compileErrors === null && fields.te
+          -stsTotal === null ? 'repair' : 'validate',                    
+      224 +      stageReached:                                           
+      225 +        fields.compileErrors === null && fields.testsTotal ===
+          + null ? 'repair' : 'validate',                                
+      226        attemptCount,
+      227        tokensIn: totals.tokensIn,
+      228        tokensOut: totals.tokensOut,
+     ...
+      238      failureStage?: Stage,
+      239    ): Promise<RepairOutcome> {
+      240      const stageStatus: StageResultStatus =
+      232 -      status === 'repaired' ? 'ok' : status === 'flagged' && a
+          -ttemptCount === 0 ? 'skipped' : 'failed';                     
+      241 +      status === 'repaired'                                   
+      242 +        ? 'ok'                                                
+      243 +        : status === 'flagged' && attemptCount === 0          
+     … 60 more lines (ctrl+o to expand)
+
+⏺ Typecheck and lint are clean. Checking how other DB tests open and close the
+  client, then writing the unit tests (scripted fake model, mocked validator,
+  real test DB):
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(apps/server/test/repair-helpers.ts)
+  ⎿  Wrote 105 lines to apps/server/test/repair-helpers.ts
+       1 /** Shared inputs for the repair-loop tests (unit and Docker). *
+         /
+       2 import { readFileSync } from 'node:fs';
+       3 import { join } from 'node:path';
+       4 import { fileURLToPath } from 'node:url';
+       5 import type { LocateResult, MigrationMapping, RepairContextInput
+         , ValidationResult } from '@sma/core';
+       6 import type { LlmResult } from '../src/infra/llm/types.js';
+       7 
+       8 export const repoRoot = fileURLToPath(new URL('../../../', impor
+     … +98 lines (~3 KB) (ctrl+o to expand)
+
+⏺ Write(apps/server/test/repair.test.ts)
+  ⎿  Wrote 411 lines to apps/server/test/repair.test.ts
+       1 /**
+       2  * Repair loop with the scripted FakeLlmAdapter and a mocked val
+         idator (no Docker), on the real
+       3  * test database. The same scenarios run against the real Docker
+          validator in
+       4  * repair.integration.test.ts.
+       5  */
+       6 import { execFileSync } from 'node:child_process';
+       7 import { afterAll, beforeAll, describe, expect, it, vi } from 'v
+         itest';
+     … +404 lines (ctrl+o to expand)
+
+⏺ Bash(npx prettier --write test/repair.test.ts test/repair-helpers.ts
+      >/dev/null && npx vitest run test/repair.test.ts 2>&1 | tail -40)
+  ⎿  ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+      FAIL  test/repair.test.ts > repair loop (FakeLlmAdapter + mocked vali
+     … +36 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/repair-helpers.ts (+6 -1)
+       2  import { readFileSync } from 'node:fs';
+       3  import { join } from 'node:path';
+       4  import { fileURLToPath } from 'node:url';
+       5 -import type { LocateResult, MigrationMapping, RepairContextInpu
+         -t, ValidationResult } from '@sma/core';                        
+       5 +import type {                                                  
+       6 +  LocateResult,                                                
+       7 +  MigrationMapping,                                            
+       8 +  RepairContextInput,                                          
+       9 +  ValidationResult,                                            
+      10 +} from '@sma/core';                                            
+      11  import type { LlmResult } from '../src/infra/llm/types.js';
+      12  
+      13  export const repoRoot = fileURLToPath(new URL('../../../', impo
+          rt.meta.url));
+  ⎿  Updated apps/server/test/repair.test.ts (+156 -39)
+      47    return vi.fn(async (input: { patch?: string }) => {
+      48      if (input.patch === undefined) {
+      49        if (baseline === 'down')
+      50 -        return { ok: false as const, error: { code: 'container_
+         -unavailable' as const, message: 'Docker is not running' } };   
+      51 -      return ok({ workDir: '/x', commit: 'c', result: baseline,
+         - patchFiles: [], timings: { installMs: 0, validateMs: 0 } });  
+      50 +        return {                                               
+      51 +          ok: false as const,                                  
+      52 +          error: { code: 'container_unavailable' as const, mess
+         +age: 'Docker is not running' },                                
+      53 +        };                                                     
+      54 +      return ok({                                              
+      55 +        workDir: '/x',                                         
+      56 +        commit: 'c',                                           
+      57 +        result: baseline,                                      
+      58 +        patchFiles: [],                                        
+      59 +        timings: { installMs: 0, validateMs: 0 },              
+      60 +      });                                                      
+      61      }
+      62      const r = scored.shift() ?? PASS();
+      54 -    return ok({ workDir: '/x', commit: 'c', result: r, patchFil
+         -es: [], timings: { installMs: 0, validateMs: 0 } });           
+      63 +    return ok({                                                
+      64 +      workDir: '/x',                                           
+      65 +      commit: 'c',                                             
+      66 +      result: r,                                               
+      67 +      patchFiles: [],                                          
+      68 +      timings: { installMs: 0, validateMs: 0 },                
+      69 +    });                                                        
+      70    });
+      71  }
+      57 -const verdict = (r: ValidationResult): GuardedVerdict => ({ out
+         -come: r.status, result: r, validated: true });                 
+      72 +const verdict = (r: ValidationResult): GuardedVerdict => ({    
+      73 +  outcome: r.status,                                           
+      74 +  result: r,                                                   
+      75 +  validated: true,                                             
+      76 +});                                                            
+      77  
+      59 -async function setup(script: LlmResult[], verdicts: GuardedVerd
+         -ict[], over: Partial<RepairInput> = {}) {                      
+      78 +async function setup(                                          
+      79 +  script: LlmResult[],                                         
+      80 +  verdicts: GuardedVerdict[],                                  
+      81 +  over: Partial<RepairInput> = {},                             
+     … 272 more lines (ctrl+o to expand)
+
+⏺ Real bug: on repaired the final run update had no columns to set. Skipping the
+  update when there's nothing to write:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Update(apps/server/src/pipeline/repair.ts)
+  ⎿  Added 3 lines, removed 2 lines
+      262        startedAt: started,
+      263        finishedAt: new Date(Math.max(Date.now(), started.getTim
+           e())),
+      264      });
+      265 -    await updateRunProgress(db, runId, {                      
+      265 +    const progress = {                                        
+      266        ...(attemptCount === 0 ? { stageReached: 'repair' as con
+           st } : {}),
+      267        ...(status === 'stage_failure'
+      268          ? { failureStage: failureStage ?? 'repair', failureDet
+           ail: reason }
+      269          : status === 'repaired'
+      270            ? {}
+      271            : { flaggedReason: reason }),
+      272 -    });                                                       
+      272 +    };                                                        
+      273 +    if (Object.keys(progress).length) await updateRunProgress(
+          +db, runId, progress);                                         
+      274      return {
+      275        status,
+      276        reason,
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The remaining 2 failures are only row order: the repair row's start time comes
+  before the baseline's, which is accurate. Making those assertions
+  order-insensitive:
+
+⏺ Bash(python3 - <<'EOF'
+      p='test/repair.test.ts'…)
+  ⎿  2
+     153:      ['validate', 'ok'],
+     154-      ['repair', 'ok'],
+     … +5 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/repair.test.ts (+5 -4)
+      149        flaggedReason: null,
+      150      });
+      151      const stages = await listStageResults(client.db, chain.run
+           .id);
+      152 -    expect(stages.map((s) => [s.stage, s.status])).toEqual([  
+      152 +    expect(stages.map((s) => [s.stage, s.status]).sort()).toEq
+          +ual([                                                         
+      153        ['validate', 'ok'],
+      154        ['repair', 'ok'],
+      155      ]);
+      156 -    expect(stages[0]!.result).toMatchObject({ baseline: { test
+          -sPassed: 10, testsTotal: 12 } });                             
+      157 -    expect(stages[1]!.result).toMatchObject({ mode: 'full', st
+          -atus: 'repaired', attempts: 1 });                             
+      156 +    const byStage = (name: string) => stages.find((s) => s.sta
+          +ge === name)!.result;                                         
+      157 +    expect(byStage('validate')).toMatchObject({ baseline: { te
+          +stsPassed: 10, testsTotal: 12 } });                           
+      158 +    expect(byStage('repair')).toMatchObject({ mode: 'full', st
+          +atus: 'repaired', attempts: 1 });                             
+      159    });
+      160  
+      161    it("wrong then correct → repaired in 2; attempt 2's context 
+           has attempt 1's failing test", async () => {
+     ...
+      468      expect(out).toMatchObject({ status: 'stage_failure', failu
+           reStage: 'validate', attempts: 0 });
+      469      expect(adapter.calls).toHaveLength(0);
+      470      const stages = await listStageResults(client.db, chain.run
+           .id);
+      470 -    expect(stages.map((s) => [s.stage, s.status])).toEqual([  
+      471 +    expect(stages.map((s) => [s.stage, s.status]).sort()).toEq
+          +ual([                                                         
+      472        ['validate', 'failed'],
+      473        ['repair', 'failed'],
+      474      ]);
+
+⏺ Bash(python3 - <<'EOF'
+      p='test/repair.test.ts'…)
+  ⎿        Tests  19 passed (19)
+  ⎿  Updated apps/server/test/repair.test.ts (+2 -2)
+      150      });
+      151      const stages = await listStageResults(client.db, chain.run
+           .id);
+      152      expect(stages.map((s) => [s.stage, s.status]).sort()).toEq
+           ual([
+      153 -      ['validate', 'ok'],                                     
+      153        ['repair', 'ok'],
+      154 +      ['validate', 'ok'],                                     
+      155      ]);
+      156      const byStage = (name: string) => stages.find((s) => s.sta
+           ge === name)!.result;
+      157      expect(byStage('validate')).toMatchObject({ baseline: { te
+           stsPassed: 10, testsTotal: 12 } });
+     ...
+      469      expect(adapter.calls).toHaveLength(0);
+      470      const stages = await listStageResults(client.db, chain.run
+           .id);
+      471      expect(stages.map((s) => [s.stage, s.status]).sort()).toEq
+           ual([
+      472 -      ['validate', 'failed'],                                 
+      472        ['repair', 'failed'],
+      473 +      ['validate', 'failed'],                                 
+      474      ]);
+      475    });
+      476  
+
+⏺ All 19 unit tests pass. Committing, then moving on to the real-Docker
+  acceptance tests.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ No ANTHROPIC_API_KEY in .env, so the live-model test will be written but
+  skipped. Writing the Docker acceptance test with the rename-only copy of the
+  consumer:
+
+⏺ Write(apps/server/test/repair.integration.test.ts)
+  ⎿  Wrote 222 lines to apps/server/test/repair.integration.test.ts
+       1 /**
+       2  * Repair loop with the scripted FakeLlmAdapter and the REAL Doc
+         ker validator (AT-06, AT-07
+       3  * ceiling part). Needs Docker and PostgreSQL: skipped locally w
+         hen Docker is not running,
+       4  * required in CI.
+       5  *
+       6  * Most checks use a **rename-only** copy of demo/consumer, buil
+         t in a temp dir: the v1 response
+       7  * fixtures plus the v2 `GET /customers/*` fixtures, so the one 
+     … +216 lines (~9 KB) (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ While the Docker suite runs (it takes a few minutes), I'll do the docs: the
+  PROGRESS line and a README section.
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+⏺ Bash(cat >> README.md <<'EOF'…)
+  ⎿  docs/DECISIONS.md:20:| 11 Repair loop | [docs/decisions/inc11.md](deci
+     sions/inc11.md) |
+     docs/PROGRESS.md:18:| 11  | Repair loop (retries, error feedback, toke
+     … +7 lines (ctrl+o to expand)
+  ⎿  Updated README.md (+32 -0)
+      243  `npm run test:llm -w @sma/server` without a database, or `npm 
+           test` for the full CI suite.
+      244  No API key or paid request is required for tests. The optional
+            live smoke test has not been run.
+      245  Run token ceilings and the multi-attempt repair loop remain In
+           crement 11 work.
+      246 +                                                              
+      247 +## Repair loop (Increment 11)                                 
+      248 +                                                              
+      249 +`repair()` in `apps/server/src/pipeline/repair.ts` runs the re
+          +pair stage for one run:                                       
+      250 +generate a patch → apply it to a **fresh** isolated working co
+          +py → cheat guards → Docker validation                         
+      251 +→ feed the errors back, for **at most 4 attempts** (FR-18 to F
+          +R-24, NFR-07).                                                
+      252 +                                                              
+      253 +- It runs only for a **breaking** change with a mapping **conf
+          +irmed** by a migration note or a                              
+      254 +  human, and at least one located call site. Anything else is 
+          +`flagged` with no model call.                                 
+      255 +- The unpatched copy is validated once first (the baseline the
+          + count guard needs).                                          
+      256 +- Before each model call: if `used + context estimate + maxOut
+          +putTokens > tokenCeiling`, the run                            
+      257 +  is `aborted` (not `failed`).                                
+      258 +- Attempt N+1's context includes attempt N's failing test name
+          +s, compiler errors and assertions.                            
+      259 +- Outcomes: `repaired`, `failed` (4 attempts used; flagged for
+          + a human), `cheating_rejected`                                
+      260 +  (stops at once), `flagged` (refusal / precondition), `aborte
+          +d` (token ceiling),                                           
+      261 +  `stage_failure` (model unavailable → `repair`; container or 
+          +baseline failure → `validate`).                               
+      262 +- Every attempt row stores patch, raw validation output, compi
+          +le errors, tests passed/total,                                
+      263 +  outcome, guard, tokens in/out, cost, model and duration. The
+          + run row keeps the totals.                                    
+      264 +- `mode: 'single_shot'` (evaluation baseline B2): one call, no
+          + guards, no retries, no feedback;                             
+      265 +  validation only scores the patch.                           
+      266 +- `repair()` never finishes the run: the orchestrator (Increme
+          +nt 13) does that, or moves on to                              
+      267 +  delivery after `repaired`.                                  
+      268 +                                                              
+      269 +"Passing" means the whole suite passes. On `demo/consumer` wit
+          +h `API_VERSION=v2` that is                                    
+      270 +impossible for one change (v2 also removes `DELETE /orders/{id
+          +}` with no confirmed mapping), so                             
+      271 +the Docker tests use a rename-only copy built at test time. Se
+          +e `docs/decisions/inc11.md`.                                  
+      272 +                                                              
+      273 +```bash                                                       
+      274 +npx vitest run test/repair.test.ts -w @sma/server             
+          + # FakeLlmAdapter + mocked validator                          
+      275 +npx vitest run test/repair.integration.test.ts -w @sma/server 
+          + # real Docker validator                                      
+      276 +ANTHROPIC_API_KEY=... npx vitest run test/repair.live.test.ts 
+          +-w @sma/server  # real model (skipped without a key)          
+      277 +```                                                           
+  ⎿  Updated apps/server/typedoc.json (+2 -1)
+      24      "src/pipeline/locate.ts",
+      25      "src/pipeline/guarded-validate.ts",
+      26      "src/infra/llm/adapter.ts",
+      27 -    "src/infra/llm/fake.ts"                                    
+      27 +    "src/infra/llm/fake.ts",                                   
+      28 +    "src/pipeline/repair.ts"                                   
+      29    ],
+      30    "tsconfig": "tsconfig.build.json"
+      31  }
+  ⎿  Updated docs/DECISIONS.md (+1 -0)
+      17  | 09 Cheat guards                      | [docs/decisions/inc09.
+          md](decisions/inc09.md)   |
+      18  
+      19  | 10 LLM adapter and context | [docs/decisions/inc10.md](decisi
+          ons/inc10.md) |
+      20 +| 11 Repair loop | [docs/decisions/inc11.md](decisions/inc11.md
+         +) |                                                            
+      21  
+      22  New increments add `docs/decisions/incNN.md` in their own PR an
+          d add one row here.
+  ⎿  Updated docs/PROGRESS.md (+1 -1)
+      15  | 08  | Validator: Docker sandbox + output parsing             
+                                                  | FR-25, FR-26, FR-32, 
+          NFR-03              | **CRITICAL (checkpoint)** | Done        |
+           #5    |
+      16  | 09  | Cheat guards                                           
+                                                  | FR-27–31, DR-04      
+                              | **CRITICAL**              | Done        |
+           #6    |
+      17  | 10  | LLM adapter + context assembly                         
+                                                  | FR-19, C-06, NFR-04, 
+          NFR-08              | Standard                  | Done        |
+           #7    |
+      18 -| 11  | Repair loop (retries, error feedback, token ceiling, co
+         -st)                                     | FR-18, FR-20–24      
+         -                    | **CRITICAL**              | Not started |
+         - #8    |                                                       
+      18 +| 11  | Repair loop (retries, error feedback, token ceiling, co
+         +st)                                     | FR-18, FR-20–24      
+         +                    | **CRITICAL**              | Done        |
+         + #8    |                                                       
+      19  | 12  | Delivery: branch + PR, flagged findings                
+                                                  | FR-33–37, C-02       
+                              | Standard                  | Not started |
+           #9    |
+      20  | 13  | Pipeline orchestrator + run records + JSON/HTML export 
+                                                  | FR-38, FR-39, FR-41  
+                              | Standard                  | Not started |
+           #10   |
+      21  | 14  | Dashboard (5 views, text labels)                       
+                                                  | UI-01–04, FR-40, FR-4
+          2                   | Standard                  | Not started |
+           #11   |
+
+⏺ Now the live-model test (skipped without a key). It needs the rename-only
+  builder, so I'll move that into the shared helpers once the Docker run
+  finishes. Writing the file now:
+
+⏺ Write(apps/server/test/repair.live.test.ts)
+  ⎿  Wrote 72 lines to apps/server/test/repair.live.test.ts
+       1 /**
+       2  * LIVE repair (AT-06): the real model repairs the demo `field_r
+         enamed` change end to end, on the
+       3  * rename-only consumer, with the real Docker validator. Skipped
+          unless ANTHROPIC_API_KEY (and
+       4  * LLM_MODEL) are set and Docker is running. It costs real money
+         : a few cents at most, since the
+       5  * token ceiling is 60,000 tokens.
+       6  */
+       7 import { rm } from 'node:fs/promises';
+     … +65 lines (ctrl+o to expand)
+
+⏺ Waiting for the Docker suite to finish before touching the helpers.
+⏺ I'm still waiting on the Docker acceptance suite (repair.integration.test.ts).
+  It runs about 15 real container validations, so it takes a few minutes, and
+  it reports back on its own when it finishes.
+
+  Where Increment 11 stands:
+  - Committed:
+    - The decisions file, which lists the failure signs and the rollback point
+      28780a8.
+    - The pure helpers in packages/core/src/repair/loop.ts, with 11 tests.
+    - A small addition to Sishir's adapter: usage is now reported on unusable
+      model answers, so truncated or invalid output still counts toward the
+      token ceiling. Two new adapter tests cover it.
+    - apps/server/src/pipeline/repair.ts, the loop itself.
+  - Unit tests: 19/19 pass, using the scripted fake model, a mocked validator
+    and the real test DB. They cover every acceptance scenario.
+  - Written but not committed:
+    - The README section, the PROGRESS line, the decisions-index row and the
+      TypeDoc entry.
+    - The live-model test. It will skip because ANTHROPIC_API_KEY in .env is
+      empty.
+
+  One thing you should know: the prompt expects "12/12 on demo/consumer with
+  v2". That can't happen when repairing one change, because v2 also removes
+  DELETE /orders/{id} with no confirmed mapping. So the Docker tests use a
+  rename-only copy of the consumer built at test time. A separate test shows
+  that on the real v2 the correct rename only reaches 6/12, and the loop does
+  not report that as repaired. The reasoning is in docs/decisions/inc11.md.
+
+  When the suite finishes I'll move the shared rename-only setup into the test
+  helpers, run the full typecheck, lint and test suite, and merge origin/main
+  into the branch. Then I'll push and open the PR. Before the PR, you'll need to
+  run /export docs/chat-logs/inc11-bigyan.txt.
+
+✻ Baked for 8m 30s · done 3:24 PM
+
+⏺ Background command "Run repair loop Docker integration tests" completed (exit
+code 0)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ All 11 Docker acceptance tests pass against the real validator (98 s). Now
+  moving the rename-only builder into the shared helpers so the live test can
+  use it:
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api/apps/server && python3 -
+      <<'EOF'
+      p='test/repair.integration.test.ts'…)
+  ⎿  test/repair.test.ts(117,35): error TS2493: Tuple type '[]' of length '
+     0' has no element at index '0'.
+     test/repair.test.ts(177,42): error TS2532: Object is possibly 'undefin
+     … +14 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/repair-helpers.ts (+38 -1)
+      1  /** Shared inputs for the repair-loop tests (unit and Docker). *
+         /
+      2 +import { createHash } from 'node:crypto';                       
+      3  import { readFileSync } from 'node:fs';
+      3 -import { join } from 'node:path';                               
+      4 +import { cp, mkdtemp, readdir, readFile, rm } from 'node:fs/prom
+        +ises';                                                          
+      5 +import { tmpdir } from 'node:os';                               
+      6 +import { join, relative } from 'node:path';                     
+      7  import { fileURLToPath } from 'node:url';
+      8  import type {
+      9    LocateResult,
+     ...
+      111  
+      112  export const PASS = (): ValidationResult =>
+      113    result({ status: 'pass', testsPassed: 12, testResults: [], r
+           awOutput: 'all passed' });
+      114 +                                                              
+      115 +/** SHA-256 of every file under a directory (skipping node_mod
+          +ules), for an unchanged-repo check. */                        
+      116 +export async function snapshot(dir: string): Promise<string> {
+      117 +  const hash = createHash('sha256');                          
+      118 +  async function walk(d: string): Promise<void> {             
+      119 +    for (const e of (await readdir(d, { withFileTypes: true })
+          +).sort((a, b) =>                                              
+      120 +      a.name.localeCompare(b.name),                           
+      121 +    )) {                                                      
+      122 +      if (e.name === 'node_modules') continue;                
+      123 +      const p = join(d, e.name);                              
+      124 +      if (e.isDirectory()) await walk(p);                     
+      125 +      else hash.update(relative(dir, p)).update(await readFile
+          +(p));                                                         
+      126 +    }                                                         
+      127 +  }                                                           
+      128 +  await walk(dir);                                            
+      129 +  return hash.digest('hex');                                  
+      130 +}                                                             
+      131 +                                                              
+      132 +/** Builds the rename-only consumer: v1 fixtures, with the v2 
+          +customer responses swapped in. */                             
+      133 +export async function renameOnlyConsumer(): Promise<string> { 
+      134 +  const dir = await mkdtemp(join(tmpdir(), 'sma-inc11-rename-o
+          +nly-'));                                                      
+      135 +  await cp(consumer, dir, {                                   
+      136 +    recursive: true,                                          
+      137 +    filter: (src) => !src.split(/[\\/]/).includes('node_module
+          +s'),                                                          
+      138 +  });                                                         
+      139 +  const v1 = join(consumer, 'test/fixtures/v1');              
+      140 +  const v2 = join(dir, 'test/fixtures/v2');                   
+     … 7 more lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/repair.integration.test.ts (+3 -38)
+      10   * See docs/decisions/inc11.md.
+      11   */
+      12  import { execFileSync } from 'node:child_process';
+      13 -import { createHash } from 'node:crypto';                      
+      14 -import { cp, mkdtemp, readdir, readFile, rm } from 'node:fs/pro
+         -mises';                                                        
+      15 -import { tmpdir } from 'node:os';                              
+      16 -import { join, relative } from 'node:path';                    
+      13 +import { rm } from 'node:fs/promises';                         
+      14  import { afterAll, beforeAll, describe, expect, it } from 'vite
+          st';
+      15  import { FOUR_ATTEMPTS_REASON } from '@sma/core';
+      16  import { listAttempts } from '../src/infra/db/index.js';
+     ...
+      29    renameChange,
+      30    renameLocate,
+      31    renameMapping,
+      32 +  renameOnlyConsumer,                                          
+      33    repoRoot,
+      34 +  snapshot,                                                    
+      35  } from './repair-helpers.js';
+      36  
+      37  const dockerVersion = await dockerServerVersion();
+     ...
+      48      encoding: 'utf8',
+      49    });
+      50  
+      52 -/** SHA-256 of every file under a directory (skipping node_modu
+         -les), for an unchanged-repo check. */                          
+      53 -async function snapshot(dir: string): Promise<string> {        
+      54 -  const hash = createHash('sha256');                           
+      55 -  async function walk(d: string): Promise<void> {              
+      56 -    for (const e of (await readdir(d, { withFileTypes: true }))
+         -.sort((a, b) =>                                                
+      57 -      a.name.localeCompare(b.name),                            
+      58 -    )) {                                                       
+      59 -      if (e.name === 'node_modules') continue;                 
+      60 -      const p = join(d, e.name);                               
+      61 -      if (e.isDirectory()) await walk(p);                      
+      62 -      else hash.update(relative(dir, p)).update(await readFile(
+         -p));                                                           
+      63 -    }                                                          
+      64 -  }                                                            
+      65 -  await walk(dir);                                             
+      66 -  return hash.digest('hex');                                   
+      67 -}                                                              
+      68 -                                                               
+     … 20 more lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/repair.live.test.ts (+37 -32)
+      24  const live =
+      25    Boolean(process.env.ANTHROPIC_API_KEY?.trim() && process.env.
+          LLM_MODEL?.trim()) &&
+      26    (await dockerServerVersion()) !== null;
+      27 -if (!live) console.warn('[repair] SKIPPING live model test: nee
+         -ds ANTHROPIC_API_KEY, LLM_MODEL and Docker.');                 
+      27 +if (!live)                                                     
+      28 +  console.warn('[repair] SKIPPING live model test: needs ANTHRO
+         +PIC_API_KEY, LLM_MODEL and Docker.');                          
+      29  
+      30  describe.skipIf(!live)('live repair of the demo field rename', 
+          () => {
+      31    let client: ReturnType<typeof openTestDb>;
+     ...
+      39      if (repo) await rm(repo, { recursive: true, force: true });
+      40    });
+      41  
+      41 -  it('repairs end to end and records attempts, tokens, cost and
+         - time', { timeout: 1_800_000 }, async () => {                  
+      42 -    const before = await snapshot(repo);                       
+      43 -    const chain = await seedChain(client);                     
+      44 -    const started = performance.now();                         
+      45 -    const out = await repair({                                 
+      46 -      db: client.db,                                           
+      47 -      runId: chain.run.id,                                     
+      48 -      change: renameChange(),                                  
+      49 -      specSectionBefore: { customer_name: { type: 'string' } },
+      50 -      specSectionAfter: { full_name: { type: 'string' } },     
+      51 -      migrationNoteEntry: renameMapping,                       
+      52 -      locateResult: renameLocate,                              
+      53 -      repo: { path: repo },                                    
+      54 -      env: { API_VERSION: 'v2' },                              
+      55 -      adapter: new AnthropicLlmAdapter(),                      
+      56 -      tokenCeiling: 60_000,                                    
+      57 -      mode: 'full',                                            
+      58 -    });                                                        
+      59 -    const rows = await listAttempts(client.db, chain.run.id);  
+      60 -    // The AT-06 numbers for the increment report.             
+      61 -    console.info(                                              
+      62 -      `[repair live] status=${out.status} attempts=${out.attemp
+         -ts} tokensIn=${out.tokensIn} ` +                               
+      63 -        `tokensOut=${out.tokensOut} costUsd=${out.costUsd.toFix
+         -ed(6)} ` +                                                     
+      64 -        `wallMs=${Math.round(performance.now() - started)} ` + 
+      65 -        `perAttempt=${JSON.stringify(rows.map((r) => [r.outcome
+         -, r.tokensIn, r.tokensOut, r.costUsd, r.durationMs]))}`,       
+      66 -    );                                                         
+      67 -    expect(out.status).toBe('repaired');                       
+      68 -    expect(out.finalResult).toMatchObject({ testsPassed: 12, te
+         -stsTotal: 12 });                                               
+     … 39 more lines (ctrl+o to expand)
+  ⎿  (timeout 5m)
+
+⏺ Type errors only in the test file: the mocked guardedValidate was declared
+  without a parameter, so its recorded calls have no type. Fixing that:
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api/apps/server && grep -n
+      "const guarded = vi.fn" test/repair.test.ts && sed -i '' 's/const guarded
+      = vi.fn(async () =…)
+  ⎿  85:  const guarded = vi.fn(async () => verdicts.shift() ?? verdict(PAS
+     S()));
+  ⎿  Updated apps/server/test/repair.test.ts (+4 -2)
+       9  import { getRunById, listAttempts, listStageResults } from '../
+          src/infra/db/index.js';
+      10  import { FakeLlmAdapter } from '../src/infra/llm/fake.js';
+      11  import type { LlmResult } from '../src/infra/llm/types.js';
+      12 -import type { GuardedVerdict } from '../src/pipeline/guarded-va
+         -lidate.js';                                                    
+      12 +import type { GuardedValidateInput, GuardedVerdict } from '../s
+         +rc/pipeline/guarded-validate.js';                              
+      13  import { repair, UNAVAILABLE_MODEL_ID, type RepairInput } from 
+          '../src/pipeline/repair.js';
+      14  import { openTestDb, seedChain } from './db-helpers.js';
+      15  import {
+     ...
+      82  ) {
+      83    const chain = await seedChain(client);
+      84    const adapter = new FakeLlmAdapter(script);
+      85 -  const guarded = vi.fn(async () => verdicts.shift() ?? verdict
+         -(PASS()));                                                     
+      85 +  const guarded = vi.fn(                                       
+      86 +    async (_input: GuardedValidateInput) => verdicts.shift() ??
+         + verdict(PASS()),                                              
+      87 +  );                                                           
+      88    const validate = over.mode === 'single_shot' ? mockValidate(r
+          esult()) : mockValidate(result());
+      89    const input: RepairInput = {
+      90      db: client.db,
+  ⎿  (timeout 5m)
+
+⏺ Typecheck and lint are clean. Committing, merging the latest origin/main, then
+  running the whole test suite:
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Branch is up to date with main (nothing new merged since this morning). The
+  full suite is running in the background now, including all the Docker tests.
+  It reports back when done, and then I'll write the INCREMENT 11 REPORT.
+
+✻ Crunched for 36s · done 3:25 PM
+
+⏺ Background command "Run the full test suite" completed (exit code 0)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Increment 11 is built and everything passes: 692 tests pass, plus 1 skipped
+  (the live-model test, because there's no API key). The real model has not been
+  tried yet. The branch has 5 commits and nothing new on main to merge. Nothing
+  is pushed yet, because the project rules say the chat log goes into the same
+  PR.
+
+  One step for you: run this, then tell me and I'll commit the log, push, and
+  open the PR:
+  /export docs/chat-logs/inc11-bigyan.txt
+
+  INCREMENT 11 REPORT
+  Status: DONE
+  Built:
+  - apps/server/src/pipeline/repair.ts: repair() runs one run's repair stage. It
+  checks the FR-18 precondition first and flags the change with no model call 
+  if it fails. It validates the unpatched copy once as the baseline, then loops 
+  up to 4 attempts: generate a patch, apply it to a fresh working copy, run the 
+  cheat guards, validate, and feed the errors back. A cheat stops the run at 
+  once. Going over the token ceiling ends the run as `aborted`. A refusal is 
+  `flagged`. A model timeout or error is a stage failure of `repair`; a 
+  container failure is a stage failure of `validate`. Every attempt row records 
+  patch, validation output, counts, outcome, guard, tokens, cost, model and 
+  duration, and the run row keeps the totals. `single_shot` mode (for baseline 
+  B2) makes one call with no guards, retries or feedback.
+  - packages/core/src/repair/loop.ts (pure): the precondition check, the ceiling
+  check, and the error summary passed to the next attempt (failing test names, 
+  TS errors, assertions).
+  - Additive change to the inc10 adapter: an `invalid_output` error now carries 
+  billed `usage`, including truncated `max_tokens` answers, so tokens spent on 
+  them count toward the ceiling and the cost.
+  - Tests: 19 unit tests (scripted fake model, mocked validator, real test DB), 
+  11 real-Docker acceptance tests, and 1 live-model test that skips without a 
+  key.
+  Tests: 692/693 passed (1 skipped: the live test, no ANTHROPIC_API_KEY), 
+  typecheck: ok, lint: ok
+  Commands to verify:
+  - npx vitest run test/repair.test.ts -w @sma/server
+  - npx vitest run test/repair.integration.test.ts -w @sma/server   (Docker, 
+  ~100 s)
+  - ANTHROPIC_API_KEY=... npx vitest run test/repair.live.test.ts -w @sma/server
+  - npm run typecheck && npm run lint && npm test
+  Decisions logged (docs/decisions/inc11.md):
+  - "Pass" means the whole suite passes. On the real 5-change v2 consumer, 12/12
+  is impossible for one change because DELETE /orders/{id} is unconfirmed. The 
+  Docker tests use a rename-only copy built at test time (baseline 10/12, 
+  correct patch 12/12). A separate test proves the real v2 case (6/12) is not 
+  reported as repaired.
+  - repair() takes `db` as an extra input and does not finish the run; the 
+  orchestrator (inc13) does.
+  - The ceiling check for attempt 1 runs before the Docker baseline.
+  - A patch that does not apply, or invalid model output, counts as a `fail` 
+  attempt and its reason is fed back. Infrastructure failures are not retried.
+  - Attempt rows for a model error store patch '', zero usage and model_id 
+  'unavailable' (those columns are NOT NULL).
+  - Earlier errors go to the next attempt newest first. Model limits default to 
+  4096 output tokens and 120 s.
+  SRS requirements covered: FR-18, FR-19 (feedback part), FR-20, FR-21, FR-22, 
+  FR-23, FR-24, FR-31, DR-03, NFR-06, NFR-07, AT-06 (fake model + real Docker), 
+  AT-07 (ceiling and model-failure parts)
+  Problems / things the human must do:
+  - Run /export docs/chat-logs/inc11-bigyan.txt before the PR is opened.
+  - The AT-06 live run has not been done: ANTHROPIC_API_KEY in .env is empty. 
+  Set it and run the live test to get the attempts, tokens, cost and time 
+  numbers.
+  - The PR changes Sishir's adapter (an optional `usage` field on errors, and 
+  the checks reordered so usage is read first). Worth a look from Sishir.
+
+✻ Crunched for 18s · done 3:28 PM
+
+❯ ok push it and open the PR when tests pass                                    
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The full suite already passed on this exact commit, so I'm pushing now. The
+  chat log can go into this PR as a follow-up commit once you run /export.
+
+  Pushed to feat/inc11-repair-loop, created PR #24, ran 1 shell command (ctrl+o to expand)
+
+⏺ I pushed the branch and opened the PR:
+  https://github.com/Bigyan1313/self_maintaining_api/pull/24. The title is
+  "Increment 11: Repair loop", the body is the increment report, and it closes
+  #8.
+
+  All tests passed locally on this exact commit before the push: 692 passed, 1
+  skipped, plus typecheck and lint. CI is still running and I'll report the
+  result when it finishes. Nothing has been merged; a teammate merges it on
+  GitHub with "Create a merge commit".
+
+  Still to do:
+  - Chat log: it isn't in the PR yet. Run /export 
+    docs/chat-logs/inc11-bigyan.txt, then tell me and I'll commit and push it to
+    the same branch.
+  - Live model run: not done, because ANTHROPIC_API_KEY isn't set. The PR body
+    says so.
+  - Sishir: this PR changes his adapter files, which the PR body points out, so
+    he should take a look.
+
+✻ Worked for 27s · done 3:28 PM
+
+※ recap: Increment 11 (the repair loop) is built, passes all local tests, and is open as PR #24, with CI still running. Next, run `/export docs/chat-logs/inc11-bigyan.txt` so I can add the chat log to that PR.
