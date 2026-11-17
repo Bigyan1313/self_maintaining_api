@@ -220,3 +220,26 @@ guards, in a fixed order (FR-27 to FR-31). The verdict names the **first** guard
 
 A patch that fails guards 1–3 never reaches the container. The pure guards live in
 `packages/core/src/guards/`, and the AT-07 patch fixtures are in `packages/core/test/fixtures/patches/`.
+
+## LLM adapter and context (Increment 10)
+
+`buildRepairContext` from `@sma/core` accepts the changed spec sections, an explicitly confirmed
+mapping, located TypeScript source contents, and validator errors from this run. It excludes
+credential, config and test paths, redacts recognizable credentials, and places every supplied
+value inside escaped untrusted-data blocks. Its `includedFiles` list is the patch allowlist.
+The caller must supply only files containing located calls; the builder never reads the filesystem.
+Human-confirmed mappings are supported. `approxTokens` is a characters/4 estimate, not billed usage.
+
+`AnthropicLlmAdapter` in `apps/server/src/infra/llm/adapter.ts` is the only provider SDK boundary.
+Set `ANTHROPIC_API_KEY` and `LLM_MODEL` in the environment (see `.env.example`). The configured model
+must have a dated entry in `config/llm-pricing.json`; unknown models fail before any request.
+`generatePatch(context, { maxOutputTokens, timeoutMs })` returns a patch, refusal, or typed error.
+It disables automatic retries and caps requests at 120 seconds. API usage supplies token counts;
+standard input/output prices supply USD cost. SDK debug logging is disabled and raw failures are
+not returned. Provider output may modify only the allowed existing source files; a patch still
+needs the cheat guards and Docker validation before delivery.
+
+`FakeLlmAdapter` consumes scripted results for offline integration. Run
+`npm run test:llm -w @sma/server` without a database, or `npm test` for the full CI suite.
+No API key or paid request is required for tests. The optional live smoke test has not been run.
+Run token ceilings and the multi-attempt repair loop remain Increment 11 work.
