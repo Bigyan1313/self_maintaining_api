@@ -9,7 +9,7 @@ import { FOUR_ATTEMPTS_REASON, ok, type ValidationResult } from '@sma/core';
 import { getRunById, listAttempts, listStageResults } from '../src/infra/db/index.js';
 import { FakeLlmAdapter } from '../src/infra/llm/fake.js';
 import type { LlmResult } from '../src/infra/llm/types.js';
-import type { GuardedVerdict } from '../src/pipeline/guarded-validate.js';
+import type { GuardedValidateInput, GuardedVerdict } from '../src/pipeline/guarded-validate.js';
 import { repair, UNAVAILABLE_MODEL_ID, type RepairInput } from '../src/pipeline/repair.js';
 import { openTestDb, seedChain } from './db-helpers.js';
 import {
@@ -82,7 +82,9 @@ async function setup(
 ) {
   const chain = await seedChain(client);
   const adapter = new FakeLlmAdapter(script);
-  const guarded = vi.fn(async () => verdicts.shift() ?? verdict(PASS()));
+  const guarded = vi.fn(
+    async (_input: GuardedValidateInput) => verdicts.shift() ?? verdict(PASS()),
+  );
   const validate = over.mode === 'single_shot' ? mockValidate(result()) : mockValidate(result());
   const input: RepairInput = {
     db: client.db,

@@ -1,6 +1,9 @@
 /** Shared inputs for the repair-loop tests (unit and Docker). */
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { cp, mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type {
   LocateResult,
@@ -108,3 +111,37 @@ export function result(over: Partial<ValidationResult> = {}): ValidationResult {
 
 export const PASS = (): ValidationResult =>
   result({ status: 'pass', testsPassed: 12, testResults: [], rawOutput: 'all passed' });
+
+/** SHA-256 of every file under a directory (skipping node_modules), for an unchanged-repo check. */
+export async function snapshot(dir: string): Promise<string> {
+  const hash = createHash('sha256');
+  async function walk(d: string): Promise<void> {
+    for (const e of (await readdir(d, { withFileTypes: true })).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    )) {
+      if (e.name === 'node_modules') continue;
+      const p = join(d, e.name);
+      if (e.isDirectory()) await walk(p);
+      else hash.update(relative(dir, p)).update(await readFile(p));
+    }
+  }
+  await walk(dir);
+  return hash.digest('hex');
+}
+
+/** Builds the rename-only consumer: v1 fixtures, with the v2 customer responses swapped in. */
+export async function renameOnlyConsumer(): Promise<string> {
+  const dir = await mkdtemp(join(tmpdir(), 'sma-inc11-rename-only-'));
+  await cp(consumer, dir, {
+    recursive: true,
+    filter: (src) => !src.split(/[\\/]/).includes('node_modules'),
+  });
+  const v1 = join(consumer, 'test/fixtures/v1');
+  const v2 = join(dir, 'test/fixtures/v2');
+  await rm(v2, { recursive: true });
+  await cp(v1, v2, { recursive: true });
+  for (const f of await readdir(join(consumer, 'test/fixtures/v2')))
+    if (f.startsWith('GET_customers_'))
+      await cp(join(consumer, 'test/fixtures/v2', f), join(v2, f));
+  return dir;
+}
