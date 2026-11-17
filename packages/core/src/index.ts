@@ -33,3 +33,5 @@ export * from './guards/paths.js';
 export * from './guards/verdict.js';
 export * from './guards/static.js';
 export * from './guards/count.js';
+export * from './repair/context.js';
+export * from './repair/output.js';

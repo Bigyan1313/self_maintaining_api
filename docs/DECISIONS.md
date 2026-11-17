@@ -16,4 +16,6 @@ Each file is a table with columns: Date | Increment | Decision | Why.
 | 08 Validator (Docker sandbox)        | [docs/decisions/inc08.md](decisions/inc08.md)   |
 | 09 Cheat guards                      | [docs/decisions/inc09.md](decisions/inc09.md)   |
 
+| 10 LLM adapter and context | [docs/decisions/inc10.md](decisions/inc10.md) |
+
 New increments add `docs/decisions/incNN.md` in their own PR and add one row here.

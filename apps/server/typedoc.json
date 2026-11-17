@@ -22,7 +22,9 @@
     "src/infra/validator/sandbox.ts",
     "src/infra/workcopy/index.ts",
     "src/pipeline/locate.ts",
-    "src/pipeline/guarded-validate.ts"
+    "src/pipeline/guarded-validate.ts",
+    "src/infra/llm/adapter.ts",
+    "src/infra/llm/fake.ts"
   ],
   "tsconfig": "tsconfig.build.json"
 }

@@ -1,0 +1,11 @@
+{
+  "asOf": "2026-11-17",
+  "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+  "scope": "Standard first-party Messages API, global routing, no tools, batch, or prompt caching",
+  "models": {
+    "claude-sonnet-5-5": {
+      "inputUsdPerMillionTokens": 2,
+      "outputUsdPerMillionTokens": 10
+    }
+  }
+}

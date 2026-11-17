@@ -36,5 +36,34 @@ export default tseslint.config(
     files: ['apps/web/src/**/*.{ts,tsx}'],
     languageOptions: { globals: { ...globals.browser } },
   },
+  {
+    files: ['**/*.{ts,tsx,js,mjs,cjs}'],
+    ignores: ['apps/server/src/infra/llm/adapter.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@anthropic-ai/sdk', '@anthropic-ai/sdk/*'],
+              message: 'Provider SDK access belongs only in infra/llm/adapter.ts (C-06).',
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ImportExpression[source.value=/^@anthropic-ai\\/sdk/]',
+          message: 'Dynamic provider imports are restricted to the adapter.',
+        },
+        {
+          selector:
+            "CallExpression[callee.name='require'][arguments.0.value=/^@anthropic-ai\\/sdk/]",
+          message: 'Provider requires are restricted to the adapter.',
+        },
+      ],
+    },
+  },
   prettier,
 );

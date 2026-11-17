@@ -19,9 +19,12 @@
     "db:migrate": "drizzle-kit migrate",
     "predb:migrate": "npm run build:core",
     "db:reset:test": "tsx src/infra/db/reset-test-db.ts",
-    "predb:reset:test": "npm run build:core"
+    "predb:reset:test": "npm run build:core",
+    "test:llm": "vitest run --config vitest.llm.config.ts",
+    "pretest:llm": "npm run build:core"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "1.4.0",
     "@octokit/rest": "22.0.0",
     "@sma/core": "0.1.0",
     "drizzle-orm": "0.45.4",
