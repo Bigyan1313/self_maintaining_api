@@ -127,6 +127,31 @@ describe('Anthropic adapter', () => {
     });
     expect(mock.create).not.toHaveBeenCalled();
   });
+  it('reports billed usage on unusable answers so the repair loop can count it (FR-24)', async () => {
+    for (const data of [
+      response('not a diff'),
+      { ...response(), stop_reason: 'max_tokens' },
+      response(patch.replace('+new', '+test-key-PLANTED')),
+    ]) {
+      mock.create.mockResolvedValue(data);
+      expect(await new AnthropicLlmAdapter().generatePatch(ctx, opts)).toMatchObject({
+        kind: 'error',
+        errorKind: 'invalid_output',
+        usage: { tokensIn: 1000, tokensOut: 100, costUsd: 0.003, modelId: 'claude-sonnet-5-5' },
+      });
+    }
+  });
+  it('reports no usage when the accounting itself is unusable or the model differs', async () => {
+    for (const data of [
+      { ...response(), usage: { input_tokens: -1, output_tokens: 2 } },
+      { ...response(), model: 'other-model' },
+    ]) {
+      mock.create.mockResolvedValue(data);
+      const result = await new AnthropicLlmAdapter().generatePatch(ctx, opts);
+      expect(result).toMatchObject({ kind: 'error', errorKind: 'invalid_output' });
+      expect(result).not.toHaveProperty('usage');
+    }
+  });
   it('rejects out-of-scope and truncated output', async () => {
     for (const data of [
       response(patch.replaceAll('src/a.ts', 'test/a.ts')),
