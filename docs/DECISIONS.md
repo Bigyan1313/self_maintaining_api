@@ -17,5 +17,6 @@ Each file is a table with columns: Date | Increment | Decision | Why.
 | 09 Cheat guards                      | [docs/decisions/inc09.md](decisions/inc09.md)   |
 
 | 10 LLM adapter and context | [docs/decisions/inc10.md](decisions/inc10.md) |
+| 11 Repair loop | [docs/decisions/inc11.md](decisions/inc11.md) |
 
 New increments add `docs/decisions/incNN.md` in their own PR and add one row here.

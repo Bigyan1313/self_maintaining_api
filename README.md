@@ -243,3 +243,35 @@ needs the cheat guards and Docker validation before delivery.
 `npm run test:llm -w @sma/server` without a database, or `npm test` for the full CI suite.
 No API key or paid request is required for tests. The optional live smoke test has not been run.
 Run token ceilings and the multi-attempt repair loop remain Increment 11 work.
+
+## Repair loop (Increment 11)
+
+`repair()` in `apps/server/src/pipeline/repair.ts` runs the repair stage for one run:
+generate a patch → apply it to a **fresh** isolated working copy → cheat guards → Docker validation
+→ feed the errors back, for **at most 4 attempts** (FR-18 to FR-24, NFR-07).
+
+- It runs only for a **breaking** change with a mapping **confirmed** by a migration note or a
+  human, and at least one located call site. Anything else is `flagged` with no model call.
+- The unpatched copy is validated once first (the baseline the count guard needs).
+- Before each model call: if `used + context estimate + maxOutputTokens > tokenCeiling`, the run
+  is `aborted` (not `failed`).
+- Attempt N+1's context includes attempt N's failing test names, compiler errors and assertions.
+- Outcomes: `repaired`, `failed` (4 attempts used; flagged for a human), `cheating_rejected`
+  (stops at once), `flagged` (refusal / precondition), `aborted` (token ceiling),
+  `stage_failure` (model unavailable → `repair`; container or baseline failure → `validate`).
+- Every attempt row stores patch, raw validation output, compile errors, tests passed/total,
+  outcome, guard, tokens in/out, cost, model and duration. The run row keeps the totals.
+- `mode: 'single_shot'` (evaluation baseline B2): one call, no guards, no retries, no feedback;
+  validation only scores the patch.
+- `repair()` never finishes the run: the orchestrator (Increment 13) does that, or moves on to
+  delivery after `repaired`.
+
+"Passing" means the whole suite passes. On `demo/consumer` with `API_VERSION=v2` that is
+impossible for one change (v2 also removes `DELETE /orders/{id}` with no confirmed mapping), so
+the Docker tests use a rename-only copy built at test time. See `docs/decisions/inc11.md`.
+
+```bash
+npx vitest run test/repair.test.ts -w @sma/server              # FakeLlmAdapter + mocked validator
+npx vitest run test/repair.integration.test.ts -w @sma/server  # real Docker validator
+ANTHROPIC_API_KEY=... npx vitest run test/repair.live.test.ts -w @sma/server  # real model (skipped without a key)
+```
