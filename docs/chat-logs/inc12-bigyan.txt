@@ -1251,3 +1251,734 @@
   feat/inc12-delivery, push it, and confirm CI on PR #27.
 
 ✻ Brewed for 11s · done 11:14 AM
+
+❯ /export docs/chat-logs/inc12-bigyan.txt                                       
+  ⎿  Conversation exported to:
+     /Users/turbo/Desktop/self_maintaining_api/docs/chat-logs/inc12-bigyan.txt
+
+❯ commit                                                                        
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ The only credential-like string in the log is the fake test token ghp_FAKE123,
+  so it's safe to commit.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I committed the chat log as cfb97cb and pushed it to feat/inc12-delivery. CI
+  is green on PR #27.
+
+  Before committing I scanned the 1,252-line log for credentials. The only match
+  is ghp_FAKE123, the fake token used in the tests.
+
+  PR #27 is open for a teammate to merge with "Create a merge commit". The live
+  smoke test still hasn't run. For that, you need to:
+  1. Create the demo consumer repo and push the contents of demo/consumer to it.
+  2. Make a fine-grained token on that repo only, and put it in .env as
+     GITHUB_TOKEN along with SMA_DEMO_REPO.
+  3. Run test/deliver.live.test.ts.
+
+  The test will open a real PR on the demo repo and print its URL. Don't merge
+  that PR.
+
+✻ Worked for 7m 17s · done 11:22 AM
+
+※ recap: Increment 12 (delivery: an sma/ branch and labelled PR, never merged) is finished; PR #27 is open with green CI and the chat log committed. Next, create the demo repo and token, then run the live smoke test.
+
+❯ I created Bigyan1313/sma-demo-consumer and set GITHUB_TOKEN and SMA_DEMO_REPO 
+  in .env                                                                       
+  (never print or log the token). On branch feat/inc12-delivery: run npm run    
+  db:up, then                                                                   
+  npm test -w @sma/server -- test/deliver.live.test.ts. Report the PR URL it    
+  prints. Then                                                                  
+  change the increment report and docs/PROGRESS.md row 12 from PARTIAL to Done  
+  with the                                                                      
+  live PR URL, and commit.                                                      
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ It passed, but the PR URL line didn't appear in the output. I'll read it back
+  from GitHub and check its state.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I'll also check that the live PR body doesn't contain the token. The
+  comparison runs inside the shell, so the token value is never printed.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Live PR: https://github.com/Bigyan1313/sma-demo-consumer/pull/1. It's open and
+  unmerged, comes from an sma/ branch into main, and has both labels. Now I'll
+  update the docs and the report.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Row 12 in docs/PROGRESS.md already says "Done" (I set it when I opened the
+  PR). I'll add the live PR URL to it and update the decisions entry that said
+  the live test hadn't run.
+
+⏺ Bash(python3 - <<'EOF'
+      p='docs/PROGRESS.md'…)  ⎿   docs/PROGRESS.md        | 40 ++++++++++++++++++++--------------------
+      docs/decisions/inc12.md | 36 ++++++++++++++++++------------------
+      2 files changed, 38 insertions(+), 38 deletions(-)
+  ⎿  Updated docs/PROGRESS.md (+20 -20)
+       3  The **GitHub Issues board** is the source of truth for who is d
+          oing what. Each increment updates
+       4  its own line here in its own PR only (see Working Rules in `CLA
+          UDE.md`).
+       5  
+       6 -| Inc | Capability                                             
+         -                                        | SRS refs             
+         -                    | Priority                  | Status      |
+         - Issue |                                                       
+       7 -| --- | -------------------------------------------------------
+         ---------------------------------------- | ---------------------
+         -------------------- | ------------------------- | ----------- |
+         - ----- |                                                       
+       8 -| 01  | Project setup: workspaces, TS, Vitest, lint, Postgres, 
+         -CI, TypeDoc                             | C-05, C-07           
+         -                    | Standard                  | Done        |
+         - —     |                                                       
+       9 -| 02  | Demo API v1/v2 + specs + migration notes + sample consu
+         -mer repo (tests pass on v1, fail on v2) | 2.2, 5.2             
+         -                    | Standard                  | Done        |
+         - —     |                                                       
+      10 -| 03  | Database schema + migrations (incl. 4-attempt limit + g
+         -uard-name constraints)                  | DR-01–05             
+         -                    | Standard                  | Done        |
+         - —     |                                                       
+      11 -| 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, 
+         -failure handling                        | FR-01–05, FR-11, FR-1
+         -2                   | Standard                  | Done        |
+         - #1    |                                                       
+      12 -| 05  | Detect: oasdiff runner + parser + evidence             
+         -                                        | FR-06, FR-08         
+         -                    | Standard                  | Done        |
+         - #2    |                                                       
+      13 -| 06  | Classify + migration-note parsing + mapping confirmatio
+         -n                                       | FR-07, FR-09, FR-10, 
+         -BR-01, BR-04, BR-05 | **CRITICAL**              | Done        |
+         - #3    |                                                       
+      14 -| 07  | Locate: ts-morph call sites + coverage report          
+         -                                        | FR-13–17, BR-02      
+         -                    | Standard                  | Done        |
+         - #4    |                                                       
+      15 -| 08  | Validator: Docker sandbox + output parsing             
+         -                                        | FR-25, FR-26, FR-32, 
+         -NFR-03              | **CRITICAL (checkpoint)** | Done        |
+         - #5    |                                                       
+      16 -| 09  | Cheat guards                                           
+         -                                        | FR-27–31, DR-04      
+         -                    | **CRITICAL**              | Done        |
+         - #6    |                                                       
+      17 -| 10  | LLM adapter + context assembly                         
+         -                                        | FR-19, C-06, NFR-04, 
+         -NFR-08              | Standard                  | Done        |
+         - #7    |                                                       
+      18 -| 11  | Repair loop (retries, error feedback, token ceiling, co
+         -st)                                     | FR-18, FR-20–24      
+         -                    | **CRITICAL**              | Done        |
+         - #8    |                                                       
+      19 -| 12  | Delivery: branch + PR, flagged findings                
+         -                                        | FR-33–37, C-02       
+         -                    | Standard                  | Done        |
+         - #9    |                                                       
+      20 -| 13  | Pipeline orchestrator + run records + JSON/HTML export 
+         -                                        | FR-38, FR-39, FR-41  
+         -                    | Standard                  | Not started |
+         - #10   |                                                       
+      21 -| 14  | Dashboard (5 views, text labels)                       
+         -                                        | UI-01–04, FR-40, FR-4
+         -2                   | Standard                  | Not started |
+         - #11   |                                                       
+      22 -| 15  | 20 frozen scenarios + failing-before check             
+         -                                        | EV-01, EV-02         
+         -                    | **CRITICAL**              | Not started |
+         - #12   |                                                       
+      23 -| 16  | Evaluation script: B1/B2/B3, results file, generated ta
+         -bles                                    | EV-03–09             
+         -                    | **CRITICAL**              | Not started |
+         - #13   |                                                       
+      24 -| 17  | Deliverables: class diagram, statechart, TypeDoc, accep
+         -tance records AT-01–12                  | 7.1                  
+         -                    | Standard                  | Not started |
+         - #14   |                                                       
+      25 -| 17a | Early deliverables: diagrams, architecture, TypeDoc fix
+         -, early acceptance records              | 7.1                  
+         -                    | Standard                  | Done        |
+         - #25   |                                                       
+       6 +| Inc | Capability                                             
+         +                                        | SRS refs             
+         +                    | Priority                  | Status       
+         +                                                          | Iss
+         +ue |                                                           
+       7 +| --- | -------------------------------------------------------
+         +--------------------------------------- | ---------------------
+         +------------------- | ------------------------- | -------------
+         +--------------------------------------------------------- | ---
+         +-- |                                                           
+       8 +| 01  | Project setup: workspaces, TS, Vitest, lint, Postgres, 
+         +CI, TypeDoc                             | C-05, C-07           
+         +                    | Standard                  | Done         
+         +                                                          | —  
+         +   |                                                           
+       9 +| 02  | Demo API v1/v2 + specs + migration notes + sample consu
+         +mer repo (tests pass on v1, fail on v2) | 2.2, 5.2             
+         +                    | Standard                  | Done         
+         +                                                          | —  
+         +   |                                                           
+      10 +| 03  | Database schema + migrations (incl. 4-attempt limit + g
+         +uard-name constraints)                  | DR-01–05             
+         +                    | Standard                  | Done         
+         +                                                          | —  
+         +   |                                                           
+      11 +| 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, 
+         +failure handling                        | FR-01–05, FR-11, FR-1
+         +2                   | Standard                  | Done         
+         +                                                          | #1 
+         +   |                                                           
+      12 +| 05  | Detect: oasdiff runner + parser + evidence             
+         +                                        | FR-06, FR-08         
+         +                    | Standard                  | Done         
+         +                                                          | #2 
+         +   |                                                           
+      13 +| 06  | Classify + migration-note parsing + mapping confirmatio
+         +n                                       | FR-07, FR-09, FR-10, 
+         +BR-01, BR-04, BR-05 | **CRITICAL**              | Done         
+         +                                                          | #3 
+         +   |                                                           
+      14 +| 07  | Locate: ts-morph call sites + coverage report          
+         +                                        | FR-13–17, BR-02      
+         +                    | Standard                  | Done         
+         +                                                          | #4 
+         +   |                                                           
+      15 +| 08  | Validator: Docker sandbox + output parsing             
+         +                                        | FR-25, FR-26, FR-32, 
+         +NFR-03              | **CRITICAL (checkpoint)** | Done         
+         +                                                          | #5 
+         +   |                                                           
+      16 +| 09  | Cheat guards                                           
+         +                                        | FR-27–31, DR-04      
+         +                    | **CRITICAL**              | Done         
+         +                                                          | #6 
+         +   |                                                           
+      17 +| 10  | LLM adapter + context assembly                         
+         +                                        | FR-19, C-06, NFR-04, 
+         +NFR-08              | Standard                  | Done         
+         +                                                          | #7 
+         +   |                                                           
+      18 +| 11  | Repair loop (retries, error feedback, token ceiling, co
+         +st)                                     | FR-18, FR-20–24      
+         +                    | **CRITICAL**              | Done         
+         +                                                          | #8 
+         +   |                                                           
+      19 +| 12  | Delivery: branch + PR, flagged findings                
+         +                                        | FR-33–37, C-02       
+         +                    | Standard                  | Done (live PR
+         +: https://github.com/Bigyan1313/sma-demo-consumer/pull/1) | #9 
+         +   |                                                           
+      20 +| 13  | Pipeline orchestrator + run records + JSON/HTML export 
+         +                                        | FR-38, FR-39, FR-41  
+         +                    | Standard                  | Not started  
+         +                                                          | #10
+         +   |                                                           
+      21 +| 14  | Dashboard (5 views, text labels)                       
+         +                                        | UI-01–04, FR-40, FR-4
+         +2                   | Standard                  | Not started  
+         +                                                          | #11
+         +   |                                                           
+      22 +| 15  | 20 frozen scenarios + failing-before check             
+         +                                        | EV-01, EV-02         
+         +                    | **CRITICAL**              | Not started  
+         +                                                          | #12
+         +   |                                                           
+     … 3 more lines (ctrl+o to expand)
+  ⎿  Updated docs/decisions/inc12.md (+18 -18)
+       1  # Decisions — Increment 12: Delivery (branch + PR, flagged find
+          ings)
+       2  
+       3 -| Date       | Decision                                        
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | Why                                                   
+         -                                                               
+         -                                                               
+         -                                                      |        
+       4 -| ---------- | ------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ------- | ------------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ------------------------------------------------------ |        
+       5 -| 2026-11-22 | The GitHub client (`infra/github/client.ts`) exp
+         -orts only `createGitHubClient`, `GitHubError` and two constants
+         -. The returned client is frozen and has 11 read/create methods.
+         - The Octokit instance never leaves the module.                 
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | FR-34 / C-02: merge, auto-merge and ref updates are im
+         -possible, not just unused. A test checks the export list and th
+         -e method list.                                                 
+         -                                                      |        
+       6 -| 2026-11-22 | Defence in depth: every request goes through a t
+         -ransport allowlist (`allowlist.ts`) before `fetch`. Only 12 (me
+         -thod, path) pairs in the one configured repository are allowed.
+         - `POST /git/refs` must create `refs/heads/sma/…` (never a prote
+         -cted branch), and `POST /pulls` must have an `sma/…` head. Grap
+         -hQL, PUT/PATCH/DELETE and other hosts are refused. The path is 
+         -matched after URL-decoding, because Octokit encodes `/` inside 
+         -a ref. | Even Octokit's generic `request()` cannot send a merge
+         -. The decoded match is how GitHub itself reads the path.       
+         -                                                               
+         -                                                      |        
+       7 -| 2026-11-22 | The protected branches are the stored `default_b
+         -ranch` plus GitHub's live default branch (fetched by `getRepo` 
+         -before any branch is created).                                 
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | The stored value could be out of date.                
+         -                                                               
+         -                                                               
+         -                                                      |        
+       8 -| 2026-11-22 | The happy-path order is `GET repo → GET commit (
+         -analyzed) → blobs → tree → commit → create ref → PR → labels`. 
+         -The prompt says "get ref". We read the repository (live default
+         - branch) and the **analyzed commit** (for its tree) instead, be
+         -cause the base must be the analyzed commit, not the current hea
+         -d. `getRef` stays in the client, for resuming a retry and for t
+         -he live test.                                                  
+         -       | The Git Data API needs the base tree SHA. The default-
+         -branch head is never used as a base.                           
+         -                                                               
+         -                                                      |        
+       9 -| 2026-11-22 | No msw/nock dependency. GitHub is mocked at the 
+         -`fetch` boundary that Octokit accepts (`test/github-fake.ts`). 
+         -The fake records every request and can script failures per rout
+         -e.                                                             
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | No new dependency (C-07). It sees exactly what would h
+         -it the network.                                                
+         -                                                               
+         -                                                      |        
+      10 -| 2026-11-22 | Missing labels are created with `ensureLabel` (G
+         -ET label → 404 → POST label; a 422 race is OK) and then added. 
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | FR-35 asks for labels to be created if missing. An exp
+         -licit colour and description beats GitHub's implicit grey label
+         -.                                                              
+         -                                                      |        
+      11 -| 2026-11-22 | `deliver` finishes the run: `repaired` + `pr_url
+         -` on success, or `stage_failure` with `failure_stage = deliver`
+         - on failure. It refuses (throws, no GitHub call) unless the run
+         - is unfinished and its **latest attempt passed** with exactly t
+         -he given patch.                                                
+         -                                                               
+         -                                                               
+         -       | Deliver is the last stage. Only validated patches get 
+         -PRs, so cheating, failed or refused runs can never reach GitHub
+         - (FR-33, FR-36).                                               
+         -                                                      |        
+      12 -| 2026-11-22 | **Retry = new child run** (`parent_run_id` = the
+         - failed run, `stage_reached = deliver`, no attempts, zero token
+         -s/cost). The failed run's `deliver` row stores the redacted evi
+         -dence, the source run id and partial GitHub progress (branch, c
+         -ommit, PR). The retry re-reads the patch from the source run's 
+         -passing attempt row.                                           
+         -                                                               
+         -       | Finished runs are frozen (FR-39 trigger) and `run_stag
+         -e_results` allows one row per (run, stage). A child run keeps e
+         -verything append-only with no migration, and matches the reanal
+         -ysis pattern. Zero usage avoids double-counting cost. |        
+      13 -| 2026-11-22 | A retry resumes from what already exists on GitH
+         -ub. An untouched `sma/` branch (head still equals the recorded 
+         -commit) is reused. A PR that was opened but not labelled only g
+         -ets labels. Otherwise the retry does a full delivery on a new `
+         -sma/run-<childId>-…` branch, rebuilding the files from the stor
+         -ed patch (`patchedFilesFromPatch`: `git apply` in a disposable 
+         -working copy, no code executed).                               
+         -       | No duplicate PRs and no orphaned work. We never update
+         - or delete refs.                                               
+         -                                                               
+         -                                                      |        
+      14 -| 2026-11-22 | If labelling fails after the PR opened, the run 
+         -is a `stage_failure`, but `pr_url` is still recorded.          
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | The PR exists and must be visible. FR-35 is not yet me
+         -t, so it is not counted as success until a retry labels it.    
+         -                                                               
+         -                                                      |        
+      15 -| 2026-11-22 | `recordFlaggedFinding({ status, reason })` accep
+         -ts `flagged`, `failed`, `cheating_rejected` and `aborted`. It w
+         -rites a `skipped` deliver row (`pullRequest: null`) and finishe
+         -s the run with `flagged_reason`. It takes no client and reads n
+         -o credential.                                                  
+         -                                                               
+         -                                                               
+         -       | FR-36: structurally 0 GitHub calls. The test also spie
+         -s on global `fetch`.                                           
+         -                                                               
+         -                                                      |        
+      16 -| 2026-11-22 | The PR title/body template (`buildPrTitle` / `bu
+         -ildPrBody`) and branch rules live in `packages/core/src/deliver
+         -y/` (new files, new exports only). Evidence JSON is trimmed to 
+         -2,000 chars per side. The **tail** of the raw output (6,000 cha
+         -rs) goes in `<details>`. Code fences are longer than any backti
+         -ck run in the content. The body is capped at 60,000 chars. Fixt
+         -ure runs are labelled (BR-06).                                 
+         -       | Pure and unit-testable (C-05). The tail holds the test
+         - summary. Content cannot break out of its fence. GitHub caps bo
+         -dies at 65,536 chars.                                          
+         -                                                      |        
+      17 -| 2026-11-22 | Redaction (`redactForDelivery`) removes the exac
+         -t token in use, token shapes (reusing `redactRepairSecrets`), `
+         -Authorization:` headers and `user:pass@` URL credentials. It ru
+         -ns on the title, the body, every error message, `failure_detail
+         -` and (deep) the stored evidence. `GitHubError` carries no `cau
+         -se`. Octokit logging is silenced.                              
+         -                                                               
+         -       | NFR-04: the token must not appear in errors, logs, PR 
+         -bodies or anything later exported.                             
+         -                                                               
+         -                                                      |        
+      18 -| 2026-11-22 | The commit is built from full file contents via 
+         -blobs/trees (base64). The mode comes from the working copy. Del
+         -etions are tree entries with `sha: null`. There is no `git push
+         -`, and a grep test fails the build if `pulls.merge`, `enablePul
+         -lRequestAutoMerge`, `git push`, a `/merge` route or `updateRef`
+         -/`deleteRef` appears in `apps/server/src`.                     
+         -                                                               
+         -       | The prompt forbids token-in-URL pushes. The grep test 
+         -is the never-merge proof.                                      
+         -                                                               
+         -                                                      |        
+      19 -| 2026-11-22 | Live smoke test `test/deliver.live.test.ts` is s
+         -kipped unless `GITHUB_TOKEN` and `SMA_DEMO_REPO=owner/name` are
+         - set. It delivers the honest rename patch on the repo's current
+         - default-branch head and checks open/unmerged/labels/default br
+         -anch unchanged. It is not run in this increment because no toke
+         -n is configured.                                               
+         -                                                               
+         -       | Human task: create the demo repo and a fine-grained to
+         -ken.                                                           
+         -                                                               
+         -                                                      |        
+      20 -| 2026-11-22 | Known limit for the orchestrator (Inc 13): a run
+         -'s `commit_sha` must exist in the GitHub repository. For `demo/
+         -consumer` (a folder inside our monorepo) the analyzed commit mu
+         -st be the demo repo's commit, otherwise delivery fails clearly 
+         -with "analyzed commit … is not in owner/name".                 
+         -                                                               
+         -                                                               
+         -       | Delivery must base on the analyzed commit and must not
+         - silently switch to the current head.                          
+         -                                                               
+         -                                                      |        
+       3 +| Date       | Decision                                        
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | Why              
+         +                                                               
+         +                                                               
+         +                                                               
+         +                            |                                  
+       4 +| ---------- | ------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +------------------------------------------- | -----------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +--------------------------- |                                  
+       5 +| 2026-11-22 | The GitHub client (`infra/github/client.ts`) exp
+         +orts only `createGitHubClient`, `GitHubError` and two constants
+         +. The returned client is frozen and has 11 read/create methods.
+         + The Octokit instance never leaves the module.                 
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | FR-34 / C-02: mer
+         +ge, auto-merge and ref updates are impossible, not just unused.
+         + A test checks the export list and the method list.            
+         +                                                               
+         +                            |                                  
+       6 +| 2026-11-22 | Defence in depth: every request goes through a t
+         +ransport allowlist (`allowlist.ts`) before `fetch`. Only 12 (me
+         +thod, path) pairs in the one configured repository are allowed.
+         + `POST /git/refs` must create `refs/heads/sma/…` (never a prote
+         +cted branch), and `POST /pulls` must have an `sma/…` head. Grap
+         +hQL, PUT/PATCH/DELETE and other hosts are refused. The path is 
+         +matched after URL-decoding, because Octokit encodes `/` inside 
+         +a ref.                                      | Even Octokit's ge
+         +neric `request()` cannot send a merge. The decoded match is how
+         + GitHub itself reads the path.                                 
+         +                                                               
+         +                            |                                  
+       7 +| 2026-11-22 | The protected branches are the stored `default_b
+         +ranch` plus GitHub's live default branch (fetched by `getRepo` 
+         +before any branch is created).                                 
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | The stored value 
+         +could be out of date.                                          
+         +                                                               
+         +                                                               
+         +                            |                                  
+       8 +| 2026-11-22 | The happy-path order is `GET repo → GET commit (
+         +analyzed) → blobs → tree → commit → create ref → PR → labels`. 
+         +The prompt says "get ref". We read the repository (live default
+         + branch) and the **analyzed commit** (for its tree) instead, be
+         +cause the base must be the analyzed commit, not the current hea
+         +d. `getRef` stays in the client, for resuming a retry and for t
+         +he live test.                                                  
+         +                                            | The Git Data API 
+         +needs the base tree SHA. The default-branch head is never used 
+         +as a base.                                                     
+         +                                                               
+         +                            |                                  
+       9 +| 2026-11-22 | No msw/nock dependency. GitHub is mocked at the 
+         +`fetch` boundary that Octokit accepts (`test/github-fake.ts`). 
+         +The fake records every request and can script failures per rout
+         +e.                                                             
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | No new dependency
+         + (C-07). It sees exactly what would hit the network.           
+         +                                                               
+         +                                                               
+         +                            |                                  
+      10 +| 2026-11-22 | Missing labels are created with `ensureLabel` (G
+         +ET label → 404 → POST label; a 422 race is OK) and then added. 
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | FR-35 asks for la
+         +bels to be created if missing. An explicit colour and descripti
+         +on beats GitHub's implicit grey label.                         
+         +                                                               
+         +                            |                                  
+      11 +| 2026-11-22 | `deliver` finishes the run: `repaired` + `pr_url
+         +` on success, or `stage_failure` with `failure_stage = deliver`
+         + on failure. It refuses (throws, no GitHub call) unless the run
+         + is unfinished and its **latest attempt passed** with exactly t
+         +he given patch.                                                
+         +                                                               
+         +                                                               
+         +                                            | Deliver is the la
+         +st stage. Only validated patches get PRs, so cheating, failed o
+         +r refused runs can never reach GitHub (FR-33, FR-36).          
+         +                                                               
+         +                            |                                  
+      12 +| 2026-11-22 | **Retry = new child run** (`parent_run_id` = the
+         + failed run, `stage_reached = deliver`, no attempts, zero token
+         +s/cost). The failed run's `deliver` row stores the redacted evi
+         +dence, the source run id and partial GitHub progress (branch, c
+         +ommit, PR). The retry re-reads the patch from the source run's 
+         +passing attempt row.                                           
+         +                                                               
+         +                                            | Finished runs are
+         + frozen (FR-39 trigger) and `run_stage_results` allows one row 
+         +per (run, stage). A child run keeps everything append-only with
+         + no migration, and matches the reanalysis pattern. Zero usage a
+         +voids double-counting cost. |                                  
+      13 +| 2026-11-22 | A retry resumes from what already exists on GitH
+         +ub. An untouched `sma/` branch (head still equals the recorded 
+         +commit) is reused. A PR that was opened but not labelled only g
+         +ets labels. Otherwise the retry does a full delivery on a new `
+         +sma/run-<childId>-…` branch, rebuilding the files from the stor
+         +ed patch (`patchedFilesFromPatch`: `git apply` in a disposable 
+         +working copy, no code executed).                               
+         +                                            | No duplicate PRs 
+         +and no orphaned work. We never update or delete refs.          
+         +                                                               
+         +                                                               
+         +                            |                                  
+      14 +| 2026-11-22 | If labelling fails after the PR opened, the run 
+         +is a `stage_failure`, but `pr_url` is still recorded.          
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | The PR exists and
+         + must be visible. FR-35 is not yet met, so it is not counted as
+         + success until a retry labels it.                              
+         +                                                               
+         +                            |                                  
+      15 +| 2026-11-22 | `recordFlaggedFinding({ status, reason })` accep
+         +ts `flagged`, `failed`, `cheating_rejected` and `aborted`. It w
+         +rites a `skipped` deliver row (`pullRequest: null`) and finishe
+         +s the run with `flagged_reason`. It takes no client and reads n
+         +o credential.                                                  
+         +                                                               
+         +                                                               
+         +                                            | FR-36: structural
+         +ly 0 GitHub calls. The test also spies on global `fetch`.      
+         +                                                               
+         +                                                               
+         +                            |                                  
+      16 +| 2026-11-22 | The PR title/body template (`buildPrTitle` / `bu
+         +ildPrBody`) and branch rules live in `packages/core/src/deliver
+         +y/` (new files, new exports only). Evidence JSON is trimmed to 
+         +2,000 chars per side. The **tail** of the raw output (6,000 cha
+         +rs) goes in `<details>`. Code fences are longer than any backti
+         +ck run in the content. The body is capped at 60,000 chars. Fixt
+         +ure runs are labelled (BR-06).                                 
+         +                                            | Pure and unit-tes
+         +table (C-05). The tail holds the test summary. Content cannot b
+         +reak out of its fence. GitHub caps bodies at 65,536 chars.     
+         +                                                               
+         +                            |                                  
+      17 +| 2026-11-22 | Redaction (`redactForDelivery`) removes the exac
+         +t token in use, token shapes (reusing `redactRepairSecrets`), `
+         +Authorization:` headers and `user:pass@` URL credentials. It ru
+         +ns on the title, the body, every error message, `failure_detail
+         +` and (deep) the stored evidence. `GitHubError` carries no `cau
+         +se`. Octokit logging is silenced.                              
+         +                                                               
+         +                                            | NFR-04: the token
+         + must not appear in errors, logs, PR bodies or anything later e
+         +xported.                                                       
+         +                                                               
+         +                            |                                  
+      18 +| 2026-11-22 | The commit is built from full file contents via 
+         +blobs/trees (base64). The mode comes from the working copy. Del
+         +etions are tree entries with `sha: null`. There is no `git push
+         +`, and a grep test fails the build if `pulls.merge`, `enablePul
+         +lRequestAutoMerge`, `git push`, a `/merge` route or `updateRef`
+         +/`deleteRef` appears in `apps/server/src`.                     
+         +                                                               
+         +                                            | The prompt forbid
+         +s token-in-URL pushes. The grep test is the never-merge proof. 
+         +                                                               
+         +                                                               
+         +                            |                                  
+      19 +| 2026-11-22 | Live smoke test `test/deliver.live.test.ts` is s
+         +kipped unless `GITHUB_TOKEN` and `SMA_DEMO_REPO=owner/name` are
+         + set. It delivers the honest rename patch on the repo's current
+         + default-branch head and checks open/unmerged/labels/default br
+         +anch unchanged. Run on 2026-11-22 against `Bigyan1313/sma-demo-
+         +consumer`: passed and opened https://github.com/Bigyan1313/sma-
+         +demo-consumer/pull/1 (open, unmerged, `sma/` head into `main`, 
+         +both labels, token absent from title/body). | Human task: creat
+         +e the demo repo and a fine-grained token.                      
+         +                                                               
+         +                                                               
+         +                            |                                  
+      20 +| 2026-11-22 | Known limit for the orchestrator (Inc 13): a run
+         +'s `commit_sha` must exist in the GitHub repository. For `demo/
+         +consumer` (a folder inside our monorepo) the analyzed commit mu
+         +st be the demo repo's commit, otherwise delivery fails clearly 
+         +with "analyzed commit … is not in owner/name".                 
+         +                                                               
+         +                                                               
+         +                                            | Delivery must bas
+         +e on the analyzed commit and must not silently switch to the cu
+         +rrent head.                                                    
+         +                                                               
+         +                            |                                  
+      21  
+      22  No schema migration and no HTTP routes. Wiring delivery into th
+          e pipeline belongs to Increment 13.
+
+⏺ Prettier re-padded the entire PROGRESS table, which would conflict with
+  teammates' PRs. I'm reverting it and will put the URL in a note under the
+  table instead, leaving row 12 as "Done".
+
+⏺ Bash(git checkout docs/PROGRESS.md && printf '\nIncrement 12 live delivery
+      smoke test: https://github.com/Bigyan1313/sma-demo-consumer/pull/1 (open,
+      never merged).\n…)
+  ⎿  Updated 1 path from the index
+     Checking formatting...
+     All matched files use Prettier code style!
+     … +3 lines (ctrl+o to expand)
+  ⎿  Updated docs/PROGRESS.md (+22 -20)
+  ⎿  (a git step in this command can move the working tree, so these may be
+     its changes, not edits) (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The live smoke test passed and opened this PR on the demo repo:
+
+  https://github.com/Bigyan1313/sma-demo-consumer/pull/1
+
+  I checked it on GitHub afterwards:
+  - It's open, has not been merged, and goes from
+    sma/run-d9e19bcd-…-field_renamed into main.
+  - It has both labels, machine-generated and awaiting-human-review.
+  - The title is [SMA] field_renamed: GET /customers/{id}.
+  - The token is not in the PR title or body. I compared them in the shell
+    without printing the token.
+  - The test also confirmed the head commit of main didn't change.
+
+  The test passed, but its [deliver] LIVE PR … line didn't appear in the npm 
+  test output. I read the URL back from GitHub with gh instead.
+
+  Updates (committed and pushed to PR #27):
+  - PR #27 report: the status now says DONE and includes the live PR URL. The
+    leftover human task is not to merge that PR, since it's the evidence for
+    AT-08.
+  - docs/PROGRESS.md: row 12 already said "Done" (I set it when opening the PR).
+    Putting the URL inside the row made Prettier re-pad the whole table, which
+    would change every teammate's row and cause merge conflicts. So row 12 stays
+    as it was, and the URL is in a one-line note under the table.
+  - docs/decisions/inc12.md: the live-test entry now records the run and the PR
+    URL.
+
+  Leave the demo PR open. PR #27 is ready for a teammate to merge with "Create a
+  merge commit".
+
+✻ Sautéed for 1m 9s · done 11:33 AM
+
+※ recap: Increment 12 (delivery) is finished: PR #27 is green and reports DONE, and the live test opened demo PR sma-demo-consumer#1, which must stay unmerged. Next, a teammate merges PR #27 with "Create a merge commit".
+
+❯ put this also in the chat log                                                 
+
+⏺ I can't add this part myself. The chat log has to be the actual transcript,
+  and only /export produces that. If I appended a hand-written summary to the
+  file, it wouldn't be the real conversation, which the project rules forbid.
+
+  Run the export again to the same file. It will contain the whole conversation,
+  including the live test and the doc updates:
+
+  /export docs/chat-logs/inc12-bigyan.txt
+
+  Then tell me it's done. I'll scan it for credentials again (this time there's
+  a real token in .env, so the check matters more), commit it to
+  feat/inc12-delivery, push, and confirm CI on PR #27.
+
+✻ Churned for 4s · done 11:45 AM
