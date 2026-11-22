@@ -1,0 +1,1984 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.317
+           Opus 5.5 · Claude Pro
+ ▘▘   ▝▝   ~/Desktop/self_maintaining_api
+
+
+❯ /clear                                                                        
+
+❯ start increment 12                                                            
+
+⏺ I'll start by reading the required context files.
+
+  Listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+⏺ Issue #9 is assigned to Bigyan1313 (you), so I can go ahead. Next, the
+  start-of-increment setup.
+
+⏺ Bash(git checkout main && git pull 2>&1 | tail -3 && npm ci 2>&1 | tail -3 &&
+      npm run consumer:install 2>&1 | tail -2 && npm run db:migrate 2>&1 | tail
+      -5)
+  ⎿  Switched to branch 'main'
+     Your branch is up to date with 'origin/main'.
+      create mode 100644 scripts/diagrams/render.ts
+     … +13 lines (ctrl+o to expand)
+  ⎿  Updated README.md (+32 -0)
+  ⎿  Updated apps/server/src/infra/llm/adapter.ts (+22 -16)
+  ⎿  Updated apps/server/src/infra/llm/types.ts (+6 -0)
+  ⎿  Updated apps/server/test/llm.test.ts (+25 -0)
+  ⎿  Created apps/server/test/repair-helpers.ts (+147 -0)
+  ⎿  … 12 more files changed
+  ⎿  (a git step in this command can move the working tree, so these may be
+     its changes, not edits) (ctrl+o to expand)
+  ⎿  (timeout 6m 40s)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The prompt is already saved and Octokit is already pinned. Now I'll read the
+  DB layer and the repair pipeline that delivery builds on.
+
+  Searched for 1 pattern, ran 4 shell commands (ctrl+o to expand)
+
+⏺ Next, I'll look for existing redaction helpers, the patch-apply utilities, and
+  how tests mock HTTP.
+
+  Ran 5 shell commands (ctrl+o to expand)
+
+⏺ I have enough context. Before writing code I'll check which delivery env vars
+  exist in .env, printing names only and never values.
+
+  Searched for 1 pattern, ran 2 shell commands (ctrl+o to expand)
+
+⏺ GITHUB_TOKEN is empty, so I'll skip the live smoke test and flag it as a human
+  task. Next I'm reusing core's redactRepairSecrets and starting on redaction,
+  branch naming, and the PR body.
+
+⏺ Write(packages/core/src/delivery/redact.ts)
+  ⎿  Wrote 31 lines to packages/core/src/delivery/redact.ts
+       1 import { redactRepairSecrets } from '../repair/context.js';
+       2 
+       3 /** What replaces every redacted value. */
+       4 export const REDACTED = '[REDACTED]';
+       5 
+       6 const AUTH_HEADER = /\b(authorization\s*[:=]\s*["']?)(?:token|be
+         arer|basic)\s+[^\s"',;}]+/gi;
+       7 const URL_CREDENTIALS = /\b(https?:\/\/)[^\s/@:]+(?::[^\s/@]*)?@
+         /gi;
+       8 
+     … +23 lines (ctrl+o to expand)
+
+⏺ Write(packages/core/src/delivery/branch.ts)
+  ⎿  Wrote 54 lines to packages/core/src/delivery/branch.ts
+       1 import type { ChangeCategory } from '../domain/enums.js';
+       2 
+       3 /** Every branch the system creates starts with this prefix (FR-
+         34, C-02). */
+       4 export const DELIVERY_BRANCH_PREFIX = 'sma/';
+       5 
+       6 /** Labels on every pull request the system opens (FR-35). */
+       7 export const DELIVERY_LABELS = [
+       8   {
+       9     name: 'machine-generated',
+     … +45 lines (ctrl+o to expand)
+
+⏺ Write(packages/core/src/delivery/pr-body.ts)
+  ⎿  Wrote 142 lines to packages/core/src/delivery/pr-body.ts
+       1 import type { ChangeCategory } from '../domain/enums.js';
+       2 import { redactForDelivery } from './redact.js';
+       3 
+       4 /** BR-03 note placed in every pull request the system opens. */
+       5 export const NEVER_MERGE_NOTE =
+       6   'Machine-generated. Passing validation is evidence, not proof.
+          Review before merging. This tool never merges.';
+       7 
+       8 /** Longest spec before/after JSON shown in the body, per side. 
+         */
+     … +134 lines (ctrl+o to expand)
+
+⏺ Next, the core exports and their unit tests.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api/packages/core && cat >>
+      src/index.ts <<'EOF'
+      export * from './delivery/redact.js';…)
+  ⎿  import { describe, expect, it } from 'vitest';
+     import { err, isErr, isOk, ok, version, type Result } from './index.js
+     ';
+     … +28 lines (ctrl+o to expand)
+  ⎿  Updated packages/core/src/index.ts (+3 -0)
+      36  export * from './repair/context.js';
+      37  export * from './repair/output.js';
+      38  export * from './repair/loop.js';
+      39 +export * from './delivery/redact.js';                          
+      40 +export * from './delivery/branch.js';                          
+      41 +export * from './delivery/pr-body.js';                         
+
+⏺ Write(packages/core/src/delivery/delivery.test.ts)
+  ⎿  Wrote 183 lines to packages/core/src/delivery/delivery.test.ts
+       1 import { describe, expect, it } from 'vitest';
+       2 import {
+       3   DELIVERY_BRANCH_PREFIX,
+       4   DELIVERY_LABELS,
+       5   deliveryBranchName,
+       6   unsafeBranchReason,
+       7 } from './branch.js';
+       8 import {
+       9   MAX_PR_BODY_CHARS,
+      10   NEVER_MERGE_NOTE,
+     … +173 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Core delivery tests and the typecheck pass. I'll commit, then build the
+  guarded GitHub client.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api && npx prettier --write
+      packages/core/src/delivery >/dev/null && git add packages/core && git
+      commit -q -m "feat(co…)
+  ⎿  87ad817 feat(core): delivery redaction, sma/ branch rules, PR title an
+     d body template
+  ⎿  Updated packages/core/src/delivery/delivery.test.ts (+4 -6)
+      62  
+      63  describe('branch names', () => {
+      64    it('builds sma/run-<id>-<category>', () => {
+      65 -    expect(deliveryBranchName('r1', 'field_type_changed')).toBe
+         -(                                                              
+      66 -      'sma/run-r1-field_type_changed',                         
+      67 -    );                                                         
+      65 +    expect(deliveryBranchName('r1', 'field_type_changed')).toBe
+         +('sma/run-r1-field_type_changed');                             
+      66      expect(deliveryBranchName('r1', 'endpoint_removed').startsW
+          ith(DELIVERY_BRANCH_PREFIX)).toBe(
+      67        true,
+      68      );
+     ...
+      102  describe('PR title and body', () => {
+      103    it('title is [SMA] <category>: <METHOD> <path>', () => {
+      104      expect(buildPrTitle(evidence())).toBe('[SMA] field_renamed
+           : GET /customers/{id}');
+      107 -    expect(                                                   
+      108 -      buildPrTitle(evidence({ change: { ...evidence().change, 
+          -method: null } })),                                           
+      109 -    ).toBe('[SMA] field_renamed: /customers/{id}');           
+      105 +    expect(buildPrTitle(evidence({ change: { ...evidence().cha
+          +nge, method: null } }))).toBe(                                
+      106 +      '[SMA] field_renamed: /customers/{id}',                 
+      107 +    );                                                        
+      108    });
+      109  
+      110    it('body has the evidence, note citation, files, call sites,
+            attempts, tests and the note', () => {
+  ⎿  Updated packages/core/src/delivery/pr-body.ts (+11 -3)
+      79   * @param evidence - Delivery evidence.
+      80   * @param knownSecrets - Exact secret values to redact (the tok
+          en in use).
+      81   */
+      82 -export function buildPrTitle(evidence: DeliveryEvidence, knownS
+         -ecrets: readonly string[] = []): string {                      
+      82 +export function buildPrTitle(                                  
+      83 +  evidence: DeliveryEvidence,                                  
+      84 +  knownSecrets: readonly string[] = [],                        
+      85 +): string {                                                    
+      86    const { category, method, path } = evidence.change;
+      87    const title = `[SMA] ${category}: ${method ? `${method.toUppe
+          rCase()} ` : ''}${path}`;
+      88    return redactForDelivery(title.replace(/[\r\n]+/g, ' '), know
+          nSecrets).slice(0, 250);
+     ...
+       96   * @param evidence - Delivery evidence.
+       97   * @param knownSecrets - Exact secret values to redact (the to
+           ken in use).
+       98   */
+       96 -export function buildPrBody(evidence: DeliveryEvidence, knownS
+          -ecrets: readonly string[] = []): string {                     
+       99 +export function buildPrBody(                                  
+      100 +  evidence: DeliveryEvidence,                                 
+      101 +  knownSecrets: readonly string[] = [],                       
+      102 +): string {                                                   
+      103    const { change, confirmation, tests } = evidence;
+      104    const confirmed =
+      105      confirmation.source === 'migration_note'
+     ...
+      125    const sections = [
+      126      `> **${NEVER_MERGE_NOTE}**`,
+      127      ...(evidence.isFixture
+      122 -      ? ['> This pull request comes from a **fixture / demonst
+          -ration run**, not a live provider event.']                    
+      128 +      ? [                                                     
+      129 +          '> This pull request comes from a **fixture / demons
+          +tration run**, not a live provider event.',                   
+      130 +        ]                                                     
+      131        : []),
+      132      `## Specification change\n\n` +
+      133        `- Category: ${code(change.category)}\n` +
+
+⏺ I'm adding a request allowlist at the GitHub fetch transport, so merge,
+  auto-merge, ref updates and deletes are blocked even through Octokit's generic
+  request().
+
+⏺ Write(apps/server/src/infra/github/allowlist.ts)
+  ⎿  Wrote 97 lines to apps/server/src/infra/github/allowlist.ts
+       1 /**
+       2  * Transport-level allowlist for the delivery GitHub client (FR-
+         34, C-02).
+       3  *
+       4  * Every HTTP request the client sends passes through {@link git
+         hubRequestRefusal} before it
+       5  * reaches the network. Only the read and create calls delivery 
+         needs are allowed. Anything
+       6  * else (a merge, an auto-merge mutation, any GraphQL, a ref upd
+         ate, a delete, a write to a
+     … +91 lines (ctrl+o to expand)
+
+⏺ Write(apps/server/src/infra/github/client.ts)
+  ⎿  Wrote 282 lines to apps/server/src/infra/github/client.ts
+       1 /**
+       2  * The only GitHub access in the system: a narrow wrapper around
+          Octokit for delivery
+       3  * (FR-33 to FR-35).
+       4  *
+       5  * **There is no merge, no auto-merge, no ref update and no dele
+         te here, and none can be added
+       6  * by a caller.** The Octokit instance never leaves this module,
+          and its transport refuses every
+       7  * request that is not on the delivery allowlist (see `allowlist
+     … +276 lines (~10 KB) (ctrl+o to expand)
+
+⏺ That createBranch pre-check condition is wrong, so I'm swapping it for an
+  explicit "live default branch known" flag.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api/apps/server/src/infra/github
+      && python3 - <<'EOF'
+      p='client.ts'…)  ⎿  src/infra/github/allowlist.ts(11,10): error TS2305: Module '"@sma/core
+     "' has no exported member 'DELIVERY_BRANCH_PREFIX'.
+     src/infra/github/allowlist.ts(11,34): error TS2724: '"@sma/core"' has
+     … +9 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/infra/github/client.ts (+4 -1)
+      142    const baseUrl = (options.baseUrl ?? GITHUB_API_URL).replace(
+           /\/$/, '');
+      143    const transport = options.fetch ?? globalThis.fetch;
+      144    const protectedBranches = new Set([options.defaultBranch]);
+      145 +  let liveDefaultKnown = false;                               
+      146  
+      147    const guardedFetch: typeof globalThis.fetch = (input, init) 
+           => {
+      148      const url = typeof input === 'string' ? input : input inst
+           anceof URL ? input.href : input.url;
+     ...
+      188        call('getRepo', async () => {
+      189          const { data } = await octokit.rest.repos.get({ owner,
+            repo });
+      190          protectedBranches.add(data.default_branch);
+      191 +        liveDefaultKnown = true;                              
+      192          return { fullName: data.full_name, defaultBranch: data
+           .default_branch };
+      193        }),
+      194      getRef: (branch) =>
+     ...
+      234        }),
+      235      createBranch: (branch, sha) =>
+      236        call('createBranch', async () => {
+      235 -        if (!protectedBranches.has('') && protectedBranches.si
+          -ze < 2) await client.getRepo();                               
+      237 +        // Always compare with GitHub's own default branch, no
+          +t only the stored one.                                        
+      238 +        if (!liveDefaultKnown) await client.getRepo();        
+      239          const reason = unsafeBranchReason(branch, [...protecte
+           dBranches]);
+      240          if (reason)
+      241            throw new GitHubError(
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The typecheck passes. Next, a reusable mocked GitHub API (injected fetch) and
+  tests for the client.
+
+⏺ Write(apps/server/test/github-fake.ts)
+  ⎿  Wrote 139 lines to apps/server/test/github-fake.ts
+       1 /**
+       2  * A mocked GitHub REST API at the `fetch` boundary: records eve
+         ry request that actually reached
+       3  * the "network" and answers the delivery endpoints with plausib
+         le data. Failures can be
+       4  * scripted per route.
+       5  */
+       6 import { createHash } from 'node:crypto';
+       7 
+       8 /** One request that reached the mocked API. */
+     … +131 lines (ctrl+o to expand)
+
+⏺ Write(apps/server/test/github-client.test.ts)
+  ⎿  Wrote 197 lines to apps/server/test/github-client.test.ts
+       1 /** Safe GitHub client (FR-34, C-02, NFR-04) against a mocked Gi
+         tHub API. No network. */
+       2 import { afterEach, describe, expect, it, vi } from 'vitest';
+       3 import * as clientModule from '../src/infra/github/client.js';
+       4 import { githubRequestRefusal } from '../src/infra/github/allowl
+         ist.js';
+       5 import { GitHubError, createGitHubClient } from '../src/infra/gi
+         thub/client.js';
+       6 import { createFakeGitHub } from './github-fake.js';
+       7 
+     … +190 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ My forbidden-name regex was too broad: "request" also matches PullRequest.
+  I'll tighten it.
+
+⏺ Bash(sed -i '' 's#^const FORBIDDEN = .*#const FORBIDDEN =
+      /merge|auto|delete|remove|update|push|graphql|^request$|octokit/i;#'
+      test/github-client.test.ts && npx vite…)
+  ⎿        Tests  31 passed (31)
+  ⎿  Updated apps/server/test/github-client.test.ts (+1 -1)
+       7  
+       8  const TOKEN = 'ghp_FAKE123';
+       9  const SHA = 'a'.repeat(40);
+      10 -const FORBIDDEN = /merge|auto|delete|remove|update|push|graphql
+         -|request|octokit/i;                                            
+      10 +const FORBIDDEN = /merge|auto|delete|remove|update|push|graphql
+         +|^request$|octokit/i;                                          
+      11  
+      12  function setup(opts: Parameters<typeof createFakeGitHub>[0] = {
+          }) {
+      13    const gh = createFakeGitHub(opts);
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api && npx prettier --write
+      apps/server/src/infra/github apps/server/test/github-*.ts >/dev/null &&
+      git add apps/server…)
+  ⎿  d01f3c5 feat(github): safe delivery client with transport allowlist (n
+     o merge, sma/ branches only, redacted errors)
+  ⎿  Updated apps/server/src/infra/github/client.ts (+4 -1)
+      177        const raw = e instanceof Error ? e.message : String(e);
+      178        throw new GitHubError(
+      179          operation,
+      180 -        redactForDelivery(`GitHub ${operation} failed${typeof 
+          -status === 'number' ? ` (HTTP ${status})` : ''}: ${raw}`, [tok
+          -en]),                                                         
+      180 +        redactForDelivery(                                    
+      181 +          `GitHub ${operation} failed${typeof status === 'numb
+          +er' ? ` (HTTP ${status})` : ''}: ${raw}`,                     
+      182 +          [token],                                            
+      183 +        ),                                                    
+      184          typeof status === 'number' ? status : undefined,
+      185        );
+      186      }
+  ⎿  Updated apps/server/test/github-client.test.ts (+15 -8)
+      132      const { gh, client } = setup({ labels: ['machine-generated
+           '] });
+      133      await client.ensureLabel({ name: 'machine-generated', colo
+           r: '000000', description: 'x' });
+      134      await client.ensureLabel({ name: 'awaiting-human-review', 
+           color: '000000', description: 'x' });
+      135 -    expect(gh.sequence()).toEqual([                           
+      136 -      'GET /labels/:name',                                    
+      137 -      'GET /labels/:name',                                    
+      138 -      'POST /labels',                                         
+      139 -    ]);                                                       
+      135 +    expect(gh.sequence()).toEqual(['GET /labels/:name', 'GET /
+          +labels/:name', 'POST /labels']);                              
+      136      expect(gh.labels.has('awaiting-human-review')).toBe(true);
+      137    });
+      138  
+     ...
+      143        content: Buffer.from('héllo').toString('base64'),
+      144        encoding: 'base64',
+      145      });
+      150 -    const pr = await client.createPullRequest({ title: 't', bo
+          -dy: 'b', head: 'sma/x', base: 'main' });                      
+      146 +    const pr = await client.createPullRequest({               
+      147 +      title: 't',                                             
+      148 +      body: 'b',                                              
+      149 +      head: 'sma/x',                                          
+      150 +      base: 'main',                                           
+      151 +    });                                                       
+      152      expect(pr).toMatchObject({ number: 1, merged: false, head:
+            'sma/x', base: 'main' });
+      153      expect(await client.getPullRequest(1)).toMatchObject({ num
+           ber: 1, state: 'open' });
+      154    });
+     ...
+      166        vi.spyOn(console, m).mockImplementation(() => undefined)
+           ,
+      167      );
+      168      const { gh, client } = setup();
+      168 -    gh.fail({ method: 'POST', path: /^\/pulls$/, status: 500, 
+          -message: `boom token ${TOKEN} leaked` });                     
+      169 +    gh.fail({                                                 
+      170 +      method: 'POST',                                         
+      171 +      path: /^\/pulls$/,                                      
+      172 +      status: 500,                                            
+      173 +      message: `boom token ${TOKEN} leaked`,                  
+      174 +    });                                                       
+      175      const error = await client
+      176        .createPullRequest({ title: 't', body: 'b', head: 'sma/x
+           ', base: 'main' })
+      177        .catch((e: unknown) => e);
+     ...
+      194        repo: 'b',
+      195        defaultBranch: 'main',
+     … 7 more lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/github-fake.ts (+14 -5)
+      53      });
+      54  
+      55    const fetch: typeof globalThis.fetch = async (input, init) =>
+           {
+      56 -    const url = new URL(typeof input === 'string' ? input : inp
+         -ut instanceof URL ? input.href : input.url);                   
+      56 +    const url = new URL(                                       
+      57 +      typeof input === 'string' ? input : input instanceof URL 
+         +? input.href : input.url,                                      
+      58 +    );                                                         
+      59      const method = (init?.method ?? 'GET').toUpperCase();
+      60      const prefix = `/repos/${owner}/${repo}`;
+      61      const path = url.pathname.startsWith(prefix) ? url.pathname
+          .slice(prefix.length) : url.pathname;
+      60 -    const body = typeof init?.body === 'string' ? (JSON.parse(i
+         -nit.body) as Record<string, unknown>) : null;                  
+      62 +    const body =                                               
+      63 +      typeof init?.body === 'string' ? (JSON.parse(init.body) a
+         +s Record<string, unknown>) : null;                             
+      64      const headers = new Headers(init?.headers);
+      65      calls.push({ method, path, body, authorization: headers.get
+          ('authorization') });
+      66  
+      67      const failure = failures.find((f) => f.method === method &&
+           f.path.test(path));
+      68      if (failure) {
+      66 -      if (failure.times === undefined || --failure.times <= 0) 
+         -failures.splice(failures.indexOf(failure), 1);                 
+      69 +      if (failure.times === undefined || --failure.times <= 0) 
+      70 +        failures.splice(failures.indexOf(failure), 1);         
+      71        return json(failure.status, { message: failure.message ??
+           'Server Error' });
+      72      }
+      73      const id = () => sha(`${++counter}`);
+     ...
+      86      let m: RegExpExecArray | null;
+      87      if (method === 'GET' && (m = /^\/git\/ref\/heads\/(.+)$/.ex
+          ec(path))) {
+      88        const ref = refs.get(m[1]!);
+      85 -      return ref ? json(200, { ref: `refs/heads/${m[1]}`, objec
+         -t: { sha: ref } }) : json(404, { message: 'Not Found' });      
+      89 +      return ref                                               
+      90 +        ? json(200, { ref: `refs/heads/${m[1]}`, object: { sha:
+         + ref } })                                                      
+      91 +        : json(404, { message: 'Not Found' });                 
+      92      }
+      93      if (method === 'GET' && (m = /^\/git\/commits\/([0-9a-f]{40
+          })$/.exec(path)))
+      94        return json(200, { sha: m[1], tree: { sha: sha(`tree-${m[
+          1]}`) } });
+     ...
+      112        return json(201, { name: body?.name });
+      113      }
+      114      if (method === 'POST' && /^\/issues\/\d+\/labels$/.test(pa
+           th))
+      109 -      return json(200, ((body?.labels as string[]) ?? []).map(
+          -(name) => ({ name })));                                       
+      115 +      return json(                                            
+      116 +        200,                                                  
+     … 5 more lines (ctrl+o to expand)
+
+⏺ Next, a helper that rebuilds the patched file contents from a stored patch. It
+  only runs git apply in an isolated working copy and executes nothing, which
+  retryDelivery needs.
+
+⏺ Write(apps/server/src/infra/workcopy/materialize.ts)
+  ⎿  Wrote 65 lines to apps/server/src/infra/workcopy/materialize.ts
+       1 import { lstat, readFile } from 'node:fs/promises';
+       2 import { join } from 'node:path';
+       3 import { err, ok, type Result } from '@sma/core';
+       4 import {
+       5   applyPatch,
+       6   createWorkingCopy,
+       7   disposeWorkingCopy,
+       8   type WorkcopyError,
+       9   type WorkcopyOptions,
+      10 } from './index.js';
+     … +55 lines (ctrl+o to expand)
+
+⏺ Now the delivery stage itself: deliver, retryDelivery and
+  recordFlaggedFinding.
+
+⏺ Write(apps/server/src/pipeline/deliver.ts)
+  ⎿  Wrote 410 lines to apps/server/src/pipeline/deliver.ts
+       1 /**
+       2  * Stage 7, Deliver (FR-33 to FR-37, C-02, BR-03).
+       3  *
+       4  * - {@link deliver}: a validated patch becomes a new `sma/…` br
+         anch (built with the Git Data
+       5  *   API on the **analyzed commit**) and a labelled pull request
+          with full evidence. The system
+       6  *   never merges, never enables auto-merge and never writes the
+          default branch: the GitHub
+       7  *   client cannot do any of that.
+     … +403 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The typecheck passes. Failed deliveries store raw validator output that later
+  gets exported, so I'm adding deep redaction before that failure row is
+  written.
+
+⏺ Bash(python3 - <<'EOF'
+      p='src/pipeline/deliver.ts'…)
+  ⎿  106:function redactDeep<T>(value: T, secrets: readonly string[]): T {
+     277:      evidence: redactDeep(evidence, secrets),
+  ⎿  Updated apps/server/src/pipeline/deliver.ts (+16 -1)
+      102  
+      103  class DeliveryFailure extends Error {}
+      104  
+      105 +/** A copy of JSON data with every string (keys included) pass
+          +ed through redaction. */                                      
+      106 +function redactDeep<T>(value: T, secrets: readonly string[]): 
+          +T {                                                           
+      107 +  const walk = (v: unknown): unknown => {                     
+      108 +    if (typeof v === 'string') return redactForDelivery(v, sec
+          +rets);                                                        
+      109 +    if (Array.isArray(v)) return v.map(walk);                 
+      110 +    if (v && typeof v === 'object')                           
+      111 +      return Object.fromEntries(                              
+      112 +        Object.entries(v).map(([k, x]) => [redactForDelivery(k
+          +, secrets), walk(x)]),                                        
+      113 +      );                                                      
+      114 +    return v;                                                 
+      115 +  };                                                          
+      116 +  return walk(value) as T;                                    
+      117 +}                                                             
+      118 +                                                              
+      119  /** The latest attempt of `sourceRunId`, which must have passe
+           d validation. */
+      120  async function validatedPatch(db: Db, sourceRunId: string) {
+      121    const rows = await listAttempts(db, sourceRunId);
+     ...
+      273      const result: FailedDeliveryResult = {
+      274        error: reason,
+      275        sourceRunId: input.sourceRunId,
+      262 -      evidence,                                               
+      276 +      // Stored for the retry and later exported: no credentia
+          +l may survive in it (NFR-04).                                 
+      277 +      evidence: redactDeep(evidence, secrets),                
+      278        progress,
+      279      };
+      280      await insertStageResult(db, {
+
+⏺ Now the delivery tests: the real test database plus the mocked GitHub API.
+
+⏺ Write(apps/server/test/deliver.test.ts)
+  ⎿  Wrote 377 lines to apps/server/test/deliver.test.ts
+       1 /**
+       2  * Delivery (FR-33 to FR-37, C-02, NFR-04) on the real test data
+         base with a mocked GitHub API
+       3  * at the fetch boundary. No network.
+       4  */
+       5 import { afterAll, afterEach, beforeAll, describe, expect, it, v
+         i } from 'vitest';
+       6 import { NEVER_MERGE_NOTE, type DeliveryEvidence } from '@sma/co
+         re';
+       7 import {
+     … +370 lines (ctrl+o to expand)
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ That probe hung (--root / makes vitest scan the whole filesystem). I'll stop
+  it and use tsx instead.
+
+⏺ Stop Task
+  ⎿  cat > /private/tmp/claude-501/-Users-turbo-Desktop-self-maintaining-ap
+     i/4c25bcb6-bf6e-4d40-b218-3380a559ebdf/scratchpad/probe.test.ts
+     <<'EOF'
+     import { it } from… · stopped
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Octokit encodes the ref's slash, so the allowlist rejected it and resume fell
+  back to rebuilding; I'm making the allowlist match the decoded path and
+  updating the fake to decode too.
+
+⏺ Bash(python3 - <<'EOF'
+      p='src/infra/github/allowlist.ts'…)
+  ⎿  61:    const raw = url.pathname.startsWith(prefix) ? url.pathname.slic
+     e(prefix.length) : url.pathname;
+     62:    const path = decodeURIComponent(raw);
+           Tests  48 passed (48)
+  ⎿  Updated apps/server/src/infra/github/allowlist.ts (+8 -1)
+      76    const pathname = parsed.pathname;
+      77    if (pathname !== prefix && !pathname.startsWith(`${prefix}/`)
+          )
+      78      return 'request outside the configured repository';
+      79 -  const rest = pathname.slice(prefix.length);                  
+      79 +  // Match the path as GitHub reads it: Octokit percent-encodes
+         + `/` inside a ref parameter.                                   
+      80 +  let rest: string;                                            
+      81 +  try {                                                        
+      82 +    rest = decodeURIComponent(pathname.slice(prefix.length));  
+      83 +  } catch {                                                    
+      84 +    return 'invalid URL encoding';                             
+      85 +  }                                                            
+      86 +  if (rest.split('/').some((p) => p === '..' || p === '.')) ret
+         +urn 'dot segment in path';                                     
+      87    const verb = method.toUpperCase();
+      88    if (!ALLOWED.some((a) => a.method === verb && a.path.test(res
+          t)))
+      89      return `${verb} ${rest || '/'} is not an allowed delivery o
+          peration`;
+  ⎿  Updated apps/server/test/github-fake.ts (+2 -1)
+      58      );
+      59      const method = (init?.method ?? 'GET').toUpperCase();
+      60      const prefix = `/repos/${owner}/${repo}`;
+      61 -    const path = url.pathname.startsWith(prefix) ? url.pathname
+         -.slice(prefix.length) : url.pathname;                          
+      61 +    const raw = url.pathname.startsWith(prefix) ? url.pathname.
+         +slice(prefix.length) : url.pathname;                           
+      62 +    const path = decodeURIComponent(raw);                      
+      63      const body =
+      64        typeof init?.body === 'string' ? (JSON.parse(init.body) a
+          s Record<string, unknown>) : null;
+      65      const headers = new Headers(init?.headers);
+
+⏺ All 48 pass. Next: an encoded-path refusal case, the never-merge grep test, a
+  real materialize test, and the live smoke test, which is skipped unless
+  credentials are set.
+
+⏺ Bash(python3 - <<'EOF'
+      p='test/github-client.test.ts'…)
+  ⎿  diff --git a/src/customers.ts b/src/customers.ts
+     index 9af07e1..7993fb7 100644
+     --- a/src/customers.ts
+     … +47 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/github-client.test.ts (+3 -0)
+       98  
+       99    it.each([
+      100      ['PUT', `${base}/pulls/1/merge`, undefined],
+      101 +    ['PUT', `${base}/pulls/1%2Fmerge`, undefined],            
+      102 +    ['PATCH', `${base}/git/refs/heads%2Fmain`, '{}'],         
+      103 +    ['GET', `${base}/git/ref/heads/sma%2F..%2F..%2Fpulls`, und
+          +efined],                                                      
+      104      ['POST', 'https://api.github.com/graphql', '{"query":"muta
+           tion{enablePullRequestAutoMerge}"}'],
+      105      ['PATCH', `${base}/git/refs/heads/main`, '{"sha":"x"}'],
+      106      ['PATCH', `${base}/git/refs/heads/sma/x`, '{"sha":"x"}'],
+  ⎿  Created apps/server/test/materialize.test.ts (+28 -0)
+       1 +/** Rebuilding patched files from a stored patch (FR-37). Only 
+         +git apply runs; no Docker. */                                  
+       2 +import { readdir } from 'node:fs/promises';                    
+       3 +import { join } from 'node:path';                              
+       4 +import { mkdtemp } from 'node:fs/promises';                    
+       5 +import { tmpdir } from 'node:os';                              
+       6 +import { expect, it } from 'vitest';                           
+       7 +import { patchedFilesFromPatch } from '../src/infra/workcopy/ma
+         +terialize.js';                                                 
+       8 +import { CORRECT_PATCH, consumer } from './repair-helpers.js'; 
+       9 +                                                               
+      10 +it('returns the full patched contents and leaves no working cop
+         +y behind', async () => {                                       
+      11 +  const workRoot = await mkdtemp(join(tmpdir(), 'sma-materializ
+         +e-'));                                                         
+      12 +  const out = await patchedFilesFromPatch(consumer, undefined, 
+         +CORRECT_PATCH, { workRoot });                                  
+      13 +  expect(out.ok).toBe(true);                                   
+      14 +  if (!out.ok) return;                                         
+      15 +  expect(out.value.map((f) => f.path)).toEqual(['src/customers.
+         +ts']);                                                         
+      16 +  expect(out.value[0]!.content).toContain('full_name');        
+      17 +  expect(out.value[0]!.content).not.toContain('customer.custome
+         +r_name');                                                      
+      18 +  expect(out.value[0]!.mode).toBe('100644');                   
+      19 +  expect(await readdir(workRoot)).toEqual([]);                 
+      20 +});                                                            
+      21 +                                                               
+      22 +it('a patch that does not apply is patch_invalid', async () => 
+         +{                                                              
+      23 +  const workRoot = await mkdtemp(join(tmpdir(), 'sma-materializ
+         +e-'));                                                         
+      24 +  const bad = CORRECT_PATCH.replace(/customer_name/g, 'nope_nam
+         +e');                                                           
+      25 +  const out = await patchedFilesFromPatch(consumer, undefined, 
+         +bad, { workRoot });                                            
+      26 +  expect(out).toMatchObject({ ok: false, error: { code: 'patch_
+         +invalid' } });                                                 
+      27 +  expect(await readdir(workRoot)).toEqual([]);                 
+      28 +});                                                            
+  ⎿  Created apps/server/test/never-merge.test.ts (+53 -0)
+       1 +/**                                                            
+       2 + * Never-merge proof (FR-34, C-02): the build fails if merge, a
+         +uto-merge or `git push` appears                                
+       3 + * anywhere in the server source.                              
+       4 + */                                                            
+       5 +import { readdirSync, readFileSync, statSync } from 'node:fs'; 
+       6 +import { join, relative } from 'node:path';                    
+       7 +import { fileURLToPath } from 'node:url';                      
+       8 +import { expect, it } from 'vitest';                           
+       9 +                                                               
+      10 +const SRC = fileURLToPath(new URL('../src', import.meta.url)); 
+      11 +                                                               
+      12 +const FORBIDDEN: readonly RegExp[] = [                         
+      13 +  /pulls\s*\.\s*merge/i,                                       
+      14 +  /enablePullRequestAutoMerge/i,                               
+      15 +  /git\s+push/i,                                               
+      16 +  /["'`]\s*push\s*["'`]/, // execFile('git', ['push', …])      
+      17 +  /\/pulls\/\{?[a-z_]*\}?\/merge/i, // raw REST route          
+      18 +  /\bgit\s*\.\s*(?:updateRef|deleteRef)\b/,                    
+      19 +  /\bmergePullRequest\b/,                                      
+      20 +];                                                             
+      21 +                                                               
+      22 +function files(dir: string): string[] {                        
+      23 +  return readdirSync(dir).flatMap((name) => {                  
+      24 +    const path = join(dir, name);                              
+      25 +    return statSync(path).isDirectory() ? files(path) : /\.(ts|
+         +js|mjs|cjs)$/.test(name) ? [path] : [];                        
+      26 +  });                                                          
+      27 +}                                                              
+      28 +                                                               
+      29 +it('no merge, auto-merge, ref update/delete or git push in apps
+         +/server/src', () => {                                          
+      30 +  const hits = files(SRC).flatMap((file) =>                    
+      31 +    readFileSync(file, 'utf8')                                 
+      32 +      .split('\n')                                             
+      33 +      .flatMap((line, i) =>                                    
+      34 +        FORBIDDEN.filter((re) => re.test(line)).map(           
+      35 +          (re) => `${relative(SRC, file)}:${i + 1} matches ${re
+         +}`,                                                            
+      36 +        ),                                                     
+      37 +      ),                                                       
+      38 +  );                                                           
+      39 +  expect(files(SRC).length).toBeGreaterThan(10);               
+      40 +  expect(hits).toEqual([]);                                    
+     … 13 more lines (ctrl+o to expand)
+
+⏺ Bash(cat > test/deliver.live.test.ts <<'EOF'
+      /**…)
+  ⎿   Test Files  4 passed | 1 skipped (5)
+           Tests  55 passed | 1 skipped (56)
+  ⎿  Updated apps/server/src/pipeline/deliver.ts (+6 -2)
+      309   * @param input - Run, repository, validated patch, patched fi
+           les and evidence.
+      310   * @param deps - Replaceable env, GitHub client and patch rebu
+           ilding.
+      311   */
+      312 -export async function deliver(input: DeliverInput, deps: Deliv
+          -erDeps = {}): Promise<DeliverOutcome> {                       
+      312 +export async function deliver(                                
+      313 +  input: DeliverInput,                                        
+      314 +  deps: DeliverDeps = {},                                     
+      315 +): Promise<DeliverOutcome> {                                  
+      316    const run = await getRunById(input.db, input.runId);
+      317    if (!run) throw new Error('Run not found');
+      318    if (run.finishedAt) throw new Error('Cannot deliver a finish
+           ed run');
+     ...
+      362        .from(runStageResults)
+      363        .where(and(eq(runStageResults.runId, failed.id), eq(runS
+           tageResults.stage, 'deliver')))
+      364    )[0];
+      362 -  if (!row || row.status !== 'failed') throw new Error('No fai
+          -led delivery is recorded for this run');                      
+      365 +  if (!row || row.status !== 'failed')                        
+      366 +    throw new Error('No failed delivery is recorded for this r
+          +un');                                                         
+      367    const stored = row.result as FailedDeliveryResult;
+      368    const attempt = await validatedPatch(db, stored.sourceRunId)
+           ;
+      369    const repository = await getRepositoryById(db, failed.reposi
+           toryId);
+  ⎿  Created apps/server/test/deliver.live.test.ts (+116 -0)
+        1 +/**                                                           
+        2 + * LIVE delivery smoke test (AT-08): opens a real pull request
+          + on the demo consumer repository                              
+        3 + * with the honest field-rename patch. Skipped unless GITHUB_T
+          +OKEN and SMA_DEMO_REPO                                        
+        4 + * (`owner/name`) are set. The PR is left open for a human: **
+          +it is never merged**.                                         
+        5 + */                                                           
+        6 +import { afterAll, beforeAll, describe, expect, it } from 'vit
+          +est';                                                         
+        7 +import { loadRootEnv } from '../src/infra/db/env.js';         
+        8 +import {                                                      
+        9 +  findRepository,                                             
+       10 +  insertAttempt,                                              
+       11 +  insertChange,                                               
+       12 +  insertRepository,                                           
+       13 +  insertRun,                                                  
+       14 +} from '../src/infra/db/index.js';                            
+       15 +import { createGitHubClient } from '../src/infra/github/client
+          +.js';                                                         
+       16 +import { patchedFilesFromPatch } from '../src/infra/workcopy/m
+          +aterialize.js';                                               
+       17 +import { deliver } from '../src/pipeline/deliver.js';         
+       18 +import { attemptValues, openTestDb, seedChain } from './db-hel
+          +pers.js';                                                     
+       19 +import { CORRECT_PATCH, consumer } from './repair-helpers.js';
+       20 +                                                              
+       21 +loadRootEnv();                                                
+       22 +const [owner, name] = (process.env.SMA_DEMO_REPO ?? '').split(
+          +'/');                                                         
+       23 +const live = Boolean(process.env.GITHUB_TOKEN?.trim() && owner
+          + && name);                                                    
+       24 +if (!live)                                                    
+       25 +  console.warn('[deliver] SKIPPING live delivery test: needs G
+          +ITHUB_TOKEN and SMA_DEMO_REPO.');                             
+       26 +                                                              
+       27 +describe.skipIf(!live)('live delivery to the demo consumer rep
+          +ository', () => {                                             
+       28 +  let client: ReturnType<typeof openTestDb>;                  
+       29 +  beforeAll(() => {                                           
+       30 +    client = openTestDb();                                    
+       31 +  });                                                         
+       32 +  afterAll(async () => {                                      
+       33 +    await client.close();                                     
+       34 +  });                                                         
+       35 +                                                              
+       36 +  it('opens a labelled, unmerged PR from an sma/ branch', { ti
+          +meout: 120_000 }, async () => {                               
+       37 +    const token = process.env.GITHUB_TOKEN!.trim();           
+       38 +    const gh = createGitHubClient({ owner: owner!, repo: name!
+          +, defaultBranch: 'main', token });                            
+       39 +    const info = await gh.getRepo();                          
+       40 +    const head = await gh.getRef(info.defaultBranch);         
+     … 76 more lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/deliver.test.ts (+48 -14)
+      147      });
+      148  
+      149      const run = await getRunById(client.db, chain.run.id);
+      150 -    expect(run).toMatchObject({ status: 'repaired', stageReach
+          -ed: 'deliver', prUrl: out.status === 'delivered' ? out.prUrl :
+          - '' });                                                       
+      150 +    expect(run).toMatchObject({                               
+      151 +      status: 'repaired',                                     
+      152 +      stageReached: 'deliver',                                
+      153 +      prUrl: out.status === 'delivered' ? out.prUrl : '',     
+      154 +    });                                                       
+      155      expect(run!.finishedAt).not.toBeNull();
+      156      const stages = await listStageResults(client.db, chain.run
+           .id);
+      157      expect(stages.map((s) => [s.stage, s.status])).toEqual([['
+           deliver', 'ok']]);
+      154 -    expect(stages[0]!.result).toMatchObject({ branch, prNumber
+          -: 1, baseCommitSha: chain.run.commitSha });                   
+      158 +    expect(stages[0]!.result).toMatchObject({                 
+      159 +      branch,                                                 
+      160 +      prNumber: 1,                                            
+      161 +      baseCommitSha: chain.run.commitSha,                     
+      162 +    });                                                       
+      163    });
+      164  
+      165    it('does not recreate labels that exist, and deletes files w
+           ith a null tree entry', async () => {
+     ...
+      186  });
+      187  
+      188  describe('deliver: only validated patches', () => {
+      181 -  it.each(['cheating', 'fail'] as const)('a %s attempt is neve
+          -r delivered (0 GitHub calls)', async (outcome) => {           
+      182 -    const { chain, gh, deps, createClient } = await validatedR
+          -un(outcome);                                                  
+      183 -    await expect(deliver(input(chain), deps)).rejects.toThrow(
+          -/passed validation/);                                         
+      184 -    expect(createClient).not.toHaveBeenCalled();              
+      185 -    expect(gh.calls).toHaveLength(0);                         
+      186 -  });                                                         
+      189 +  it.each(['cheating', 'fail'] as const)(                     
+      190 +    'a %s attempt is never delivered (0 GitHub calls)',       
+      191 +    async (outcome) => {                                      
+      192 +      const { chain, gh, deps, createClient } = await validate
+          +dRun(outcome);                                                
+      193 +      await expect(deliver(input(chain), deps)).rejects.toThro
+          +w(/passed validation/);                                       
+      194 +      expect(createClient).not.toHaveBeenCalled();            
+      195 +      expect(gh.calls).toHaveLength(0);                       
+      196 +    },                                                        
+      197 +  );                                                          
+      198  
+     … 73 more lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/never-merge.test.ts (+9 -2)
+      22  function files(dir: string): string[] {
+      23    return readdirSync(dir).flatMap((name) => {
+      24      const path = join(dir, name);
+      25 -    return statSync(path).isDirectory() ? files(path) : /\.(ts|
+         -js|mjs|cjs)$/.test(name) ? [path] : [];                        
+      25 +    return statSync(path).isDirectory()                        
+      26 +      ? files(path)                                            
+      27 +      : /\.(ts|js|mjs|cjs)$/.test(name)                        
+      28 +        ? [path]                                               
+      29 +        : [];                                                  
+      30    });
+      31  }
+      32  
+     ...
+      53      "octokit.request('PUT /repos/{owner}/{repo}/pulls/{pull_num
+          ber}/merge')",
+      54      'octokit.rest.git.updateRef({ ref })',
+      55    ])
+      52 -    expect(FORBIDDEN.some((re) => re.test(line)), line).toBe(tr
+         -ue);                                                           
+      56 +    expect(                                                    
+      57 +      FORBIDDEN.some((re) => re.test(line)),                   
+      58 +      line,                                                    
+      59 +    ).toBe(true);                                              
+      60  });
+  ⎿  (timeout 3m)
+⏺ Typecheck and the new tests pass. I'll simplify the live test's change setup,
+  since it can reuse the seeded change. Then I'll check that prettier didn't
+  touch unrelated files.
+
+⏺ Bash(python3 - <<'EOF'
+      import re…)
+  ⎿  50:    const { change } = await seedChain(client);
+      M apps/server/src/infra/github/allowlist.ts
+      M apps/server/test/github-client.test.ts
+     … +7 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/deliver.live.test.ts (+1 -7)
+       8  import {
+       9    findRepository,
+      10    insertAttempt,
+      11 -  insertChange,                                                
+      11    insertRepository,
+      12    insertRun,
+      13  } from '../src/infra/db/index.js';
+     ...
+      47          credentialRef: 'GITHUB_TOKEN',
+      48          localPath: consumer,
+      49        }));
+      51 -    const seeded = await seedChain(client);                    
+      52 -    const change = await insertChange(client.db, {             
+      53 -      ...seeded.change,                                        
+      54 -      id: undefined,                                           
+      55 -      createdAt: undefined,                                    
+      56 -    } as unknown as Parameters<typeof insertChange>[1]);       
+      50 +    const { change } = await seedChain(client);                
+      51      const run = await insertRun(client.db, {
+      52        changeId: change.id,
+      53        repositoryId: repository.id,
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now the docs: the decisions log, the PROGRESS line, and .env.example.
+
+⏺ Bash(python3 - <<'EOF'
+      p='.env.example'…)
+  ⎿  [warn] docs/decisions/inc12.md
+     [warn] Code style issues found in the above file. Run Prettier with --
+     write to fix.
+  ⎿  Updated .env.example (+2 -0)
+      12  
+      13  # GitHub token used by Delivery (Increment 12) to push branches
+           and open PRs
+      14  GITHUB_TOKEN=
+      15 +# Optional: owner/name of the demo consumer repo for the live d
+         +elivery smoke test (opens a real PR, never merged)             
+      16 +# SMA_DEMO_REPO=Bigyan1313/sma-demo-consumer                   
+      17  
+      18  # LLM provider (used only by apps/server/src/infra/llm/adapter.
+          ts, Increment 10)
+      19  ANTHROPIC_API_KEY=
+  ⎿  Updated docs/PROGRESS.md (+1 -1)
+      16  | 09  | Cheat guards                                           
+                                                  | FR-27–31, DR-04      
+                              | **CRITICAL**              | Done        |
+           #6    |
+      17  | 10  | LLM adapter + context assembly                         
+                                                  | FR-19, C-06, NFR-04, 
+          NFR-08              | Standard                  | Done        |
+           #7    |
+      18  | 11  | Repair loop (retries, error feedback, token ceiling, co
+          st)                                     | FR-18, FR-20–24      
+                              | **CRITICAL**              | Done        |
+           #8    |
+      19 -| 12  | Delivery: branch + PR, flagged findings                
+         -                                        | FR-33–37, C-02       
+         -                    | Standard                  | Not started |
+         - #9    |                                                       
+      19 +| 12  | Delivery: branch + PR, flagged findings                
+         +                                        | FR-33–37, C-02       
+         +                    | Standard                  | Done        |
+         + #9    |                                                       
+      20  | 13  | Pipeline orchestrator + run records + JSON/HTML export 
+                                                  | FR-38, FR-39, FR-41  
+                              | Standard                  | Not started |
+           #10   |
+      21  | 14  | Dashboard (5 views, text labels)                       
+                                                  | UI-01–04, FR-40, FR-4
+          2                   | Standard                  | Not started |
+           #11   |
+      22  | 15  | 20 frozen scenarios + failing-before check             
+                                                  | EV-01, EV-02         
+                              | **CRITICAL**              | Not started |
+           #12   |
+  ⎿  Created docs/decisions/inc12.md (+22 -0)
+       1 +# Decisions — Increment 12: Delivery (branch + PR, flagged find
+         +ings)                                                          
+       2 +                                                               
+       3 +| Date       | Decision | Why |                                
+       4 +| ---------- | -------- | --- |                                
+       5 +| 2026-11-22 | The GitHub client (`infra/github/client.ts`) exp
+         +orts only `createGitHubClient`, `GitHubError` and two constants
+         +. The returned client is frozen and has 11 read/create methods.
+         + The Octokit instance never leaves the module. | FR-34 / C-02: 
+         +merge, auto-merge and ref updates are impossible, not just unus
+         +ed. A test checks the export list and the method list. |       
+       6 +| 2026-11-22 | Defence in depth: every request goes through a t
+         +ransport allowlist (`allowlist.ts`) before `fetch`. Only 12 (me
+         +thod, path) pairs in the one configured repository are allowed.
+         + `POST /git/refs` must create `refs/heads/sma/…` (never a prote
+         +cted branch), and `POST /pulls` must have an `sma/…` head. Grap
+         +hQL, PUT/PATCH/DELETE and other hosts are refused. The path is 
+         +matched after URL-decoding, because Octokit encodes `/` inside 
+         +a ref. | Even Octokit's generic `request()` cannot send a merge
+         +. The decoded match is how GitHub itself reads the path. |     
+       7 +| 2026-11-22 | The protected branches are the stored `default_b
+         +ranch` plus GitHub's live default branch (fetched by `getRepo` 
+         +before any branch is created). | The stored value could be out 
+         +of date. |                                                     
+       8 +| 2026-11-22 | The happy-path order is `GET repo → GET commit (
+         +analyzed) → blobs → tree → commit → create ref → PR → labels`. 
+         +The prompt says "get ref". We read the repository (live default
+         + branch) and the **analyzed commit** (for its tree) instead, be
+         +cause the base must be the analyzed commit, not the current hea
+         +d. `getRef` stays in the client, for resuming a retry and for t
+         +he live test. | The Git Data API needs the base tree SHA. The d
+         +efault-branch head is never used as a base. |                  
+       9 +| 2026-11-22 | No msw/nock dependency. GitHub is mocked at the 
+         +`fetch` boundary that Octokit accepts (`test/github-fake.ts`). 
+         +The fake records every request and can script failures per rout
+         +e. | No new dependency (C-07). It sees exactly what would hit t
+         +he network. |                                                  
+      10 +| 2026-11-22 | Missing labels are created with `ensureLabel` (G
+         +ET label → 404 → POST label; a 422 race is OK) and then added. 
+         +| FR-35 asks for labels to be created if missing. An explicit c
+         +olour and description beats GitHub's implicit grey label. |    
+      11 +| 2026-11-22 | `deliver` finishes the run: `repaired` + `pr_url
+         +` on success, or `stage_failure` with `failure_stage = deliver`
+         + on failure. It refuses (throws, no GitHub call) unless the run
+         + is unfinished and its **latest attempt passed** with exactly t
+         +he given patch. | Deliver is the last stage. Only validated pat
+         +ches get PRs, so cheating, failed or refused runs can never rea
+         +ch GitHub (FR-33, FR-36). |                                    
+      12 +| 2026-11-22 | **Retry = new child run** (`parent_run_id` = the
+         + failed run, `stage_reached = deliver`, no attempts, zero token
+         +s/cost). The failed run's `deliver` row stores the redacted evi
+         +dence, the source run id and partial GitHub progress (branch, c
+         +ommit, PR). The retry re-reads the patch from the source run's 
+         +passing attempt row. | Finished runs are frozen (FR-39 trigger)
+         + and `run_stage_results` allows one row per (run, stage). A chi
+         +ld run keeps everything append-only with no migration, and matc
+         +hes the reanalysis pattern. Zero usage avoids double-counting c
+         +ost. |                                                         
+      13 +| 2026-11-22 | A retry resumes from what already exists on GitH
+         +ub. An untouched `sma/` branch (head still equals the recorded 
+         +commit) is reused. A PR that was opened but not labelled only g
+         +ets labels. Otherwise the retry does a full delivery on a new `
+         +sma/run-<childId>-…` branch, rebuilding the files from the stor
+         +ed patch (`patchedFilesFromPatch`: `git apply` in a disposable 
+         +working copy, no code executed). | No duplicate PRs and no orph
+         +aned work. We never update or delete refs. |                   
+      14 +| 2026-11-22 | If labelling fails after the PR opened, the run 
+         +is a `stage_failure`, but `pr_url` is still recorded. | The PR 
+         +exists and must be visible. FR-35 is not yet met, so it is not 
+         +counted as success until a retry labels it. |                  
+      15 +| 2026-11-22 | `recordFlaggedFinding({ status, reason })` accep
+         +ts `flagged`, `failed`, `cheating_rejected` and `aborted`. It w
+         +rites a `skipped` deliver row (`pullRequest: null`) and finishe
+         +s the run with `flagged_reason`. It takes no client and reads n
+         +o credential. | FR-36: structurally 0 GitHub calls. The test al
+         +so spies on global `fetch`. |                                  
+      16 +| 2026-11-22 | The PR title/body template (`buildPrTitle` / `bu
+         +ildPrBody`) and branch rules live in `packages/core/src/deliver
+         +y/` (new files, new exports only). Evidence JSON is trimmed to 
+         +2,000 chars per side. The **tail** of the raw output (6,000 cha
+         +rs) goes in `<details>`. Code fences are longer than any backti
+         +ck run in the content. The body is capped at 60,000 chars. Fixt
+         +ure runs are labelled (BR-06). | Pure and unit-testable (C-05).
+         + The tail holds the test summary. Content cannot break out of i
+         +ts fence. GitHub caps bodies at 65,536 chars. |                
+      17 +| 2026-11-22 | Redaction (`redactForDelivery`) removes the exac
+         +t token in use, token shapes (reusing `redactRepairSecrets`), `
+         +Authorization:` headers and `user:pass@` URL credentials. It ru
+         +ns on the title, the body, every error message, `failure_detail
+         +` and (deep) the stored evidence. `GitHubError` carries no `cau
+         +se`. Octokit logging is silenced. | NFR-04: the token must not 
+         +appear in errors, logs, PR bodies or anything later exported. |
+      18 +| 2026-11-22 | The commit is built from full file contents via 
+         +blobs/trees (base64). The mode comes from the working copy. Del
+         +etions are tree entries with `sha: null`. There is no `git push
+         +`, and a grep test fails the build if `pulls.merge`, `enablePul
+         +lRequestAutoMerge`, `git push`, a `/merge` route or `updateRef`
+         +/`deleteRef` appears in `apps/server/src`. | The prompt forbids
+         + token-in-URL pushes. The grep test is the never-merge proof. |
+      19 +| 2026-11-22 | Live smoke test `test/deliver.live.test.ts` is s
+         +kipped unless `GITHUB_TOKEN` and `SMA_DEMO_REPO=owner/name` are
+         + set. It delivers the honest rename patch on the repo's current
+         + default-branch head and checks open/unmerged/labels/default br
+         +anch unchanged. It is not run in this increment because no toke
+         +n is configured. | Human task: create the demo repo and a fine-
+         +grained token. |                                               
+      20 +| 2026-11-22 | Known limit for the orchestrator (Inc 13): a run
+         +'s `commit_sha` must exist in the GitHub repository. For `demo/
+         +consumer` (a folder inside our monorepo) the analyzed commit mu
+         +st be the demo repo's commit, otherwise delivery fails clearly 
+         +with "analyzed commit … is not in owner/name". | Delivery must 
+         +base on the analyzed commit and must not silently switch to the
+         + current head. |                                               
+      21 +                                                               
+      22 +No schema migration and no HTTP routes. Wiring delivery into th
+         +e pipeline belongs to Increment 13.                            
+
+⏺ Bash(npx prettier --write docs/decisions/inc12.md >/dev/null && git add -A
+      docs .env.example && git commit -q -m "docs: increment 12 decisions,
+      progress line, SMA_DE…)
+  ⎿  Already up to date.
+  ⎿  Updated docs/decisions/inc12.md (+18 -18)
+  ⎿  (a git step in this command can move the working tree, so these may be
+     its changes, not edits) (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Typecheck and lint are clean, and main already includes 17a. Now the full test
+  suite.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ All 789 tests pass. One is skipped: the live delivery test, because no token
+  is set. Now I'll push and open the PR.
+
+  Created PR #27, ran 1 shell command (ctrl+o to expand)
+
+⏺ Increment 12 (delivery) is built and in PR #27, which closes issue #9. CI is
+  green, and I've left the PR open for a teammate to merge. Status is PARTIAL
+  because the live smoke test against a real GitHub repo hasn't run:
+  GITHUB_TOKEN is empty in .env.
+
+  https://github.com/Bigyan1313/self_maintaining_api/pull/27
+
+  INCREMENT 12 REPORT
+  Status: PARTIAL (live smoke test not run yet; it needs a token and demo repo, 
+  see below)
+  Built:
+  - packages/core/src/delivery/: token redaction, sma/ branch rules, PR labels, 
+  PR title/body template
+    (spec before/after trimmed, migration-note citation or "Confirmed by <human>
+  at <time>", files and
+    call-site lines, attempt count, passed/total tests, collapsed trimmed raw 
+  output, the BR-03
+    "never merges" note, fixture label)
+  - infra/github/client.ts: a locked GitHub client with 11 read/create methods 
+  only. It has no merge,
+    auto-merge, ref update or delete. It creates only sma/ branches and never 
+  the stored or live
+    default branch. Its errors have the token removed and carry no attached 
+  cause.
+  - infra/github/allowlist.ts: every request is checked before it reaches the 
+  network. Only 12
+    delivery operations on the one configured repo are allowed, so a merge can't
+  be sent even through
+    Octokit's generic request().
+  - pipeline/deliver.ts:
+    - deliver() builds a commit on the analyzed commit, creates 
+  sma/run-<id>-<category>, opens the
+      PR and adds both labels, creating them if missing.
+    - A delivery failure is a stage_failure (deliver) and the patch is kept.
+    - retryDelivery() re-delivers the stored patch in a new child run.
+    - recordFlaggedFinding() opens no PR and makes zero GitHub calls.
+  - infra/workcopy/materialize.ts: rebuilds the patched files from the stored 
+  patch (git apply only,
+    in a throwaway copy, no code executed)
+  - A grep test fails the build if merge, auto-merge or git push code appears in
+  apps/server/src.
+    GitHub is mocked at the fetch level. A live smoke test is included.
+  Tests: 789/790 (1 skipped: live delivery smoke test), typecheck: ok, lint: ok
+  Commands to verify:
+  - npm test
+  - npm run typecheck && npm run lint
+  - Live: set GITHUB_TOKEN and SMA_DEMO_REPO=owner/name, then
+    npx vitest run --root apps/server test/deliver.live.test.ts
+  Decisions logged (docs/decisions/inc12.md):
+  - The client surface plus the request allowlist. The allowlist checks the 
+  decoded URL path, because
+    Octokit encodes "/" inside branch names.
+  - GitHub's live default branch is protected, not just the stored one.
+  - The call order reads the repo and the analyzed commit instead of the 
+  prompt's "get ref", because
+    the base must be the analyzed commit, not the branch's current head.
+  - GitHub is mocked by injecting fetch into Octokit, with no msw/nock 
+  dependency.
+  - deliver() refuses any patch that isn't the latest passing attempt.
+  - A retry is a new child run, because finished runs are frozen and each stage 
+  gets one result row
+    per run. It reuses an existing sma/ branch or PR rather than duplicating it.
+  - If labelling fails after the PR opened, the run is a stage_failure but 
+  pr_url is still recorded.
+  - Redaction applies to the PR title, PR body, every error, failure_detail and 
+  the stored evidence.
+  SRS requirements covered: FR-33, FR-34, FR-35, FR-36, FR-37, C-02, BR-03, 
+  NFR-04 (delivery), BR-06
+  Problems / things the human must do:
+  - Create a GitHub repo (e.g. Bigyan1313/sma-demo-consumer) and push the 
+  contents of demo/consumer
+    to it.
+  - Create a fine-grained token with Contents: read/write and Pull requests: 
+  read/write on that repo
+    only. Put it in .env as GITHUB_TOKEN and add 
+  SMA_DEMO_REPO=Bigyan1313/sma-demo-consumer.
+  - Run the live smoke test and report the PR URL it prints. Do NOT merge that 
+  PR.
+  - Run /export docs/chat-logs/inc12-bigyan.txt; I'll commit it to this branch.
+  - Note for Increment 13: a run's commit_sha must exist in the GitHub repo. 
+  Otherwise delivery fails
+    with "analyzed commit … is not in owner/name", which matters for the 
+  demo/consumer setup.
+
+  I also fixed a bug in the GitHub client while testing. The allowlist was
+  refusing Octokit's encoded branch-name URLs, which would have stopped retries
+  from reusing a branch that already exists.
+
+✻ Worked for 24m 56s · done 2:02 AM
+
+※ recap: Increment 12 (delivery: an sma/ branch and labelled PR, never a merge) is done and in PR #27, with CI green; only the live GitHub smoke test hasn't run. Next, create the demo repo and token, set GITHUB_TOKEN and SMA_DEMO_REPO in .env, then run it.
+
+❯ Run /export docs/chat-logs/inc12-bigyan.txt and commit it.                    
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I can't run that one myself. /export is a built-in Claude Code command that
+  only you can trigger; I can't call it from a tool. I checked, and
+  docs/chat-logs/inc12-bigyan.txt doesn't exist yet. Writing a summary in its
+  place wouldn't count, because the chat log has to be the actual transcript.
+
+  Type this in the prompt:
+
+  /export docs/chat-logs/inc12-bigyan.txt
+
+  Then tell me it's done. I'll check the file for credentials (the only token in
+  it should be the fake ghp_FAKE123 test value), commit it to
+  feat/inc12-delivery, push it, and confirm CI on PR #27.
+
+✻ Brewed for 11s · done 11:14 AM
+
+❯ /export docs/chat-logs/inc12-bigyan.txt                                       
+  ⎿  Conversation exported to:
+     /Users/turbo/Desktop/self_maintaining_api/docs/chat-logs/inc12-bigyan.txt
+
+❯ commit                                                                        
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ The only credential-like string in the log is the fake test token ghp_FAKE123,
+  so it's safe to commit.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I committed the chat log as cfb97cb and pushed it to feat/inc12-delivery. CI
+  is green on PR #27.
+
+  Before committing I scanned the 1,252-line log for credentials. The only match
+  is ghp_FAKE123, the fake token used in the tests.
+
+  PR #27 is open for a teammate to merge with "Create a merge commit". The live
+  smoke test still hasn't run. For that, you need to:
+  1. Create the demo consumer repo and push the contents of demo/consumer to it.
+  2. Make a fine-grained token on that repo only, and put it in .env as
+     GITHUB_TOKEN along with SMA_DEMO_REPO.
+  3. Run test/deliver.live.test.ts.
+
+  The test will open a real PR on the demo repo and print its URL. Don't merge
+  that PR.
+
+✻ Worked for 7m 17s · done 11:22 AM
+
+※ recap: Increment 12 (delivery: an sma/ branch and labelled PR, never merged) is finished; PR #27 is open with green CI and the chat log committed. Next, create the demo repo and token, then run the live smoke test.
+
+❯ I created Bigyan1313/sma-demo-consumer and set GITHUB_TOKEN and SMA_DEMO_REPO 
+  in .env                                                                       
+  (never print or log the token). On branch feat/inc12-delivery: run npm run    
+  db:up, then                                                                   
+  npm test -w @sma/server -- test/deliver.live.test.ts. Report the PR URL it    
+  prints. Then                                                                  
+  change the increment report and docs/PROGRESS.md row 12 from PARTIAL to Done  
+  with the                                                                      
+  live PR URL, and commit.                                                      
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ It passed, but the PR URL line didn't appear in the output. I'll read it back
+  from GitHub and check its state.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I'll also check that the live PR body doesn't contain the token. The
+  comparison runs inside the shell, so the token value is never printed.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Live PR: https://github.com/Bigyan1313/sma-demo-consumer/pull/1. It's open and
+  unmerged, comes from an sma/ branch into main, and has both labels. Now I'll
+  update the docs and the report.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Row 12 in docs/PROGRESS.md already says "Done" (I set it when I opened the
+  PR). I'll add the live PR URL to it and update the decisions entry that said
+  the live test hadn't run.
+
+⏺ Bash(python3 - <<'EOF'
+      p='docs/PROGRESS.md'…)  ⎿   docs/PROGRESS.md        | 40 ++++++++++++++++++++--------------------
+      docs/decisions/inc12.md | 36 ++++++++++++++++++------------------
+      2 files changed, 38 insertions(+), 38 deletions(-)
+  ⎿  Updated docs/PROGRESS.md (+20 -20)
+       3  The **GitHub Issues board** is the source of truth for who is d
+          oing what. Each increment updates
+       4  its own line here in its own PR only (see Working Rules in `CLA
+          UDE.md`).
+       5  
+       6 -| Inc | Capability                                             
+         -                                        | SRS refs             
+         -                    | Priority                  | Status      |
+         - Issue |                                                       
+       7 -| --- | -------------------------------------------------------
+         ---------------------------------------- | ---------------------
+         -------------------- | ------------------------- | ----------- |
+         - ----- |                                                       
+       8 -| 01  | Project setup: workspaces, TS, Vitest, lint, Postgres, 
+         -CI, TypeDoc                             | C-05, C-07           
+         -                    | Standard                  | Done        |
+         - —     |                                                       
+       9 -| 02  | Demo API v1/v2 + specs + migration notes + sample consu
+         -mer repo (tests pass on v1, fail on v2) | 2.2, 5.2             
+         -                    | Standard                  | Done        |
+         - —     |                                                       
+      10 -| 03  | Database schema + migrations (incl. 4-attempt limit + g
+         -uard-name constraints)                  | DR-01–05             
+         -                    | Standard                  | Done        |
+         - —     |                                                       
+      11 -| 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, 
+         -failure handling                        | FR-01–05, FR-11, FR-1
+         -2                   | Standard                  | Done        |
+         - #1    |                                                       
+      12 -| 05  | Detect: oasdiff runner + parser + evidence             
+         -                                        | FR-06, FR-08         
+         -                    | Standard                  | Done        |
+         - #2    |                                                       
+      13 -| 06  | Classify + migration-note parsing + mapping confirmatio
+         -n                                       | FR-07, FR-09, FR-10, 
+         -BR-01, BR-04, BR-05 | **CRITICAL**              | Done        |
+         - #3    |                                                       
+      14 -| 07  | Locate: ts-morph call sites + coverage report          
+         -                                        | FR-13–17, BR-02      
+         -                    | Standard                  | Done        |
+         - #4    |                                                       
+      15 -| 08  | Validator: Docker sandbox + output parsing             
+         -                                        | FR-25, FR-26, FR-32, 
+         -NFR-03              | **CRITICAL (checkpoint)** | Done        |
+         - #5    |                                                       
+      16 -| 09  | Cheat guards                                           
+         -                                        | FR-27–31, DR-04      
+         -                    | **CRITICAL**              | Done        |
+         - #6    |                                                       
+      17 -| 10  | LLM adapter + context assembly                         
+         -                                        | FR-19, C-06, NFR-04, 
+         -NFR-08              | Standard                  | Done        |
+         - #7    |                                                       
+      18 -| 11  | Repair loop (retries, error feedback, token ceiling, co
+         -st)                                     | FR-18, FR-20–24      
+         -                    | **CRITICAL**              | Done        |
+         - #8    |                                                       
+      19 -| 12  | Delivery: branch + PR, flagged findings                
+         -                                        | FR-33–37, C-02       
+         -                    | Standard                  | Done        |
+         - #9    |                                                       
+      20 -| 13  | Pipeline orchestrator + run records + JSON/HTML export 
+         -                                        | FR-38, FR-39, FR-41  
+         -                    | Standard                  | Not started |
+         - #10   |                                                       
+      21 -| 14  | Dashboard (5 views, text labels)                       
+         -                                        | UI-01–04, FR-40, FR-4
+         -2                   | Standard                  | Not started |
+         - #11   |                                                       
+      22 -| 15  | 20 frozen scenarios + failing-before check             
+         -                                        | EV-01, EV-02         
+         -                    | **CRITICAL**              | Not started |
+         - #12   |                                                       
+      23 -| 16  | Evaluation script: B1/B2/B3, results file, generated ta
+         -bles                                    | EV-03–09             
+         -                    | **CRITICAL**              | Not started |
+         - #13   |                                                       
+      24 -| 17  | Deliverables: class diagram, statechart, TypeDoc, accep
+         -tance records AT-01–12                  | 7.1                  
+         -                    | Standard                  | Not started |
+         - #14   |                                                       
+      25 -| 17a | Early deliverables: diagrams, architecture, TypeDoc fix
+         -, early acceptance records              | 7.1                  
+         -                    | Standard                  | Done        |
+         - #25   |                                                       
+       6 +| Inc | Capability                                             
+         +                                        | SRS refs             
+         +                    | Priority                  | Status       
+         +                                                          | Iss
+         +ue |                                                           
+       7 +| --- | -------------------------------------------------------
+         +--------------------------------------- | ---------------------
+         +------------------- | ------------------------- | -------------
+         +--------------------------------------------------------- | ---
+         +-- |                                                           
+       8 +| 01  | Project setup: workspaces, TS, Vitest, lint, Postgres, 
+         +CI, TypeDoc                             | C-05, C-07           
+         +                    | Standard                  | Done         
+         +                                                          | —  
+         +   |                                                           
+       9 +| 02  | Demo API v1/v2 + specs + migration notes + sample consu
+         +mer repo (tests pass on v1, fail on v2) | 2.2, 5.2             
+         +                    | Standard                  | Done         
+         +                                                          | —  
+         +   |                                                           
+      10 +| 03  | Database schema + migrations (incl. 4-attempt limit + g
+         +uard-name constraints)                  | DR-01–05             
+         +                    | Standard                  | Done         
+         +                                                          | —  
+         +   |                                                           
+      11 +| 04  | Ingest: upload/URL, normalize, hash, baseline, dedupe, 
+         +failure handling                        | FR-01–05, FR-11, FR-1
+         +2                   | Standard                  | Done         
+         +                                                          | #1 
+         +   |                                                           
+      12 +| 05  | Detect: oasdiff runner + parser + evidence             
+         +                                        | FR-06, FR-08         
+         +                    | Standard                  | Done         
+         +                                                          | #2 
+         +   |                                                           
+      13 +| 06  | Classify + migration-note parsing + mapping confirmatio
+         +n                                       | FR-07, FR-09, FR-10, 
+         +BR-01, BR-04, BR-05 | **CRITICAL**              | Done         
+         +                                                          | #3 
+         +   |                                                           
+      14 +| 07  | Locate: ts-morph call sites + coverage report          
+         +                                        | FR-13–17, BR-02      
+         +                    | Standard                  | Done         
+         +                                                          | #4 
+         +   |                                                           
+      15 +| 08  | Validator: Docker sandbox + output parsing             
+         +                                        | FR-25, FR-26, FR-32, 
+         +NFR-03              | **CRITICAL (checkpoint)** | Done         
+         +                                                          | #5 
+         +   |                                                           
+      16 +| 09  | Cheat guards                                           
+         +                                        | FR-27–31, DR-04      
+         +                    | **CRITICAL**              | Done         
+         +                                                          | #6 
+         +   |                                                           
+      17 +| 10  | LLM adapter + context assembly                         
+         +                                        | FR-19, C-06, NFR-04, 
+         +NFR-08              | Standard                  | Done         
+         +                                                          | #7 
+         +   |                                                           
+      18 +| 11  | Repair loop (retries, error feedback, token ceiling, co
+         +st)                                     | FR-18, FR-20–24      
+         +                    | **CRITICAL**              | Done         
+         +                                                          | #8 
+         +   |                                                           
+      19 +| 12  | Delivery: branch + PR, flagged findings                
+         +                                        | FR-33–37, C-02       
+         +                    | Standard                  | Done (live PR
+         +: https://github.com/Bigyan1313/sma-demo-consumer/pull/1) | #9 
+         +   |                                                           
+      20 +| 13  | Pipeline orchestrator + run records + JSON/HTML export 
+         +                                        | FR-38, FR-39, FR-41  
+         +                    | Standard                  | Not started  
+         +                                                          | #10
+         +   |                                                           
+      21 +| 14  | Dashboard (5 views, text labels)                       
+         +                                        | UI-01–04, FR-40, FR-4
+         +2                   | Standard                  | Not started  
+         +                                                          | #11
+         +   |                                                           
+      22 +| 15  | 20 frozen scenarios + failing-before check             
+         +                                        | EV-01, EV-02         
+         +                    | **CRITICAL**              | Not started  
+         +                                                          | #12
+         +   |                                                           
+     … 3 more lines (ctrl+o to expand)
+  ⎿  Updated docs/decisions/inc12.md (+18 -18)
+       1  # Decisions — Increment 12: Delivery (branch + PR, flagged find
+          ings)
+       2  
+       3 -| Date       | Decision                                        
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | Why                                                   
+         -                                                               
+         -                                                               
+         -                                                      |        
+       4 -| ---------- | ------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ------- | ------------------------------------------------------
+         ----------------------------------------------------------------
+         ----------------------------------------------------------------
+         ------------------------------------------------------ |        
+       5 -| 2026-11-22 | The GitHub client (`infra/github/client.ts`) exp
+         -orts only `createGitHubClient`, `GitHubError` and two constants
+         -. The returned client is frozen and has 11 read/create methods.
+         - The Octokit instance never leaves the module.                 
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | FR-34 / C-02: merge, auto-merge and ref updates are im
+         -possible, not just unused. A test checks the export list and th
+         -e method list.                                                 
+         -                                                      |        
+       6 -| 2026-11-22 | Defence in depth: every request goes through a t
+         -ransport allowlist (`allowlist.ts`) before `fetch`. Only 12 (me
+         -thod, path) pairs in the one configured repository are allowed.
+         - `POST /git/refs` must create `refs/heads/sma/…` (never a prote
+         -cted branch), and `POST /pulls` must have an `sma/…` head. Grap
+         -hQL, PUT/PATCH/DELETE and other hosts are refused. The path is 
+         -matched after URL-decoding, because Octokit encodes `/` inside 
+         -a ref. | Even Octokit's generic `request()` cannot send a merge
+         -. The decoded match is how GitHub itself reads the path.       
+         -                                                               
+         -                                                      |        
+       7 -| 2026-11-22 | The protected branches are the stored `default_b
+         -ranch` plus GitHub's live default branch (fetched by `getRepo` 
+         -before any branch is created).                                 
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | The stored value could be out of date.                
+         -                                                               
+         -                                                               
+         -                                                      |        
+       8 -| 2026-11-22 | The happy-path order is `GET repo → GET commit (
+         -analyzed) → blobs → tree → commit → create ref → PR → labels`. 
+         -The prompt says "get ref". We read the repository (live default
+         - branch) and the **analyzed commit** (for its tree) instead, be
+         -cause the base must be the analyzed commit, not the current hea
+         -d. `getRef` stays in the client, for resuming a retry and for t
+         -he live test.                                                  
+         -       | The Git Data API needs the base tree SHA. The default-
+         -branch head is never used as a base.                           
+         -                                                               
+         -                                                      |        
+       9 -| 2026-11-22 | No msw/nock dependency. GitHub is mocked at the 
+         -`fetch` boundary that Octokit accepts (`test/github-fake.ts`). 
+         -The fake records every request and can script failures per rout
+         -e.                                                             
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | No new dependency (C-07). It sees exactly what would h
+         -it the network.                                                
+         -                                                               
+         -                                                      |        
+      10 -| 2026-11-22 | Missing labels are created with `ensureLabel` (G
+         -ET label → 404 → POST label; a 422 race is OK) and then added. 
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | FR-35 asks for labels to be created if missing. An exp
+         -licit colour and description beats GitHub's implicit grey label
+         -.                                                              
+         -                                                      |        
+      11 -| 2026-11-22 | `deliver` finishes the run: `repaired` + `pr_url
+         -` on success, or `stage_failure` with `failure_stage = deliver`
+         - on failure. It refuses (throws, no GitHub call) unless the run
+         - is unfinished and its **latest attempt passed** with exactly t
+         -he given patch.                                                
+         -                                                               
+         -                                                               
+         -       | Deliver is the last stage. Only validated patches get 
+         -PRs, so cheating, failed or refused runs can never reach GitHub
+         - (FR-33, FR-36).                                               
+         -                                                      |        
+      12 -| 2026-11-22 | **Retry = new child run** (`parent_run_id` = the
+         - failed run, `stage_reached = deliver`, no attempts, zero token
+         -s/cost). The failed run's `deliver` row stores the redacted evi
+         -dence, the source run id and partial GitHub progress (branch, c
+         -ommit, PR). The retry re-reads the patch from the source run's 
+         -passing attempt row.                                           
+         -                                                               
+         -       | Finished runs are frozen (FR-39 trigger) and `run_stag
+         -e_results` allows one row per (run, stage). A child run keeps e
+         -verything append-only with no migration, and matches the reanal
+         -ysis pattern. Zero usage avoids double-counting cost. |        
+      13 -| 2026-11-22 | A retry resumes from what already exists on GitH
+         -ub. An untouched `sma/` branch (head still equals the recorded 
+         -commit) is reused. A PR that was opened but not labelled only g
+         -ets labels. Otherwise the retry does a full delivery on a new `
+         -sma/run-<childId>-…` branch, rebuilding the files from the stor
+         -ed patch (`patchedFilesFromPatch`: `git apply` in a disposable 
+         -working copy, no code executed).                               
+         -       | No duplicate PRs and no orphaned work. We never update
+         - or delete refs.                                               
+         -                                                               
+         -                                                      |        
+      14 -| 2026-11-22 | If labelling fails after the PR opened, the run 
+         -is a `stage_failure`, but `pr_url` is still recorded.          
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -                                                               
+         -       | The PR exists and must be visible. FR-35 is not yet me
+         -t, so it is not counted as success until a retry labels it.    
+         -                                                               
+         -                                                      |        
+      15 -| 2026-11-22 | `recordFlaggedFinding({ status, reason })` accep
+         -ts `flagged`, `failed`, `cheating_rejected` and `aborted`. It w
+         -rites a `skipped` deliver row (`pullRequest: null`) and finishe
+         -s the run with `flagged_reason`. It takes no client and reads n
+         -o credential.                                                  
+         -                                                               
+         -                                                               
+         -       | FR-36: structurally 0 GitHub calls. The test also spie
+         -s on global `fetch`.                                           
+         -                                                               
+         -                                                      |        
+      16 -| 2026-11-22 | The PR title/body template (`buildPrTitle` / `bu
+         -ildPrBody`) and branch rules live in `packages/core/src/deliver
+         -y/` (new files, new exports only). Evidence JSON is trimmed to 
+         -2,000 chars per side. The **tail** of the raw output (6,000 cha
+         -rs) goes in `<details>`. Code fences are longer than any backti
+         -ck run in the content. The body is capped at 60,000 chars. Fixt
+         -ure runs are labelled (BR-06).                                 
+         -       | Pure and unit-testable (C-05). The tail holds the test
+         - summary. Content cannot break out of its fence. GitHub caps bo
+         -dies at 65,536 chars.                                          
+         -                                                      |        
+      17 -| 2026-11-22 | Redaction (`redactForDelivery`) removes the exac
+         -t token in use, token shapes (reusing `redactRepairSecrets`), `
+         -Authorization:` headers and `user:pass@` URL credentials. It ru
+         -ns on the title, the body, every error message, `failure_detail
+         -` and (deep) the stored evidence. `GitHubError` carries no `cau
+         -se`. Octokit logging is silenced.                              
+         -                                                               
+         -       | NFR-04: the token must not appear in errors, logs, PR 
+         -bodies or anything later exported.                             
+         -                                                               
+         -                                                      |        
+      18 -| 2026-11-22 | The commit is built from full file contents via 
+         -blobs/trees (base64). The mode comes from the working copy. Del
+         -etions are tree entries with `sha: null`. There is no `git push
+         -`, and a grep test fails the build if `pulls.merge`, `enablePul
+         -lRequestAutoMerge`, `git push`, a `/merge` route or `updateRef`
+         -/`deleteRef` appears in `apps/server/src`.                     
+         -                                                               
+         -       | The prompt forbids token-in-URL pushes. The grep test 
+         -is the never-merge proof.                                      
+         -                                                               
+         -                                                      |        
+      19 -| 2026-11-22 | Live smoke test `test/deliver.live.test.ts` is s
+         -kipped unless `GITHUB_TOKEN` and `SMA_DEMO_REPO=owner/name` are
+         - set. It delivers the honest rename patch on the repo's current
+         - default-branch head and checks open/unmerged/labels/default br
+         -anch unchanged. It is not run in this increment because no toke
+         -n is configured.                                               
+         -                                                               
+         -       | Human task: create the demo repo and a fine-grained to
+         -ken.                                                           
+         -                                                               
+         -                                                      |        
+      20 -| 2026-11-22 | Known limit for the orchestrator (Inc 13): a run
+         -'s `commit_sha` must exist in the GitHub repository. For `demo/
+         -consumer` (a folder inside our monorepo) the analyzed commit mu
+         -st be the demo repo's commit, otherwise delivery fails clearly 
+         -with "analyzed commit … is not in owner/name".                 
+         -                                                               
+         -                                                               
+         -       | Delivery must base on the analyzed commit and must not
+         - silently switch to the current head.                          
+         -                                                               
+         -                                                      |        
+       3 +| Date       | Decision                                        
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | Why              
+         +                                                               
+         +                                                               
+         +                                                               
+         +                            |                                  
+       4 +| ---------- | ------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +------------------------------------------- | -----------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +--------------------------- |                                  
+       5 +| 2026-11-22 | The GitHub client (`infra/github/client.ts`) exp
+         +orts only `createGitHubClient`, `GitHubError` and two constants
+         +. The returned client is frozen and has 11 read/create methods.
+         + The Octokit instance never leaves the module.                 
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | FR-34 / C-02: mer
+         +ge, auto-merge and ref updates are impossible, not just unused.
+         + A test checks the export list and the method list.            
+         +                                                               
+         +                            |                                  
+       6 +| 2026-11-22 | Defence in depth: every request goes through a t
+         +ransport allowlist (`allowlist.ts`) before `fetch`. Only 12 (me
+         +thod, path) pairs in the one configured repository are allowed.
+         + `POST /git/refs` must create `refs/heads/sma/…` (never a prote
+         +cted branch), and `POST /pulls` must have an `sma/…` head. Grap
+         +hQL, PUT/PATCH/DELETE and other hosts are refused. The path is 
+         +matched after URL-decoding, because Octokit encodes `/` inside 
+         +a ref.                                      | Even Octokit's ge
+         +neric `request()` cannot send a merge. The decoded match is how
+         + GitHub itself reads the path.                                 
+         +                                                               
+         +                            |                                  
+       7 +| 2026-11-22 | The protected branches are the stored `default_b
+         +ranch` plus GitHub's live default branch (fetched by `getRepo` 
+         +before any branch is created).                                 
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | The stored value 
+         +could be out of date.                                          
+         +                                                               
+         +                                                               
+         +                            |                                  
+       8 +| 2026-11-22 | The happy-path order is `GET repo → GET commit (
+         +analyzed) → blobs → tree → commit → create ref → PR → labels`. 
+         +The prompt says "get ref". We read the repository (live default
+         + branch) and the **analyzed commit** (for its tree) instead, be
+         +cause the base must be the analyzed commit, not the current hea
+         +d. `getRef` stays in the client, for resuming a retry and for t
+         +he live test.                                                  
+         +                                            | The Git Data API 
+         +needs the base tree SHA. The default-branch head is never used 
+         +as a base.                                                     
+         +                                                               
+         +                            |                                  
+       9 +| 2026-11-22 | No msw/nock dependency. GitHub is mocked at the 
+         +`fetch` boundary that Octokit accepts (`test/github-fake.ts`). 
+         +The fake records every request and can script failures per rout
+         +e.                                                             
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | No new dependency
+         + (C-07). It sees exactly what would hit the network.           
+         +                                                               
+         +                                                               
+         +                            |                                  
+      10 +| 2026-11-22 | Missing labels are created with `ensureLabel` (G
+         +ET label → 404 → POST label; a 422 race is OK) and then added. 
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | FR-35 asks for la
+         +bels to be created if missing. An explicit colour and descripti
+         +on beats GitHub's implicit grey label.                         
+         +                                                               
+         +                            |                                  
+      11 +| 2026-11-22 | `deliver` finishes the run: `repaired` + `pr_url
+         +` on success, or `stage_failure` with `failure_stage = deliver`
+         + on failure. It refuses (throws, no GitHub call) unless the run
+         + is unfinished and its **latest attempt passed** with exactly t
+         +he given patch.                                                
+         +                                                               
+         +                                                               
+         +                                            | Deliver is the la
+         +st stage. Only validated patches get PRs, so cheating, failed o
+         +r refused runs can never reach GitHub (FR-33, FR-36).          
+         +                                                               
+         +                            |                                  
+      12 +| 2026-11-22 | **Retry = new child run** (`parent_run_id` = the
+         + failed run, `stage_reached = deliver`, no attempts, zero token
+         +s/cost). The failed run's `deliver` row stores the redacted evi
+         +dence, the source run id and partial GitHub progress (branch, c
+         +ommit, PR). The retry re-reads the patch from the source run's 
+         +passing attempt row.                                           
+         +                                                               
+         +                                            | Finished runs are
+         + frozen (FR-39 trigger) and `run_stage_results` allows one row 
+         +per (run, stage). A child run keeps everything append-only with
+         + no migration, and matches the reanalysis pattern. Zero usage a
+         +voids double-counting cost. |                                  
+      13 +| 2026-11-22 | A retry resumes from what already exists on GitH
+         +ub. An untouched `sma/` branch (head still equals the recorded 
+         +commit) is reused. A PR that was opened but not labelled only g
+         +ets labels. Otherwise the retry does a full delivery on a new `
+         +sma/run-<childId>-…` branch, rebuilding the files from the stor
+         +ed patch (`patchedFilesFromPatch`: `git apply` in a disposable 
+         +working copy, no code executed).                               
+         +                                            | No duplicate PRs 
+         +and no orphaned work. We never update or delete refs.          
+         +                                                               
+         +                                                               
+         +                            |                                  
+      14 +| 2026-11-22 | If labelling fails after the PR opened, the run 
+         +is a `stage_failure`, but `pr_url` is still recorded.          
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                            | The PR exists and
+         + must be visible. FR-35 is not yet met, so it is not counted as
+         + success until a retry labels it.                              
+         +                                                               
+         +                            |                                  
+      15 +| 2026-11-22 | `recordFlaggedFinding({ status, reason })` accep
+         +ts `flagged`, `failed`, `cheating_rejected` and `aborted`. It w
+         +rites a `skipped` deliver row (`pullRequest: null`) and finishe
+         +s the run with `flagged_reason`. It takes no client and reads n
+         +o credential.                                                  
+         +                                                               
+         +                                                               
+         +                                            | FR-36: structural
+         +ly 0 GitHub calls. The test also spies on global `fetch`.      
+         +                                                               
+         +                                                               
+         +                            |                                  
+      16 +| 2026-11-22 | The PR title/body template (`buildPrTitle` / `bu
+         +ildPrBody`) and branch rules live in `packages/core/src/deliver
+         +y/` (new files, new exports only). Evidence JSON is trimmed to 
+         +2,000 chars per side. The **tail** of the raw output (6,000 cha
+         +rs) goes in `<details>`. Code fences are longer than any backti
+         +ck run in the content. The body is capped at 60,000 chars. Fixt
+         +ure runs are labelled (BR-06).                                 
+         +                                            | Pure and unit-tes
+         +table (C-05). The tail holds the test summary. Content cannot b
+         +reak out of its fence. GitHub caps bodies at 65,536 chars.     
+         +                                                               
+         +                            |                                  
+      17 +| 2026-11-22 | Redaction (`redactForDelivery`) removes the exac
+         +t token in use, token shapes (reusing `redactRepairSecrets`), `
+         +Authorization:` headers and `user:pass@` URL credentials. It ru
+         +ns on the title, the body, every error message, `failure_detail
+         +` and (deep) the stored evidence. `GitHubError` carries no `cau
+         +se`. Octokit logging is silenced.                              
+         +                                                               
+         +                                            | NFR-04: the token
+         + must not appear in errors, logs, PR bodies or anything later e
+         +xported.                                                       
+         +                                                               
+         +                            |                                  
+      18 +| 2026-11-22 | The commit is built from full file contents via 
+         +blobs/trees (base64). The mode comes from the working copy. Del
+         +etions are tree entries with `sha: null`. There is no `git push
+         +`, and a grep test fails the build if `pulls.merge`, `enablePul
+         +lRequestAutoMerge`, `git push`, a `/merge` route or `updateRef`
+         +/`deleteRef` appears in `apps/server/src`.                     
+         +                                                               
+         +                                            | The prompt forbid
+         +s token-in-URL pushes. The grep test is the never-merge proof. 
+         +                                                               
+         +                                                               
+         +                            |                                  
+      19 +| 2026-11-22 | Live smoke test `test/deliver.live.test.ts` is s
+         +kipped unless `GITHUB_TOKEN` and `SMA_DEMO_REPO=owner/name` are
+         + set. It delivers the honest rename patch on the repo's current
+         + default-branch head and checks open/unmerged/labels/default br
+         +anch unchanged. Run on 2026-11-22 against `Bigyan1313/sma-demo-
+         +consumer`: passed and opened https://github.com/Bigyan1313/sma-
+         +demo-consumer/pull/1 (open, unmerged, `sma/` head into `main`, 
+         +both labels, token absent from title/body). | Human task: creat
+         +e the demo repo and a fine-grained token.                      
+         +                                                               
+         +                                                               
+         +                            |                                  
+      20 +| 2026-11-22 | Known limit for the orchestrator (Inc 13): a run
+         +'s `commit_sha` must exist in the GitHub repository. For `demo/
+         +consumer` (a folder inside our monorepo) the analyzed commit mu
+         +st be the demo repo's commit, otherwise delivery fails clearly 
+         +with "analyzed commit … is not in owner/name".                 
+         +                                                               
+         +                                                               
+         +                                            | Delivery must bas
+         +e on the analyzed commit and must not silently switch to the cu
+         +rrent head.                                                    
+         +                                                               
+         +                            |                                  
+      21  
+      22  No schema migration and no HTTP routes. Wiring delivery into th
+          e pipeline belongs to Increment 13.
+
+⏺ Prettier re-padded the entire PROGRESS table, which would conflict with
+  teammates' PRs. I'm reverting it and will put the URL in a note under the
+  table instead, leaving row 12 as "Done".
+
+⏺ Bash(git checkout docs/PROGRESS.md && printf '\nIncrement 12 live delivery
+      smoke test: https://github.com/Bigyan1313/sma-demo-consumer/pull/1 (open,
+      never merged).\n…)
+  ⎿  Updated 1 path from the index
+     Checking formatting...
+     All matched files use Prettier code style!
+     … +3 lines (ctrl+o to expand)
+  ⎿  Updated docs/PROGRESS.md (+22 -20)
+  ⎿  (a git step in this command can move the working tree, so these may be
+     its changes, not edits) (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The live smoke test passed and opened this PR on the demo repo:
+
+  https://github.com/Bigyan1313/sma-demo-consumer/pull/1
+
+  I checked it on GitHub afterwards:
+  - It's open, has not been merged, and goes from
+    sma/run-d9e19bcd-…-field_renamed into main.
+  - It has both labels, machine-generated and awaiting-human-review.
+  - The title is [SMA] field_renamed: GET /customers/{id}.
+  - The token is not in the PR title or body. I compared them in the shell
+    without printing the token.
+  - The test also confirmed the head commit of main didn't change.
+
+  The test passed, but its [deliver] LIVE PR … line didn't appear in the npm 
+  test output. I read the URL back from GitHub with gh instead.
+
+  Updates (committed and pushed to PR #27):
+  - PR #27 report: the status now says DONE and includes the live PR URL. The
+    leftover human task is not to merge that PR, since it's the evidence for
+    AT-08.
+  - docs/PROGRESS.md: row 12 already said "Done" (I set it when opening the PR).
+    Putting the URL inside the row made Prettier re-pad the whole table, which
+    would change every teammate's row and cause merge conflicts. So row 12 stays
+    as it was, and the URL is in a one-line note under the table.
+  - docs/decisions/inc12.md: the live-test entry now records the run and the PR
+    URL.
+
+  Leave the demo PR open. PR #27 is ready for a teammate to merge with "Create a
+  merge commit".
+
+✻ Sautéed for 1m 9s · done 11:33 AM
+
+※ recap: Increment 12 (delivery) is finished: PR #27 is green and reports DONE, and the live test opened demo PR sma-demo-consumer#1, which must stay unmerged. Next, a teammate merges PR #27 with "Create a merge commit".
+
+❯ put this also in the chat log                                                 
+
+⏺ I can't add this part myself. The chat log has to be the actual transcript,
+  and only /export produces that. If I appended a hand-written summary to the
+  file, it wouldn't be the real conversation, which the project rules forbid.
+
+  Run the export again to the same file. It will contain the whole conversation,
+  including the live test and the doc updates:
+
+  /export docs/chat-logs/inc12-bigyan.txt
+
+  Then tell me it's done. I'll scan it for credentials again (this time there's
+  a real token in .env, so the check matters more), commit it to
+  feat/inc12-delivery, push, and confirm CI on PR #27.
+
+✻ Churned for 4s · done 11:45 AM
