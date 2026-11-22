@@ -648,11 +648,20 @@ export class Orchestrator {
    * Finishes runs left `running` by a stopped server (DR-01, NFR-02): each gets a `failed` row
    * for the stage it had reached (unless one exists) and ends as `stage_failure` of that stage.
    * Call once at startup, before any new run starts.
+   * @param scope - Limit recovery to one repository (tests, or a deployment that shares one
+   *   database between servers). Default: every running run.
    * @returns The ids of the runs that were finished.
    */
-  async recoverInterruptedRuns(): Promise<string[]> {
+  async recoverInterruptedRuns(scope: { repositoryId?: string } = {}): Promise<string[]> {
     if (this.busy) throw new RunBusyError();
-    const stale = await this.db.select().from(runs).where(eq(runs.status, 'running'));
+    const stale = await this.db
+      .select()
+      .from(runs)
+      .where(
+        scope.repositoryId
+          ? and(eq(runs.status, 'running'), eq(runs.repositoryId, scope.repositoryId))
+          : eq(runs.status, 'running'),
+      );
     for (const run of stale)
       await this.recordStageFailure(run.id, run.stageReached, new Error(INTERRUPTED_REASON));
     return stale.map((r) => r.id);

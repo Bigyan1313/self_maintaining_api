@@ -25,7 +25,7 @@ import {
 } from '../src/pipeline/orchestrator.js';
 import { loadRunDetail, stageResultsInOrder } from '../src/pipeline/run-detail.js';
 import { FakeLlmAdapter } from '../src/infra/llm/fake.js';
-import { insertApi, insertRun } from '../src/infra/db/index.js';
+import { insertApi, insertRun, insertSpecCheck } from '../src/infra/db/index.js';
 import { PG, expectDbRejects, openTestDb, randomCommitSha, uid } from './db-helpers.js';
 import {
   NOTE_YAML,
@@ -153,6 +153,29 @@ describe('spec-check flow (UC-02)', () => {
     expect(out.check.failureStage?.value).toBe('classify');
     expect(out.pipeline.changeIds).toEqual([]);
     expect((await getApiById(client.db, api.id))!.baselineVersionId).toBe(baseline);
+  });
+});
+
+describe('spec_checks.failure_stage constraints (migration 0002)', () => {
+  it('rejects a failed check without a stage, a stage on a non-failed check, and a run stage', async () => {
+    const api = await insertApi(client.db, { name: `constraint-${uid()}` });
+    await expectDbRejects(
+      insertSpecCheck(client.db, { apiId: api.id, outcome: 'failed', errorDetail: 'x' }),
+      { code: PG.checkViolation, constraint: 'spec_checks_failed_iff_failure_stage' },
+    );
+    await expectDbRejects(
+      insertSpecCheck(client.db, { apiId: api.id, outcome: 'no_change', failureStage: 'detect' }),
+      { code: PG.checkViolation, constraint: 'spec_checks_failed_iff_failure_stage' },
+    );
+    await expectDbRejects(
+      insertSpecCheck(client.db, {
+        apiId: api.id,
+        outcome: 'failed',
+        errorDetail: 'x',
+        failureStage: 'repair',
+      }),
+      { code: PG.checkViolation, constraint: 'spec_checks_failure_stage_in_check' },
+    );
   });
 });
 
@@ -479,7 +502,9 @@ describe('append-only runs, reanalysis, one run at a time', () => {
       isFixture: true,
     });
     const { orchestrator } = makeOrchestrator(client.db);
-    expect(await orchestrator.recoverInterruptedRuns()).toContain(stale.id);
+    expect(await orchestrator.recoverInterruptedRuns({ repositoryId: repo.id })).toEqual([
+      stale.id,
+    ]);
     const after = await getRunById(client.db, stale.id);
     expect(after).toMatchObject({ status: 'stage_failure', failureStage: 'repair' });
     expect(after?.failureDetail).toContain(INTERRUPTED_REASON);
