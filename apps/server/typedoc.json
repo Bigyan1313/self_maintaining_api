@@ -24,7 +24,8 @@
     "src/pipeline/locate.ts",
     "src/pipeline/guarded-validate.ts",
     "src/infra/llm/adapter.ts",
-    "src/infra/llm/fake.ts"
+    "src/infra/llm/fake.ts",
+    "src/pipeline/repair.ts"
   ],
   "tsconfig": "tsconfig.build.json"
 }

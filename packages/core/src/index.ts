@@ -35,3 +35,4 @@ export * from './guards/static.js';
 export * from './guards/count.js';
 export * from './repair/context.js';
 export * from './repair/output.js';
+export * from './repair/loop.js';

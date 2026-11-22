@@ -85,12 +85,6 @@ export class AnthropicLlmAdapter implements LlmAdapter {
         ),
         deadline,
       ]);
-      if (
-        response.stop_reason !== 'end_turn' ||
-        response.model !== modelId ||
-        response.content.some((block) => block.type !== 'text')
-      )
-        return error('invalid_output', 'Provider returned an incomplete or unsupported response');
       const tokensIn = response.usage.input_tokens;
       const tokensOut = response.usage.output_tokens;
       if (
@@ -99,15 +93,10 @@ export class AnthropicLlmAdapter implements LlmAdapter {
         response.usage.cache_read_input_tokens
       )
         return error('invalid_output', 'Provider returned unsupported usage accounting');
-      const text = response.content
-        .map((block) => (block.type === 'text' ? block.text : ''))
-        .join('\n');
-      // Refusals may be redacted; a patch containing secrets is refused rather than silently altered.
-      const parsed = parseRepairOutput(text, ctx.includedFiles);
-      if (parsed.kind === 'invalid_output') return error('invalid_output', parsed.message);
-      if (parsed.kind === 'patch' && scrub(parsed.patch) !== parsed.patch)
-        return error('invalid_output', 'Provider patch contains credential-like text');
-      const usage = {
+      if (response.model !== modelId)
+        return error('invalid_output', 'Provider returned an incomplete or unsupported response');
+      // Usage is known from here on, so every unusable answer still reports what it cost.
+      const billed = {
         tokensIn,
         tokensOut,
         costUsd:
@@ -115,8 +104,25 @@ export class AnthropicLlmAdapter implements LlmAdapter {
             tokensOut * price.outputUsdPerMillionTokens) /
           1_000_000,
         modelId,
-        durationMs: duration(),
       };
+      const unusable = (message: string): LlmResult => {
+        const failure = error('invalid_output', message);
+        return failure.kind === 'error' ? { ...failure, usage: billed } : failure;
+      };
+      if (
+        response.stop_reason !== 'end_turn' ||
+        response.content.some((block) => block.type !== 'text')
+      )
+        return unusable('Provider returned an incomplete or unsupported response');
+      const text = response.content
+        .map((block) => (block.type === 'text' ? block.text : ''))
+        .join('\n');
+      // Refusals may be redacted; a patch containing secrets is refused rather than silently altered.
+      const parsed = parseRepairOutput(text, ctx.includedFiles);
+      if (parsed.kind === 'invalid_output') return unusable(parsed.message);
+      if (parsed.kind === 'patch' && scrub(parsed.patch) !== parsed.patch)
+        return unusable('Provider patch contains credential-like text');
+      const usage = { ...billed, durationMs: duration() };
       return parsed.kind === 'patch'
         ? { ...parsed, ...usage }
         : { ...parsed, reason: scrub(parsed.reason), ...usage };

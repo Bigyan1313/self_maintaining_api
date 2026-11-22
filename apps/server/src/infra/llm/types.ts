@@ -22,6 +22,12 @@ export type LlmResult =
       errorKind: 'timeout' | 'api_error' | 'invalid_output' | 'missing_key';
       message: string;
       durationMs: number;
+      /**
+       * Billed usage when the provider did answer but the answer was unusable
+       * (`invalid_output`), so the repair loop can record it and count it against the
+       * token ceiling (FR-23, FR-24). Absent when no response was received.
+       */
+      usage?: Omit<LlmUsage, 'durationMs'>;
     };
 /** All repair orchestration depends on this interface, never on a provider SDK. */
 export interface LlmAdapter {

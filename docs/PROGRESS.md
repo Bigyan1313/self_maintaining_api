@@ -15,7 +15,7 @@ its own line here in its own PR only (see Working Rules in `CLAUDE.md`).
 | 08  | Validator: Docker sandbox + output parsing                                                     | FR-25, FR-26, FR-32, NFR-03              | **CRITICAL (checkpoint)** | Done        | #5    |
 | 09  | Cheat guards                                                                                   | FR-27–31, DR-04                          | **CRITICAL**              | Done        | #6    |
 | 10  | LLM adapter + context assembly                                                                 | FR-19, C-06, NFR-04, NFR-08              | Standard                  | Done        | #7    |
-| 11  | Repair loop (retries, error feedback, token ceiling, cost)                                     | FR-18, FR-20–24                          | **CRITICAL**              | Not started | #8    |
+| 11  | Repair loop (retries, error feedback, token ceiling, cost)                                     | FR-18, FR-20–24                          | **CRITICAL**              | Done        | #8    |
 | 12  | Delivery: branch + PR, flagged findings                                                        | FR-33–37, C-02                           | Standard                  | Not started | #9    |
 | 13  | Pipeline orchestrator + run records + JSON/HTML export                                         | FR-38, FR-39, FR-41                      | Standard                  | Not started | #10   |
 | 14  | Dashboard (5 views, text labels)                                                               | UI-01–04, FR-40, FR-42                   | Standard                  | Not started | #11   |
