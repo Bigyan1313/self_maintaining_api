@@ -25,6 +25,8 @@ jobs:
     env:
       # Throwaway credentials for the CI-only service container; tests derive `sma_test` from this.
       DATABASE_URL: postgres://sma:ci-only-password@localhost:5432/sma
+      # CI never renders diagrams (only checks them), so skip puppeteer's Chrome download.
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,6 +52,10 @@ jobs:
           "$HOME/.local/bin/oasdiff" --version
       - run: npm run typecheck
       - run: npm run lint
+      # API docs must build from a fresh checkout (the script builds @sma/core first).
+      - run: npm run docs
+      # Every class/state in docs/diagrams must still exist in the code.
+      - run: npm run diagrams:check
       # Includes the Docker validator integration tests (AT-11); the runner has Docker.
       - run: npm test
       # The validator must leave the developer's repo and Docker clean (FR-20, NFR-06).
