@@ -81,6 +81,7 @@ describe('full happy-path chain', () => {
       apiId: api.id,
       outcome: 'failed',
       errorDetail: 'HTTP 503 from provider',
+      failureStage: 'ingest',
       finishedAt: new Date(),
     });
     expect((await listSpecChecks(db, api.id)).map((c) => c.outcome).sort()).toEqual([

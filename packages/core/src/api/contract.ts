@@ -83,14 +83,30 @@ export const SpecCheckSchema = z.object({
   outcome: labeled(enums.SPEC_CHECK_OUTCOMES, enums.SPEC_CHECK_OUTCOME_LABELS),
   specVersionId: id.nullable(),
   errorDetail: z.string().nullable(),
+  /** Stage a failed check failed in (ingest, detect or classify). @implementedIn inc13 */
+  failureStage: labeled(enums.STAGES, enums.STAGE_LABELS).nullable().optional(),
 });
 /** Check history returned by GET /api/apis/:id/checks. @implementedIn inc04 */
 export const SpecChecksSchema = z.array(SpecCheckSchema);
-/** Upload/check response. @implementedIn inc04 */
+/**
+ * What the spec-check flow did after ingest (UC-02 steps 3 to 6): how many classified changes
+ * the pair has, whether the baseline advanced, and the stage failure, if any. @implementedIn inc13
+ */
+export const SpecPipelineSchema = z.object({
+  changeIds: z.array(id),
+  baselineAdvanced: z.boolean(),
+  failure: z
+    .object({ stage: labeled(enums.STAGES, enums.STAGE_LABELS), detail: z.string() })
+    .nullable(),
+});
+/** Spec-check pipeline summary. */
+export type SpecPipeline = z.infer<typeof SpecPipelineSchema>;
+/** Upload/check response. `pipeline` is present when the orchestrator ran. @implementedIn inc04 */
 export const IngestResponseSchema = z.object({
   check: SpecCheckSchema,
   baselineVersionId: id.nullable(),
   sourceMode: labeled(enums.SOURCE_MODES, enums.SOURCE_MODE_LABELS),
+  pipeline: SpecPipelineSchema.optional(),
 });
 /** Serialized ingestion response. */
 export type IngestResponse = z.infer<typeof IngestResponseSchema>;
@@ -136,8 +152,12 @@ export const ChangesSchema = z.array(ChangeSchema);
 export const ConfirmMappingRequestSchema = z
   .object({ mapping: z.record(z.string(), json), confirmedBy: text })
   .strict();
+/** Repair modes: `full` (B3, default) or `single_shot` (B2, evaluation only). @implementedIn inc13 */
+export const RUN_MODES = ['full', 'single_shot'] as const;
 /** Start one run. @implementedIn inc13 */
-export const StartRunRequestSchema = z.object({ changeId: id, repositoryId: id }).strict();
+export const StartRunRequestSchema = z
+  .object({ changeId: id, repositoryId: id, mode: z.enum(RUN_MODES).optional() })
+  .strict();
 /** Run metadata with text labels for every outcome. @implementedIn inc13 */
 export const RunSchema = z.object({
   id,
@@ -225,6 +245,12 @@ export const RunActionRequestSchema = z.object({}).strict();
 export const ExportQuerySchema = z.object({ format: z.enum(['json', 'html']) });
 /** HTML export response. @implementedIn inc13 */
 export const HtmlExportSchema = z.string();
+/** Response of POST /api/runs/:id/export: both files were written (DR-05). @implementedIn inc13 */
+export const SavedExportSchema = z.object({
+  saved: z.literal(true),
+  json: z.string(),
+  html: z.string(),
+});
 /** Evaluation label selector (omitted means latest). @implementedIn inc16 */
 export const ResultsQuerySchema = z.object({ label: text.optional() });
 /** Persisted scenario evaluation row. @implementedIn inc16 */
@@ -297,6 +323,7 @@ export const API_CONTRACT = {
   export: {
     path: '/api/runs/:id/export',
     GET: { query: ExportQuerySchema, response: z.union([RunDetailSchema, HtmlExportSchema]) },
+    POST: { request: RunActionRequestSchema, response: SavedExportSchema },
   },
   results: { path: '/api/results', GET: { query: ResultsQuerySchema, response: ResultsSchema } },
 } as const;

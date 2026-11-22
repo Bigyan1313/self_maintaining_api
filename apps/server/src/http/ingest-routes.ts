@@ -5,7 +5,9 @@ import {
   IdParamsSchema,
   MAX_SPEC_BYTES,
   SPEC_CHECK_OUTCOME_LABELS,
+  STAGE_LABELS,
   type FieldErrors,
+  type IngestResponse,
 } from '@sma/core';
 import {
   type Db,
@@ -15,7 +17,7 @@ import {
   listSpecChecks,
 } from '../infra/db/index.js';
 import { apis, repositories } from '../infra/db/schema.js';
-import { ingest, ApiNotFoundError } from '../pipeline/ingest.js';
+import { ingest, ApiNotFoundError, type IngestSource } from '../pipeline/ingest.js';
 import {
   validateApi,
   validateRepository,
@@ -30,6 +32,11 @@ export interface IngestDependencies {
   retrieve?: SpecRetriever;
   probeRepository?: RepositoryProbe;
   polling?: boolean;
+  /**
+   * The full spec-check flow (ingest → detect → classify → advance baseline, inc13). When set,
+   * uploads, URL checks and scheduled checks run it instead of ingest alone.
+   */
+  checkSpec?: (apiId: string, source: IngestSource) => Promise<IngestResponse>;
 }
 
 /** Register only Increment 04 HTTP endpoints. Later contract endpoints remain unimplemented. */
@@ -39,7 +46,9 @@ export async function registerIngestRoutes(
 ): Promise<void> {
   const { db } = deps;
   const queue = new CheckQueue();
-  const check = (id: string) => ingest(db, id, { mode: 'retrieved' }, deps.retrieve);
+  const run = (id: string, source: IngestSource) =>
+    deps.checkSpec ? deps.checkSpec(id, source) : ingest(db, id, source, deps.retrieve);
+  const check = (id: string) => run(id, { mode: 'retrieved' });
   const poller = new SpecPoller(queue, () => db.select().from(apis), check);
   let timer: ReturnType<typeof setInterval> | undefined;
   let polling: Promise<void> = Promise.resolve();
@@ -144,6 +153,9 @@ export async function registerIngestRoutes(
     return checks.map((c) => ({
       ...c,
       outcome: { value: c.outcome, label: SPEC_CHECK_OUTCOME_LABELS[c.outcome] },
+      failureStage: c.failureStage
+        ? { value: c.failureStage, label: STAGE_LABELS[c.failureStage] }
+        : null,
     }));
   });
   app.post<{ Params: { id: string } }>('/api/apis/:id/check', async (request, reply) => {
@@ -184,7 +196,7 @@ export async function registerIngestRoutes(
             .code(400)
             .send([{ field: 'body', message: 'Upload a raw JSON or YAML document' }]);
         const result = await queue.run(() =>
-          ingest(db, params.data.id, { mode: 'uploaded', text: request.body as string }),
+          run(params.data.id, { mode: 'uploaded', text: request.body as string }),
         );
         return reply.code(result.check.outcome.value === 'failed' ? 422 : 200).send(result);
       },

@@ -8,6 +8,7 @@ import {
   parseSpec,
   SPEC_CHECK_OUTCOME_LABELS,
   SOURCE_MODE_LABELS,
+  STAGE_LABELS,
   type IngestResponse,
   type SourceMode,
   type SpecError,
@@ -144,6 +145,7 @@ export async function ingest(
           outcome,
           specVersionId: versionId,
           errorDetail,
+          failureStage: outcome === 'failed' ? 'ingest' : null,
           startedAt: started.time,
           finishedAt: sql`clock_timestamp()`,
         })
@@ -156,6 +158,9 @@ export async function ingest(
         startedAt: check.startedAt.toISOString(),
         finishedAt: check.finishedAt?.toISOString() ?? null,
         outcome: { value: outcome, label: SPEC_CHECK_OUTCOME_LABELS[outcome] },
+        failureStage: check.failureStage
+          ? { value: check.failureStage, label: STAGE_LABELS[check.failureStage] }
+          : null,
       },
       baselineVersionId,
       sourceMode: { value: mode, label: SOURCE_MODE_LABELS[mode] },
