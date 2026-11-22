@@ -25,7 +25,15 @@
     "src/pipeline/guarded-validate.ts",
     "src/infra/llm/adapter.ts",
     "src/infra/llm/fake.ts",
-    "src/pipeline/repair.ts"
+    "src/pipeline/repair.ts",
+    "src/infra/github/client.ts",
+    "src/infra/workcopy/materialize.ts",
+    "src/pipeline/deliver.ts",
+    "src/pipeline/orchestrator.ts",
+    "src/pipeline/run-inputs.ts",
+    "src/pipeline/run-detail.ts",
+    "src/pipeline/export.ts",
+    "src/http/run-routes.ts"
   ],
   "tsconfig": "tsconfig.build.json"
 }
