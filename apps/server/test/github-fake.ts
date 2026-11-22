@@ -58,7 +58,8 @@ export function createFakeGitHub(opts: FakeGitHubOptions = {}) {
     );
     const method = (init?.method ?? 'GET').toUpperCase();
     const prefix = `/repos/${owner}/${repo}`;
-    const path = url.pathname.startsWith(prefix) ? url.pathname.slice(prefix.length) : url.pathname;
+    const raw = url.pathname.startsWith(prefix) ? url.pathname.slice(prefix.length) : url.pathname;
+    const path = decodeURIComponent(raw);
     const body =
       typeof init?.body === 'string' ? (JSON.parse(init.body) as Record<string, unknown>) : null;
     const headers = new Headers(init?.headers);

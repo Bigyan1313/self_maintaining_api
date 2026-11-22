@@ -76,7 +76,14 @@ export function githubRequestRefusal(
   const pathname = parsed.pathname;
   if (pathname !== prefix && !pathname.startsWith(`${prefix}/`))
     return 'request outside the configured repository';
-  const rest = pathname.slice(prefix.length);
+  // Match the path as GitHub reads it: Octokit percent-encodes `/` inside a ref parameter.
+  let rest: string;
+  try {
+    rest = decodeURIComponent(pathname.slice(prefix.length));
+  } catch {
+    return 'invalid URL encoding';
+  }
+  if (rest.split('/').some((p) => p === '..' || p === '.')) return 'dot segment in path';
   const verb = method.toUpperCase();
   if (!ALLOWED.some((a) => a.method === verb && a.path.test(rest)))
     return `${verb} ${rest || '/'} is not an allowed delivery operation`;

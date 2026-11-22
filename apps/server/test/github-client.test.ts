@@ -98,6 +98,9 @@ describe('transport allowlist', () => {
 
   it.each([
     ['PUT', `${base}/pulls/1/merge`, undefined],
+    ['PUT', `${base}/pulls/1%2Fmerge`, undefined],
+    ['PATCH', `${base}/git/refs/heads%2Fmain`, '{}'],
+    ['GET', `${base}/git/ref/heads/sma%2F..%2F..%2Fpulls`, undefined],
     ['POST', 'https://api.github.com/graphql', '{"query":"mutation{enablePullRequestAutoMerge}"}'],
     ['PATCH', `${base}/git/refs/heads/main`, '{"sha":"x"}'],
     ['PATCH', `${base}/git/refs/heads/sma/x`, '{"sha":"x"}'],
