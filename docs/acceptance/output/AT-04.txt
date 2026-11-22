@@ -1,0 +1,87 @@
+# AT-04 Classification and refusal  (FR-07, FR-10, FR-18, FR-36; BR-04, BR-05)
+
+$ Compare each v1→v2 verdict with its hand-written label (breaking / safe, category, mapping)
+  ✓ GET /customers/{id} response-required-property-removed → breaking  → breaking, field_renamed, confirmed, confidence 0.95
+  ✓ GET /customers/{id} response-required-property-added → safe  → safe, other, unconfirmed, confidence 0.9
+  ✓ GET /customers/{id} response-optional-property-added → safe  → safe, other, unconfirmed, confidence 0.9
+  ✓ GET /orders request-parameter-became-required → breaking  → breaking, required_param_added, confirmed, confidence 0.95
+  ✓ GET /orders/{id} response-property-type-changed → breaking  → breaking, field_type_changed, confirmed, confidence 0.95
+  ✓ GET /orders/{id} response-property-pattern-added → safe  → safe, other, unconfirmed, confidence 0.9
+  ✓ DELETE /orders/{id} api-removed-without-deprecation → breaking  → breaking, endpoint_removed, unconfirmed, confidence 0.95
+  ✓ GET /orders/{id}/invoice api-path-removed-without-deprecation → breaking  → breaking, endpoint_removed, confirmed, confidence 0.95
+  ✓ GET /invoices/{orderId} endpoint-added → safe  → safe, other, unconfirmed, confidence 0.9
+labels vs verdicts:
+    [
+      "GET /customers/{id} response-required-property-removed: expected breaking, field_renamed, confirmed; got breaking, field_renamed, confirmed, confidence 0.95",
+      "GET /customers/{id} response-required-property-added: expected safe, other, unconfirmed; got safe, other, unconfirmed, confidence 0.9",
+      "GET /customers/{id} response-optional-property-added: expected safe, other, unconfirmed; got safe, other, unconfirmed, confidence 0.9",
+      "GET /orders request-parameter-became-required: expected breaking, required_param_added, confirmed; got breaking, required_param_added, confirmed, confidence 0.95",
+      "GET /orders/{id} response-property-type-changed: expected breaking, field_type_changed, confirmed; got breaking, field_type_changed, confirmed, confidence 0.95",
+      "GET /orders/{id} response-property-pattern-added: expected safe, other, unconfirmed; got safe, other, unconfirmed, confidence 0.9",
+      "DELETE /orders/{id} api-removed-without-deprecation: expected breaking, endpoint_removed, unconfirmed; got breaking, endpoint_removed, unconfirmed, confidence 0.95",
+      "GET /orders/{id}/invoice api-path-removed-without-deprecation: expected breaking, endpoint_removed, confirmed; got breaking, endpoint_removed, confirmed, confidence 0.95",
+      "GET /invoices/{orderId} endpoint-added: expected safe, other, unconfirmed; got safe, other, unconfirmed, confidence 0.9"
+    ]
+
+$ Unknown verdicts: POST /api/apis (v1), upload v1 with `cancelled` added to the Order status enum, detectAndClassify
+verdicts:
+    [
+      "- - api-version-not-bumped → unknown (0.5), unconfirmed",
+      "GET /orders response-property-enum-value-added → unknown (0.5), unconfirmed",
+      "GET /orders/{id} response-property-enum-value-added → unknown (0.5), unconfirmed"
+    ]
+  ✓ exactly the 3 expected differences are found  → 3
+  ✓ GET /orders response-property-enum-value-added → unknown, unconfirmed  → unknown
+  ✓ GET /orders/{id} response-property-enum-value-added → unknown, unconfirmed  → unknown
+  ✓ - - api-version-not-bumped → unknown, unconfirmed  → unknown
+
+$ Refusal: buildRepairContext() for changes without a confirmed mapping (the gate in front of Repair)
+DELETE /orders/{id} (breaking, no note entry, no replacement):
+    {
+      "ok": false,
+      "error": "Repair requires a breaking change with an explicitly confirmed mapping"
+    }
+  ✓ repair is refused for DELETE /orders/{id} (breaking, no note entry, no replacement)  → Repair requires a breaking change with an explicitly confirmed mapping
+an unknown enum change:
+    {
+      "ok": false,
+      "error": "Repair requires a breaking change with an explicitly confirmed mapping"
+    }
+  ✓ repair is refused for an unknown enum change  → Repair requires a breaking change with an explicitly confirmed mapping
+  ✓ DELETE /orders/{id} (removed with no documented replacement) stays unconfirmed with no mapping (BR-05)  → {   "mappingStatus": "unconfirmed",   "mapping": null }
+control: the note-confirmed rename:
+    {
+      "ok": true,
+      "files": [
+        "src/customers.ts"
+      ]
+    }
+  ✓ control: a breaking change with a note-confirmed mapping is accepted  → [   "src/customers.ts" ]
+
+$ Human confirmation (FR-10): v1→v2 with no note, POST /api/changes/:id/confirm-mapping
+  ✓ without a note, every change is unconfirmed  → [   "unconfirmed",   "unconfirmed",   "unconfirmed",   "unconfirmed",   "unconfirmed",   "unconfirmed",   "unconfirmed",   "unconfirmed",   "unconfirmed" ]
+  ✓ the unconfirmed rename candidate is refused  → Repair requires a breaking change with an explicitly confirmed mapping
+wrong target "display_name": HTTP 400:
+    [
+      {
+        "field": "mapping",
+        "message": "Mapping does not match the change and before/after evidence"
+      }
+    ]
+  ✓ a mapping that does not match the spec evidence is rejected (400)  → 400
+target "full_name": HTTP 200:
+    {
+      "mappingStatus": {
+        "value": "confirmed",
+        "label": "Mapping confirmed"
+      },
+      "mappingSource": {
+        "value": "human",
+        "label": "Confirmed by a human"
+      },
+      "confirmedBy": "acceptance script (acting as the reviewer)"
+    }
+  ✓ an explicit confirmation that matches the evidence is stored with source "human" and the confirmer  → human
+  – NOT RUN: a run for an unconfirmed change is recorded as "flagged" with its reason, and opens no pull request (FR-18, FR-36) (the repair loop and the orchestrator that set run status are inc 11 and inc 13)
+
+RESULT AT-04: PARTIAL — All 21 assertions that can run on this build passed; 1 required part(s) need later increments: a run for an unconfirmed change is recorded as "flagged" with its reason, and opens no pull request (FR-18, FR-36) (the repair loop and the orchestrator that set run status are inc 11 and inc 13).
