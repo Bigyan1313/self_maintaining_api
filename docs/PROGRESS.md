@@ -22,3 +22,4 @@ its own line here in its own PR only (see Working Rules in `CLAUDE.md`).
 | 15  | 20 frozen scenarios + failing-before check                                                     | EV-01, EV-02                             | **CRITICAL**              | Not started | #12   |
 | 16  | Evaluation script: B1/B2/B3, results file, generated tables                                    | EV-03–09                                 | **CRITICAL**              | Not started | #13   |
 | 17  | Deliverables: class diagram, statechart, TypeDoc, acceptance records AT-01–12                  | 7.1                                      | Standard                  | Not started | #14   |
+| 17a | Early deliverables: diagrams, architecture, TypeDoc fix, early acceptance records              | 7.1                                      | Standard                  | Done        | #25   |
