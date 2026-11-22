@@ -1,0 +1,267 @@
+{
+  "meta": {
+    "runAt": "2026-11-22T06:00:19.224Z",
+    "commit": "06d0e7939ead",
+    "branch": "feat/inc17a-early-deliverables",
+    "dirty": false,
+    "os": "macOS 26.6, Darwin 25.6.0 (arm64)",
+    "node": "v22.19.0",
+    "docker": "29.9.2",
+    "postgres": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2)",
+    "oasdiff": "1.35.0",
+    "database": "sma_acceptance_test"
+  },
+  "checks": [
+    {
+      "id": "AT-01",
+      "title": "Configuration",
+      "requirements": "FR-01, FR-02; UI-01",
+      "procedure": "Save and reload a valid configuration. Reject missing fields, an unreachable repository, an unparseable specification, and a repository over the size limits.",
+      "inputs": [
+        "A git repository copied from `demo/consumer` (branch `main`).",
+        "The Demo Shop v1 spec, `demo/api/specs/v1.yaml`.",
+        "Invalid inputs: empty bodies, a `localPath` that does not exist, a token value in `credentialRef`, the spec text `{bad`, and a git repository with 201 TypeScript files."
+      ],
+      "steps": [
+        "Create a git repository from demo/consumer to register",
+        "POST /api/repositories  {owner, name, defaultBranch: \"main\", localPath, credentialRef: \"SMA_ACCEPTANCE_UNSET_TOKEN\"}",
+        "POST /api/apis  {name: \"demo-shop\", specText: <v1.yaml>, filename: \"v1.yaml\"}",
+        "Restart: close the server and its database pool, start a new server on the same database",
+        "GET /api/repositories and GET /api/apis on the new server",
+        "POST /api/repositories  {} (missing fields)",
+        "POST /api/apis  {} (missing fields)",
+        "POST /api/repositories  {..., localPath: \"/nonexistent/acceptance-repo\"} (unreachable repository)",
+        "POST /api/repositories  {..., credentialRef: \"ghp_\" + 36 characters} (a token value instead of a variable name)",
+        "POST /api/apis  {name, specText: \"{bad\"} (unparseable specification)",
+        "POST /api/repositories  {..., localPath: <git repo with 201 .ts files>} (over the 200-file limit)",
+        "Count rows again: invalid input must not save anything or start any analysis (FR-02)"
+      ],
+      "notRun": [
+        {
+          "item": "UI-01: the Configuration view in the dashboard",
+          "reason": "the dashboard views are built in inc 14"
+        }
+      ],
+      "verdict": "PARTIAL",
+      "reason": "All 12 assertions that can run on this build passed; 1 required part(s) need later increments: UI-01: the Configuration view in the dashboard (the dashboard views are built in inc 14).",
+      "durationMs": 410,
+      "screenshot": true
+    },
+    {
+      "id": "AT-02",
+      "title": "Ingestion",
+      "requirements": "FR-03 to FR-06, FR-11, FR-12",
+      "procedure": "Verify baseline establishment, an identical-hash upload producing no new version, and a changed specification producing a version and a difference list. Verify a failed retrieval leaves the baseline unchanged.",
+      "inputs": [
+        "`demo/api/specs/v1.yaml` as YAML, then the same document as JSON with every key order reversed.",
+        "A spec URL that cannot be reached: `http://127.0.0.1:1/openapi.yaml`.",
+        "`demo/api/specs/v2.yaml`."
+      ],
+      "steps": [
+        "POST /api/apis  {name: \"demo-shop-at02\", specSourceUrl: \"http://127.0.0.1:1/openapi.yaml\"}",
+        "POST /api/apis/:id/specs  (v1.yaml, content-type application/yaml)",
+        "POST /api/apis/:id/specs  (the same document as JSON, every key order reversed)",
+        "POST /api/apis/:id/check  (retrieve from the unreachable URL)",
+        "POST /api/apis/:id/specs  (v2.yaml) — a later check after the failure",
+        "detectAndClassify(db, apiId, v1, v2)  — called directly; its HTTP route comes with the orchestrator (inc 13)",
+        "GET /api/apis/:id/checks",
+        "FR-12: POST /api/apis with pollIntervalSeconds 59, then 60 (polling is optional; when set it must be ≥ 60 s)"
+      ],
+      "notRun": [],
+      "verdict": "PASS",
+      "reason": "All 16 assertions passed.",
+      "durationMs": 170,
+      "screenshot": true
+    },
+    {
+      "id": "AT-03",
+      "title": "Detection",
+      "requirements": "FR-06 to FR-09",
+      "procedure": "Over the frozen pairs, verify every expected difference is found with its path, method, and pointer, and that evidence is retained.",
+      "inputs": [
+        "`demo/api/specs/v1.yaml` → `demo/api/specs/v2.yaml` (the only spec pair that exists before inc 15).",
+        "The migration note `demo/api/migration-notes/v1-to-v2.yaml`.",
+        "Hand-written expected differences: `DEMO_V1_V2` in `scripts/acceptance/expected.ts`."
+      ],
+      "steps": [
+        "POST /api/apis {name: \"demo-shop-at03\", specText: v1}, then POST /api/apis/:id/specs (v2)",
+        "POST /api/apis/:id/migration-notes  {fromVersionId: v1, toVersionId: v2, rawYaml: v1-to-v2.yaml}",
+        "detectAndClassify(db, apiId, v1, v2)",
+        "Compare with the 9 hand-written expected differences; check each pointer against the stored specs",
+        "GET /api/changes?apiId=<id>  (the stored rows, as the dashboard will read them)"
+      ],
+      "notRun": [
+        {
+          "item": "\"over the frozen pairs\": the other scenario pairs",
+          "reason": "the 20 frozen scenarios are built in inc 15; only the demo v1→v2 pair exists now"
+        }
+      ],
+      "verdict": "PARTIAL",
+      "reason": "All 21 assertions that can run on this build passed; 1 required part(s) need later increments: \"over the frozen pairs\": the other scenario pairs (the 20 frozen scenarios are built in inc 15; only the demo v1→v2 pair exists now).",
+      "durationMs": 127,
+      "screenshot": true
+    },
+    {
+      "id": "AT-04",
+      "title": "Classification and refusal",
+      "requirements": "FR-07, FR-10, FR-18, FR-36; BR-04, BR-05",
+      "procedure": "Verify breaking, safe, and unknown verdicts against hand-written labels. Verify that a change with no confirmed mapping is flagged and never enters repair.",
+      "inputs": [
+        "The classified v1→v2 changes from AT-03 (with the migration note).",
+        "v1 → v1 with `cancelled` added to the Order status enum (made in memory from v1.yaml).",
+        "v1 → v2 with no migration note (for a human confirmation).",
+        "Hand-written labels: `DEMO_V1_V2` and `DEMO_V1_ENUM` in `scripts/acceptance/expected.ts`."
+      ],
+      "steps": [
+        "Compare each v1→v2 verdict with its hand-written label (breaking / safe, category, mapping)",
+        "Unknown verdicts: POST /api/apis (v1), upload v1 with `cancelled` added to the Order status enum, detectAndClassify",
+        "Refusal: buildRepairContext() for changes without a confirmed mapping (the gate in front of Repair)",
+        "Human confirmation (FR-10): v1→v2 with no note, POST /api/changes/:id/confirm-mapping"
+      ],
+      "notRun": [
+        {
+          "item": "a run for an unconfirmed change is recorded as \"flagged\" with its reason, and opens no pull request (FR-18, FR-36)",
+          "reason": "the repair loop and the orchestrator that set run status are inc 11 and inc 13"
+        }
+      ],
+      "verdict": "PARTIAL",
+      "reason": "All 21 assertions that can run on this build passed; 1 required part(s) need later increments: a run for an unconfirmed change is recorded as \"flagged\" with its reason, and opens no pull request (FR-18, FR-36) (the repair loop and the orchestrator that set run status are inc 11 and inc 13).",
+      "durationMs": 237,
+      "screenshot": true
+    },
+    {
+      "id": "AT-05",
+      "title": "Location and coverage",
+      "requirements": "FR-13 to FR-17; BR-02",
+      "procedure": "Verify all three call patterns are located with file and line, and that dynamic URLs, wrappers, aliases, and excluded files are reported as coverage limits rather than treated as absent.",
+      "inputs": [
+        "A git repository copied from `demo/consumer` (src, test, config files), plus `src/alias.ts` (a re-exported axios alias), `.env`, and a symlink `src/linked.ts → customers.ts`.",
+        "A small clean git repository with one file that calls only `/health`.",
+        "Targets from the v1→v2 changes of AT-03. Hand-written expected call sites: `CONSUMER_CALL_SITES` in `scripts/acceptance/expected.ts`."
+      ],
+      "steps": [
+        "Create the consumer copy and register it: POST /api/repositories",
+        "locate(db, run, repo, {\"method\":\"GET\",\"path\":\"/customers/{id}\"})  — fetch",
+        "locate(db, run, repo, {\"method\":\"GET\",\"path\":\"/orders/{id}\"})  — axios instance",
+        "locate(db, run, repo, {\"method\":\"DELETE\",\"path\":\"/orders/{id}\"})  — axios static",
+        "locate(db, run, repo, {\"method\":\"GET\",\"path\":\"/orders/{id}/invoice\",\"operationId\":\"getOrderInvoice\"})  — generated client",
+        "Coverage limits in the same results: unsupported usage and skipped files (FR-15, FR-17)",
+        "A target nothing calls directly, in the same repository: GET /invoices/{orderId}",
+        "A clean repository whose only call is fetch(\"/health\"): locate GET /customers/{id}"
+      ],
+      "notRun": [],
+      "verdict": "PASS",
+      "reason": "All 22 assertions passed.",
+      "durationMs": 532,
+      "screenshot": true
+    },
+    {
+      "id": "AT-07",
+      "title": "Failures and guards (guards half)",
+      "requirements": "FR-11, FR-24, FR-27 to FR-31, FR-37; DR-04, DR-05; NFR-02, NFR-06",
+      "procedure": "Inject a source failure, a model failure, a container failure, a delivery failure, and a token-ceiling breach. Verify stage-specific reporting with no false success. Separately, submit patches that delete a test, reduce passing tests, add a type suppression, and edit configuration; verify each is rejected and names its guard.",
+      "inputs": [
+        "`demo/consumer` validated against API v1 in the Docker sandbox (the pre-patch baseline).",
+        "Patches: `delete-test.diff`, `ts-ignore.diff`, `tsconfig-loosen.diff` (from `packages/core/test/fixtures/patches/`) and `wrong-display-name.diff` (from `scripts/acceptance/patches/`, a source-only change that makes 2 passing tests fail)."
+      ],
+      "steps": [
+        "validate({repoPath: demo/consumer, env: {API_VERSION: \"v1\"}})  → pre-patch baseline in the sandbox",
+        "guardedValidate({patch: delete-test.diff, preResult: baseline})  — delete a test",
+        "guardedValidate({patch: wrong-display-name.diff, preResult: baseline})  — reduce passing tests",
+        "guardedValidate({patch: ts-ignore.diff, preResult: baseline})  — add a type suppression",
+        "guardedValidate({patch: tsconfig-loosen.diff, preResult: baseline})  — edit configuration",
+        "Store each rejection as an attempt (attempts table) and try two invalid rows (DR-04)"
+      ],
+      "notRun": [
+        {
+          "item": "the run stops with no further attempts after a cheating verdict (FR-31, end to end)",
+          "reason": "the repair loop is inc 11"
+        },
+        {
+          "item": "failure half: injected model, container and delivery failures and a token-ceiling breach, each reported as its own stage failure with no false success (FR-24, FR-37, NFR-02)",
+          "reason": "needs the repair loop (inc 11), delivery (inc 12) and the orchestrator (inc 13); the source-failure case is recorded in AT-02"
+        }
+      ],
+      "verdict": "PARTIAL",
+      "reason": "All 13 assertions that can run on this build passed; 2 required part(s) need later increments: the run stops with no further attempts after a cheating verdict (FR-31, end to end) (the repair loop is inc 11); failure half: injected model, container and delivery failures and a token-ceiling breach, each reported as its own stage failure with no false success (FR-24, FR-37, NFR-02) (needs the repair loop (inc 11), delivery (inc 12) and the orchestrator (inc 13); the source-failure case is recorded in AT-02).",
+      "durationMs": 11152,
+      "screenshot": true
+    },
+    {
+      "id": "AT-09",
+      "title": "Boundaries",
+      "requirements": "FR-15, FR-17; C-01",
+      "procedure": "Test an oversized repository, an oversized specification, a symbolic link, and an ambiguous change. Verify limits are reported and compatibility is never inferred from uninspected code.",
+      "inputs": [
+        "A git repository with 201 TypeScript files (limit: 200 files / 20,000 lines).",
+        "A spec upload of 5 MiB + 1 byte (limit: 5 MiB).",
+        "A git repository with `src/a.ts` and a symlink `src/link.ts → a.ts`.",
+        "v1 → v2 with no migration note (the `customer_name` → `full_name` rename is ambiguous without one)."
+      ],
+      "steps": [
+        "locateCallSites(<git repo with 201 .ts files>, GET /customers/{id})",
+        "POST /api/apis/:id/specs with a 5 MiB + 1 byte body",
+        "Ambiguous change: v1 → v2 with no migration note, detectAndClassify",
+        "Register a repository with a symbolic link, then locate GET /customers/{id}"
+      ],
+      "notRun": [],
+      "verdict": "PASS",
+      "reason": "All 8 assertions passed.",
+      "durationMs": 489,
+      "screenshot": true
+    },
+    {
+      "id": "AT-11",
+      "title": "Isolation",
+      "requirements": "FR-20, FR-32, FR-34; NFR-03; C-02, C-03",
+      "procedure": "Verify the container runs without network access, without host credentials, and as a non-root user, and that the developer’s working copy and the default branch are unchanged after a full run.",
+      "inputs": [
+        "The probe repository `apps/server/test/fixtures/validator/probe-repo`: 7 Vitest tests that try the network, print the user id and environment, and write to the file system.",
+        "Fake host credentials set in the server process: `GITHUB_TOKEN=ghp_FAKE…`, `ANTHROPIC_API_KEY=sk-ant-FAKE…`.",
+        "This repository (`demo/consumer`, test fixtures) before and after every container run of AT-07 and AT-11."
+      ],
+      "steps": [
+        "validate({repoPath: probe-repo, env: {API_VERSION: \"probe\"}}) with fake GITHUB_TOKEN and ANTHROPIC_API_KEY in process.env",
+        "buildRunArgs({phase: \"validate\", ...})  — the docker run flags the sandbox uses",
+        "git status --porcelain -- demo/consumer apps/server/test/fixtures; git rev-parse HEAD  (after all container runs)",
+        "docker ps --all --filter label=sma.validator=1"
+      ],
+      "notRun": [
+        {
+          "item": "the default branch is unchanged after a full pipeline run, and nothing is merged (FR-34, C-02)",
+          "reason": "delivery (inc 12) and the full pipeline run (inc 13) are not built; no code in this build pushes or merges"
+        }
+      ],
+      "verdict": "PARTIAL",
+      "reason": "All 8 assertions that can run on this build passed; 1 required part(s) need later increments: the default branch is unchanged after a full pipeline run, and nothing is merged (FR-34, C-02) (delivery (inc 12) and the full pipeline run (inc 13) are not built; no code in this build pushes or merges).",
+      "durationMs": 2825,
+      "screenshot": true
+    }
+  ],
+  "pending": [
+    {
+      "id": "AT-06",
+      "title": "Repair loop",
+      "requirements": "FR-18 to FR-23, FR-25, FR-26",
+      "waitsFor": "the repair loop (inc 11)"
+    },
+    {
+      "id": "AT-08",
+      "title": "Records, delivery, and export",
+      "requirements": "FR-33 to FR-35, FR-38 to FR-42; DR-01 to DR-03",
+      "waitsFor": "delivery (inc 12), the orchestrator and export (inc 13) and the dashboard (inc 14)"
+    },
+    {
+      "id": "AT-10",
+      "title": "Context and data protection",
+      "requirements": "FR-19; NFR-04, NFR-08",
+      "waitsFor": "the repair loop (inc 11) and delivery (inc 12), so the context, logs, reports and PR bodies can be inspected end to end"
+    },
+    {
+      "id": "AT-12",
+      "title": "Evaluation",
+      "requirements": "EV-01 to EV-09; NFR-01, NFR-05, NFR-07, NFR-09",
+      "waitsFor": "the scenarios (inc 15) and the evaluation script (inc 16)"
+    }
+  ]
+}

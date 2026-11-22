@@ -1,0 +1,267 @@
+# AT-05 Location and coverage  (FR-13 to FR-17; BR-02)
+
+$ Create the consumer copy and register it: POST /api/repositories
+repository:
+    {
+      "repositoryId": "0a4c29cf-ca9e-4d11-b7e3-030572c50839",
+      "head": "0932a36b504fb4a5401d3966f9494c207213cb02"
+    }
+
+$ locate(db, run, repo, {"method":"GET","path":"/customers/{id}"})  — fetch
+result:
+    {
+      "outcome": "affected",
+      "reason": "Supported calls to the changed operation were found; coverage limits are listed separately.",
+      "callSites": [
+        "src/customers.ts:12:21 fetch"
+      ],
+      "unsupported": [
+        "src/alias.ts:2 reexported_alias",
+        "test/setup.ts:40 unknown_client",
+        "src/generated/apiClient.ts:31 unknown_client",
+        "src/unsupported/dynamicUrl.ts:9 dynamic_url",
+        "src/unsupported/wrapper.ts:5 wrapper"
+      ],
+      "skipped": [
+        ".env (credential or environment file)",
+        ".git (dependency, metadata, configuration or build output)",
+        "package.json (not TypeScript source)",
+        "README.md (not TypeScript source)",
+        "src/config.ts (configuration file)",
+        "src/linked.ts (symbolic link not followed)",
+        "test/fixtures/v1/DELETE_orders_1.json (not TypeScript source)",
+        "test/fixtures/v1/DELETE_orders_2.json (not TypeScript source)",
+        "test/fixtures/v1/DELETE_orders_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_3.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_3.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_4.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-all.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-bogus.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-closed.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-open.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_1_invoice.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_2_invoice.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_2.json (not TypeScript source)",
+    … (39 more lines)
+  ✓ outcome is "affected"  → affected
+  ✓ found fetch at src/customers.ts:12 with column and excerpt (FR-13, FR-14)  → src/customers.ts:12:21
+  ✓ call sites, coverage and the locate stage result are stored; the run records the real commit  → {   "callSites": 1,   "coverage": 76,   "stageResults": 1,   "commitSha": "0932a36b504fb4a5401d3966f9494c207213cb02" }
+
+$ locate(db, run, repo, {"method":"GET","path":"/orders/{id}"})  — axios instance
+result:
+    {
+      "outcome": "affected",
+      "reason": "Supported calls to the changed operation were found; coverage limits are listed separately.",
+      "callSites": [
+        "src/orders.ts:27:26 axios_instance"
+      ],
+      "unsupported": [
+        "src/alias.ts:2 reexported_alias",
+        "test/setup.ts:40 unknown_client",
+        "src/generated/apiClient.ts:31 unknown_client",
+        "src/unsupported/dynamicUrl.ts:9 dynamic_url",
+        "src/unsupported/wrapper.ts:5 wrapper"
+      ],
+      "skipped": [
+        ".env (credential or environment file)",
+        ".git (dependency, metadata, configuration or build output)",
+        "package.json (not TypeScript source)",
+        "README.md (not TypeScript source)",
+        "src/config.ts (configuration file)",
+        "src/linked.ts (symbolic link not followed)",
+        "test/fixtures/v1/DELETE_orders_1.json (not TypeScript source)",
+        "test/fixtures/v1/DELETE_orders_2.json (not TypeScript source)",
+        "test/fixtures/v1/DELETE_orders_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_3.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_3.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_4.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-all.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-bogus.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-closed.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-open.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_1_invoice.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_2_invoice.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_2.json (not TypeScript source)",
+    … (39 more lines)
+  ✓ outcome is "affected"  → affected
+  ✓ found axios_instance at src/orders.ts:27 with column and excerpt (FR-13, FR-14)  → src/orders.ts:27:26
+  ✓ call sites, coverage and the locate stage result are stored; the run records the real commit  → {   "callSites": 1,   "coverage": 76,   "stageResults": 1,   "commitSha": "0932a36b504fb4a5401d3966f9494c207213cb02" }
+
+$ locate(db, run, repo, {"method":"DELETE","path":"/orders/{id}"})  — axios static
+result:
+    {
+      "outcome": "affected",
+      "reason": "Supported calls to the changed operation were found; coverage limits are listed separately.",
+      "callSites": [
+        "src/admin.ts:6:21 axios_static"
+      ],
+      "unsupported": [
+        "src/alias.ts:2 reexported_alias",
+        "test/setup.ts:40 unknown_client",
+        "src/generated/apiClient.ts:31 unknown_client",
+        "src/unsupported/dynamicUrl.ts:9 dynamic_url",
+        "src/unsupported/wrapper.ts:5 wrapper"
+      ],
+      "skipped": [
+        ".env (credential or environment file)",
+        ".git (dependency, metadata, configuration or build output)",
+        "package.json (not TypeScript source)",
+        "README.md (not TypeScript source)",
+        "src/config.ts (configuration file)",
+        "src/linked.ts (symbolic link not followed)",
+        "test/fixtures/v1/DELETE_orders_1.json (not TypeScript source)",
+        "test/fixtures/v1/DELETE_orders_2.json (not TypeScript source)",
+        "test/fixtures/v1/DELETE_orders_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_3.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_3.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_4.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-all.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-bogus.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-closed.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-open.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_1_invoice.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_2_invoice.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_2.json (not TypeScript source)",
+    … (39 more lines)
+  ✓ outcome is "affected"  → affected
+  ✓ found axios_static at src/admin.ts:6 with column and excerpt (FR-13, FR-14)  → src/admin.ts:6:21
+  ✓ call sites, coverage and the locate stage result are stored; the run records the real commit  → {   "callSites": 1,   "coverage": 76,   "stageResults": 1,   "commitSha": "0932a36b504fb4a5401d3966f9494c207213cb02" }
+
+$ locate(db, run, repo, {"method":"GET","path":"/orders/{id}/invoice","operationId":"getOrderInvoice"})  — generated client
+result:
+    {
+      "outcome": "affected",
+      "reason": "Supported calls to the changed operation were found; coverage limits are listed separately.",
+      "callSites": [
+        "src/invoices.ts:5:25 generated_client",
+        "src/invoices.ts:11:25 generated_client"
+      ],
+      "unsupported": [
+        "src/alias.ts:2 reexported_alias",
+        "test/setup.ts:40 unknown_client",
+        "src/generated/apiClient.ts:31 unknown_client",
+        "src/unsupported/dynamicUrl.ts:9 dynamic_url",
+        "src/unsupported/wrapper.ts:5 wrapper"
+      ],
+      "skipped": [
+        ".env (credential or environment file)",
+        ".git (dependency, metadata, configuration or build output)",
+        "package.json (not TypeScript source)",
+        "README.md (not TypeScript source)",
+        "src/config.ts (configuration file)",
+        "src/linked.ts (symbolic link not followed)",
+        "test/fixtures/v1/DELETE_orders_1.json (not TypeScript source)",
+        "test/fixtures/v1/DELETE_orders_2.json (not TypeScript source)",
+        "test/fixtures/v1/DELETE_orders_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_3.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_3.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_4.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-all.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-bogus.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-closed.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-open.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_1_invoice.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_2_invoice.json (not TypeScript source)",
+    … (40 more lines)
+  ✓ outcome is "affected"  → affected
+  ✓ found generated_client at src/invoices.ts:5 with column and excerpt (FR-13, FR-14)  → src/invoices.ts:5:25
+  ✓ found generated_client at src/invoices.ts:11 with column and excerpt (FR-13, FR-14)  → src/invoices.ts:11:25
+  ✓ call sites, coverage and the locate stage result are stored; the run records the real commit  → {   "callSites": 2,   "coverage": 76,   "stageResults": 1,   "commitSha": "0932a36b504fb4a5401d3966f9494c207213cb02" }
+
+$ Coverage limits in the same results: unsupported usage and skipped files (FR-15, FR-17)
+  ✓ dynamic_url in src/unsupported/dynamicUrl.ts is reported as unsupported usage  → src/unsupported/dynamicUrl.ts:9
+  ✓ wrapper in src/unsupported/wrapper.ts is reported as unsupported usage  → src/unsupported/wrapper.ts:5
+  ✓ reexported_alias in src/alias.ts is reported as unsupported usage  → src/alias.ts:2
+  ✓ .env is listed as skipped: "credential or environment file"  → {   "filePath": ".env",   "inspected": false,   "skipReason": "credential or environment file" }
+  ✓ src/linked.ts is listed as skipped: "symbolic link not followed"  → {   "filePath": "src/linked.ts",   "inspected": false,   "skipReason": "symbolic link not followed" }
+  ✓ vitest.config.ts is listed as skipped: "configuration file"  → {   "filePath": "vitest.config.ts",   "inspected": false,   "skipReason": "configuration file" }
+  ✓ README.md is listed as skipped: "not TypeScript source"  → {   "filePath": "README.md",   "inspected": false,   "skipReason": "not TypeScript source" }
+
+$ A target nothing calls directly, in the same repository: GET /invoices/{orderId}
+result:
+    {
+      "outcome": "needs_review",
+      "reason": "No supported matching call was found, but coverage is incomplete or usage is unsupported; needs review.",
+      "callSites": [],
+      "unsupported": [
+        "src/alias.ts:2 reexported_alias",
+        "test/setup.ts:40 unknown_client",
+        "src/generated/apiClient.ts:31 unknown_client",
+        "src/unsupported/dynamicUrl.ts:9 dynamic_url",
+        "src/unsupported/wrapper.ts:5 wrapper"
+      ],
+      "skipped": [
+        ".env (credential or environment file)",
+        ".git (dependency, metadata, configuration or build output)",
+        "package.json (not TypeScript source)",
+        "README.md (not TypeScript source)",
+        "src/config.ts (configuration file)",
+        "src/linked.ts (symbolic link not followed)",
+        "test/fixtures/v1/DELETE_orders_1.json (not TypeScript source)",
+        "test/fixtures/v1/DELETE_orders_2.json (not TypeScript source)",
+        "test/fixtures/v1/DELETE_orders_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_3.json (not TypeScript source)",
+        "test/fixtures/v1/GET_customers_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_3.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_4.json (not TypeScript source)",
+        "test/fixtures/v1/GET_invoices_999.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-all.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-bogus.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-closed.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders__status-open.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_1_invoice.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_1.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_2_invoice.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_2.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_3_invoice.json (not TypeScript source)",
+        "test/fixtures/v1/GET_orders_3.json (not TypeScript source)",
+    … (37 more lines)
+  ✓ no call found, but dynamic URL / wrapper / alias exist → "needs_review", never "not affected" (BR-02)  → needs_review
+
+$ A clean repository whose only call is fetch("/health"): locate GET /customers/{id}
+result:
+    {
+      "outcome": "not_affected",
+      "reason": "Not affected within supported scope",
+      "callSites": [],
+      "unsupported": [],
+      "skipped": [
+        ".git (dependency, metadata, configuration or build output)"
+      ],
+      "inspected": 1
+    }
+  ✓ complete coverage and no call → "not_affected" with the text "Not affected within supported scope" (FR-16)  → Not affected within supported scope
+
+RESULT AT-05: PASS — All 22 assertions passed.

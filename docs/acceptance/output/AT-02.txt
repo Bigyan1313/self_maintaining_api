@@ -1,0 +1,150 @@
+# AT-02 Ingestion  (FR-03 to FR-06, FR-11, FR-12)
+
+$ POST /api/apis  {name: "demo-shop-at02", specSourceUrl: "http://127.0.0.1:1/openapi.yaml"}
+HTTP 201:
+    {
+      "id": "18e32635-34df-4400-9c63-57e72ca3f2ae",
+      "name": "demo-shop-at02",
+      "specSourceUrl": "http://127.0.0.1:1/openapi.yaml",
+      "pollIntervalSeconds": null,
+      "baselineVersionId": null,
+      "createdAt": "2026-11-22T06:00:19.678Z"
+    }
+
+$ POST /api/apis/:id/specs  (v1.yaml, content-type application/yaml)
+HTTP 200:
+    {
+      "check": {
+        "id": "bd9b6098-f677-47dc-8692-8bb4742f8efd",
+        "apiId": "18e32635-34df-4400-9c63-57e72ca3f2ae",
+        "startedAt": "2026-11-22T06:00:19.683Z",
+        "finishedAt": "2026-11-22T06:00:19.712Z",
+        "outcome": {
+          "value": "baseline_established",
+          "label": "Baseline established"
+        },
+        "specVersionId": "14cd1e4f-bbd2-4e39-8b2f-049600b47daa",
+        "errorDetail": null
+      },
+      "baselineVersionId": "14cd1e4f-bbd2-4e39-8b2f-049600b47daa",
+      "sourceMode": {
+        "value": "uploaded",
+        "label": "Uploaded"
+      }
+    }
+  ✓ outcome is "baseline_established" (FR-04)  → baseline_established
+  ✓ the API baseline now points to this version  → 14cd1e4f-bbd2-4e39-8b2f-049600b47daa
+stored spec_versions row (FR-03):
+    {
+      "sourceMode": "uploaded",
+      "sourceIdentifier": "upload",
+      "retrievedAt": "2026-11-22T06:00:19.705Z",
+      "contentSha256": "a9409fde7fb4ef8384bec27da4cbafcf1650f0b355988a606a64fc23a1e75e51"
+    }
+  ✓ stored as normalized JSON with source, time and SHA-256 (FR-03)  → upload
+  ✓ the SHA-256 equals an independent hash of the key-sorted JSON  → a9409fde7fb4ef8384bec27da4cbafcf1650f0b355988a606a64fc23a1e75e51
+
+$ POST /api/apis/:id/specs  (the same document as JSON, every key order reversed)
+HTTP 200:
+    {
+      "id": "bfdb647f-4021-4d10-b61b-2cbeb8bff4d1",
+      "apiId": "18e32635-34df-4400-9c63-57e72ca3f2ae",
+      "startedAt": "2026-11-22T06:00:19.720Z",
+      "finishedAt": "2026-11-22T06:00:19.745Z",
+      "outcome": {
+        "value": "no_change",
+        "label": "No change"
+      },
+      "specVersionId": "14cd1e4f-bbd2-4e39-8b2f-049600b47daa",
+      "errorDetail": null
+    }
+  ✓ outcome is "no_change"  → no_change
+  ✓ no second version was stored (FR-05)  → 1
+
+$ POST /api/apis/:id/check  (retrieve from the unreachable URL)
+HTTP 422:
+    {
+      "check": {
+        "id": "caaab8d4-0f20-4a18-89ef-29709e7d134e",
+        "apiId": "18e32635-34df-4400-9c63-57e72ca3f2ae",
+        "startedAt": "2026-11-22T06:00:19.749Z",
+        "finishedAt": "2026-11-22T06:00:19.757Z",
+        "outcome": {
+          "value": "failed",
+          "label": "Check failed"
+        },
+        "specVersionId": null,
+        "errorDetail": "unreachable: Cannot retrieve specification"
+      },
+      "baselineVersionId": "14cd1e4f-bbd2-4e39-8b2f-049600b47daa",
+      "sourceMode": {
+        "value": "retrieved",
+        "label": "Retrieved from URL"
+      }
+    }
+  ✓ reported as a failed check (422), not as "no change" (FR-11)  → failed
+  ✓ the failure has an error detail  → unreachable: Cannot retrieve specification
+  ✓ the baseline is unchanged after the failure  → 14cd1e4f-bbd2-4e39-8b2f-049600b47daa
+
+$ POST /api/apis/:id/specs  (v2.yaml) — a later check after the failure
+HTTP 200:
+    {
+      "id": "5723ba83-e32f-456f-a3b8-5e0923e9dcf1",
+      "apiId": "18e32635-34df-4400-9c63-57e72ca3f2ae",
+      "startedAt": "2026-11-22T06:00:19.760Z",
+      "finishedAt": "2026-11-22T06:00:19.785Z",
+      "outcome": {
+        "value": "changed",
+        "label": "Changed"
+      },
+      "specVersionId": "b20bdc28-7ddd-47f7-8562-725e909b745b",
+      "errorDetail": null
+    }
+  ✓ outcome is "changed"  → changed
+  ✓ a second version is stored  → 2
+  ✓ the baseline is not moved by a check (it stays v1)  → 14cd1e4f-bbd2-4e39-8b2f-049600b47daa
+
+$ detectAndClassify(db, apiId, v1, v2)  — called directly; its HTTP route comes with the orchestrator (inc 13)
+difference list (FR-06):
+    [
+      "GET /customers/{id}  response-optional-property-added  /components/schemas/Customer/properties/phone",
+      "GET /customers/{id}  response-required-property-added  /components/schemas/Customer/properties/full_name",
+      "GET /customers/{id}  response-required-property-removed  /components/schemas/Customer/properties/customer_name",
+      "GET /invoices/{orderId}  endpoint-added  /paths/~1invoices~1{orderId}/get",
+      "GET /orders  request-parameter-became-required  /paths/~1orders/get/parameters/0",
+      "DELETE /orders/{id}  api-removed-without-deprecation  /paths/~1orders~1{id}/delete",
+      "GET /orders/{id}  response-property-pattern-added  /components/schemas/Order/properties/total",
+      "GET /orders/{id}  response-property-type-changed  /components/schemas/Order/properties/total",
+      "GET /orders/{id}/invoice  api-path-removed-without-deprecation  /paths/~1orders~1{id}~1invoice/get"
+    ]
+  ✓ a structured difference list is produced (9 differences)  → 9
+  ✓ every difference has a path, a method and a JSON pointer (FR-06)  → 0
+
+$ GET /api/apis/:id/checks
+outcomes with their text labels (the route lists newest first):
+    [
+      {
+        "value": "changed",
+        "label": "Changed"
+      },
+      {
+        "value": "failed",
+        "label": "Check failed"
+      },
+      {
+        "value": "no_change",
+        "label": "No change"
+      },
+      {
+        "value": "baseline_established",
+        "label": "Baseline established"
+      }
+    ]
+  ✓ all four checks are recorded (newest first), each with a text label  → [   "Changed",   "Check failed",   "No change",   "Baseline established" ]
+
+$ FR-12: POST /api/apis with pollIntervalSeconds 59, then 60 (polling is optional; when set it must be ≥ 60 s)
+59 s: HTTP 400 [{"field":"pollIntervalSeconds","message":"Missing or invalid field"}]
+60 s: HTTP 201
+  ✓ an interval under 60 s is rejected and 60 s is accepted  → [   400,   201 ]
+
+RESULT AT-02: PASS — All 16 assertions passed.

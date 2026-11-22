@@ -1,0 +1,151 @@
+# AT-01 Configuration  (FR-01, FR-02; UI-01)
+
+$ Create a git repository from demo/consumer to register
+localPath: <tmp>/at01-consumer
+
+$ POST /api/repositories  {owner, name, defaultBranch: "main", localPath, credentialRef: "SMA_ACCEPTANCE_UNSET_TOKEN"}
+HTTP 201:
+    {
+      "id": "8dcb96d0-d58d-4d9c-aea9-40dd350aad47",
+      "owner": "acceptance",
+      "name": "demo-consumer",
+      "defaultBranch": "main",
+      "credentialRef": "SMA_ACCEPTANCE_UNSET_TOKEN",
+      "localPath": "<tmp>/at01-consumer",
+      "createdAt": "2026-11-22T06:00:19.373Z"
+    }
+  ✓ valid repository is saved (201)  → 201
+  ✓ only the NAME of the credential variable is stored (FR-01)  → SMA_ACCEPTANCE_UNSET_TOKEN
+
+$ POST /api/apis  {name: "demo-shop", specText: <v1.yaml>, filename: "v1.yaml"}
+HTTP 201:
+    {
+      "id": "f428bf9f-519a-457d-9c28-1472deea2dec",
+      "name": "demo-shop",
+      "specSourceUrl": null,
+      "pollIntervalSeconds": null,
+      "baselineVersionId": "077ea975-2fbe-46a8-95e0-4cb0f5f11f32",
+      "createdAt": "2026-11-22T06:00:19.432Z"
+    }
+  ✓ valid API is saved (201) with a baseline version  → 201
+
+$ Restart: close the server and its database pool, start a new server on the same database
+
+$ GET /api/repositories and GET /api/apis on the new server
+reloaded repository:
+    {
+      "id": "8dcb96d0-d58d-4d9c-aea9-40dd350aad47",
+      "owner": "acceptance",
+      "name": "demo-consumer",
+      "defaultBranch": "main",
+      "credentialRef": "SMA_ACCEPTANCE_UNSET_TOKEN",
+      "localPath": "<tmp>/at01-consumer",
+      "createdAt": "2026-11-22T06:00:19.373Z"
+    }
+reloaded API:
+    {
+      "id": "f428bf9f-519a-457d-9c28-1472deea2dec",
+      "name": "demo-shop",
+      "specSourceUrl": null,
+      "pollIntervalSeconds": null,
+      "baselineVersionId": "077ea975-2fbe-46a8-95e0-4cb0f5f11f32",
+      "createdAt": "2026-11-22T06:00:19.432Z"
+    }
+  ✓ the repository is reloaded unchanged  → demo-consumer
+  ✓ the API is reloaded unchanged  → demo-shop
+row counts before the invalid requests:
+    {
+      "repositories": 1,
+      "apis": 1,
+      "spec_checks": 1,
+      "runs": 0
+    }
+
+$ POST /api/repositories  {} (missing fields)
+HTTP 400:
+    [
+      {
+        "field": "owner",
+        "message": "Missing or invalid field"
+      },
+      {
+        "field": "name",
+        "message": "Missing or invalid field"
+      },
+      {
+        "field": "defaultBranch",
+        "message": "Missing or invalid field"
+      },
+      {
+        "field": "localPath",
+        "message": "Missing or invalid field"
+      }
+    ]
+  ✓ rejected with 400 naming the field "owner"  → [   "owner",   "name",   "defaultBranch",   "localPath" ]
+
+$ POST /api/apis  {} (missing fields)
+HTTP 400:
+    [
+      {
+        "field": "name",
+        "message": "Missing or invalid field"
+      }
+    ]
+  ✓ rejected with 400 naming the field "name"  → [   "name" ]
+
+$ POST /api/repositories  {..., localPath: "/nonexistent/acceptance-repo"} (unreachable repository)
+HTTP 400:
+    [
+      {
+        "field": "localPath",
+        "message": "Repository is unreachable, unreadable, symbolic, or not a Git repository root"
+      }
+    ]
+  ✓ rejected with 400 naming the field "localPath"  → [   "localPath" ]
+
+$ POST /api/repositories  {..., credentialRef: "ghp_" + 36 characters} (a token value instead of a variable name)
+HTTP 400:
+    [
+      {
+        "field": "credentialRef",
+        "message": "Missing or invalid field"
+      },
+      {
+        "field": "credentialRef",
+        "message": "Supply only the credential environment variable name; remove credential values"
+      }
+    ]
+  ✓ rejected with 400 naming the field "credentialRef"  → [   "credentialRef",   "credentialRef" ]
+
+$ POST /api/apis  {name, specText: "{bad"} (unparseable specification)
+HTTP 400:
+    [
+      {
+        "field": "specText",
+        "message": "Flow map must end with a }"
+      }
+    ]
+  ✓ rejected with 400 naming the field "specText"  → [   "specText" ]
+
+$ POST /api/repositories  {..., localPath: <git repo with 201 .ts files>} (over the 200-file limit)
+HTTP 400:
+    [
+      {
+        "field": "localPath",
+        "message": "Repository exceeds 200 selected TypeScript files or 20,000 lines"
+      }
+    ]
+  ✓ rejected with 400 naming the field "localPath"  → [   "localPath" ]
+
+$ Count rows again: invalid input must not save anything or start any analysis (FR-02)
+row counts after:
+    {
+      "repositories": 1,
+      "apis": 1,
+      "spec_checks": 1,
+      "runs": 0
+    }
+  ✓ no repository, API, spec check or run was created by an invalid request  → {   "repositories": 1,   "apis": 1,   "spec_checks": 1,   "runs": 0 }
+  – NOT RUN: UI-01: the Configuration view in the dashboard (the dashboard views are built in inc 14)
+
+RESULT AT-01: PARTIAL — All 12 assertions that can run on this build passed; 1 required part(s) need later increments: UI-01: the Configuration view in the dashboard (the dashboard views are built in inc 14).
