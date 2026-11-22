@@ -11,7 +11,7 @@ charts use the same words as the database, the API, and the UI.
   (inc 11), delivery (inc 12), or the pipeline orchestrator (inc 13). The stored value already
   exists in the enum and in the database, but nothing sets it yet.
 
-`npm run diagrams:check` compares each chart with its enum. Every enum value must be a state in
+`npm run docs:check` compares each chart with its enum. Every enum value must be a state in
 the chart, and every state in the chart must be an enum value or a pseudo-state listed in that
 chart's table.
 

@@ -286,3 +286,42 @@ export function checkStatecharts(markdown: string, read: ReadText): string[] {
   }
   return problems;
 }
+
+/** Whether a repository path (file or folder) exists. */
+export type PathExists = (repoRelativePath: string) => boolean;
+
+/**
+ * Checks every relative Markdown link and image in a document. Web links (`http:`, `https:`,
+ * `mailto:`) and in-page anchors are skipped; `#fragment` and `?query` parts are ignored.
+ * @param markdown - The document text.
+ * @param docPath - The document's repository-relative path, e.g. `docs/architecture.md`.
+ * @param exists - File-system probe.
+ * @returns One problem per broken link.
+ */
+export function checkMarkdownLinks(
+  markdown: string,
+  docPath: string,
+  exists: PathExists,
+): string[] {
+  const problems: string[] = [];
+  const dir = docPath.split('/').slice(0, -1);
+  for (const m of markdown.matchAll(/!?\[[^\]]*\]\(([^)\s]+)\)/g)) {
+    const target = m[1]!;
+    if (/^(https?:|mailto:|#)/.test(target)) continue;
+    const parts = [...dir];
+    for (const seg of target.split(/[?#]/)[0]!.split('/')) {
+      if (seg === '' || seg === '.') continue;
+      if (seg === '..') {
+        if (!parts.length) {
+          parts.push('..');
+          break;
+        }
+        parts.pop();
+      } else parts.push(seg);
+    }
+    const resolved = parts.join('/');
+    if (parts.includes('..') || !exists(resolved))
+      problems.push(`${docPath}: broken link ${target}`);
+  }
+  return problems;
+}

@@ -2,7 +2,7 @@
 
 Built from the code on `main` after Increment 10. Every node below is a real TypeScript module,
 class, interface, or type in the repository. The table under the diagram lists each one with its
-file, and `npm run diagrams:check` checks that every listed symbol is in that file.
+file, and `npm run docs:check` checks that every listed symbol is in that file.
 
 **Notation**
 
@@ -588,7 +588,7 @@ classDiagram
 
 ## Every node and the file it lives in
 
-`npm run diagrams:check` reads this table. For each row it checks that the file exists and that
+`npm run docs:check` reads this table. For each row it checks that the file exists and that
 every symbol in backticks appears in it. It also checks that every node in the diagram has a row.
 
 | Node                    | Kind      | Symbols checked                                                                                                                                                    | File                                                |

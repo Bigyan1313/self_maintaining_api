@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   checkClassDiagram,
+  checkMarkdownLinks,
   checkStatecharts,
   classNodes,
   containsSymbol,
@@ -142,6 +143,23 @@ describe('checkStatecharts', () => {
       '## 3. Repair attempt loop: state invented is neither in ATTEMPT_OUTCOMES nor a listed helper',
       '## 3. Repair attempt loop: table row cheating is not in the chart',
       '## 3. Repair attempt loop: guard order g2 → g1 → g3 ≠ GUARD_ORDER g1 → g2 → g3',
+    ]);
+  });
+});
+
+describe('checkMarkdownLinks', () => {
+  const exists = (p: string) => ['docs/a.md', 'src', 'src/x.ts', 'README.md'].includes(p);
+  it('accepts relative files, folders, anchors and web links', () => {
+    const md =
+      '[a](a.md#top) [s](../src) [x](../src/x.ts) [r](../README.md) [w](https://e.x) [h](#here) ![i](./a.md)';
+    expect(checkMarkdownLinks(md, 'docs/arch.md', exists)).toEqual([]);
+  });
+  it('reports missing targets and links that leave the repository', () => {
+    expect(
+      checkMarkdownLinks('[m](missing.md) [o](../../outside.md)', 'docs/arch.md', exists),
+    ).toEqual([
+      'docs/arch.md: broken link missing.md',
+      'docs/arch.md: broken link ../../outside.md',
     ]);
   });
 });

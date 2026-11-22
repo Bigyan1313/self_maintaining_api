@@ -55,7 +55,7 @@ jobs:
       # API docs must build from a fresh checkout (the script builds @sma/core first).
       - run: npm run docs
       # Every class/state in docs/diagrams must still exist in the code.
-      - run: npm run diagrams:check
+      - run: npm run docs:check
       # Includes the Docker validator integration tests (AT-11); the runner has Docker.
       - run: npm test
       # The validator must leave the developer's repo and Docker clean (FR-20, NFR-06).
