@@ -138,6 +138,24 @@ async function fakeAdapter(folder: string, id: string) {
   ]);
 }
 
+/** Container errors/timeouts stop evaluation immediately instead of entering B3 retries. */
+export function timedValidator(
+  trial: EvaluationTrial,
+  runner: typeof validate = validate,
+): typeof validate {
+  return async (input) => {
+    const started = performance.now();
+    try {
+      const result = await runner(input);
+      if (result.ok && ['error', 'timeout'].includes(result.value.result.status))
+        throw new Error(`Container did not complete validation (${result.value.result.status})`);
+      return result;
+    } finally {
+      trial.containerMs += performance.now() - started;
+    }
+  };
+}
+
 /** Execute B1 directly or B2/B3 through the real persistent pipeline, always in Docker. */
 export async function runTrial(input: {
   db: Db;
@@ -197,14 +215,7 @@ export async function runTrial(input: {
   const started = performance.now();
   const repo = await committedCopy(join(folder, 'repo'), entry.repoCommit);
   try {
-    const timedValidate: typeof validate = async (data) => {
-      const start = performance.now();
-      try {
-        return await validate(data);
-      } finally {
-        trial.containerMs += performance.now() - start;
-      }
-    };
+    const timedValidate = timedValidator(trial);
     if (baseline === 'B1') {
       const out = await timedValidate({
         repoPath: repo,
@@ -319,12 +330,9 @@ export async function runTrial(input: {
         trial.outcome = run.status;
         trial.reason = adapter.stopped ?? run.failureDetail ?? run.flaggedReason ?? run.status;
         trial.attemptsUsed = adapter.calls;
-        trial.tokensIn = run.tokensIn;
-        trial.tokensOut = run.tokensOut;
-        trial.costUsd = Number(run.costUsd);
         trial.modelMs = adapter.modelMs;
         trial.guard = attempts.find((a) => a.guardName)?.guardName ?? null;
-        trial.patch = attempts.filter((a) => a.patch).at(-1)?.patch ?? '';
+        trial.patch = attempts.filter((a) => a.patch).at(-1)?.patch ?? trial.patch;
         trial.completed =
           run.status !== 'stage_failure' &&
           !adapter.stopped &&

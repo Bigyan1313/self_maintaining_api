@@ -4,9 +4,10 @@ import { readFile, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import type { SpecDifference } from '@sma/core';
+import { ok, type SpecDifference, type ValidationResult } from '@sma/core';
+import { sampleTrial } from './test-helpers.js';
 import type { Change } from '../apps/server/src/infra/db/index.js';
-import { committedCopy, detectionLabel, admit } from './runtime.js';
+import { committedCopy, detectionLabel, admit, timedValidator } from './runtime.js';
 const exec = promisify(execFile);
 const difference = (details: Record<string, unknown>): SpecDifference => ({
   id: 'd',
@@ -61,4 +62,21 @@ it('excludes a modified frozen hash before any container/model execution', async
     admissible: false,
     reason: expect.stringContaining('modified after freezing'),
   });
+});
+
+it('stops container timeouts/errors before B3 can make another model call', async () => {
+  for (const status of ['timeout', 'error'] as const) {
+    const trial = sampleTrial();
+    const validator = timedValidator(trial, async () =>
+      ok({
+        workDir: '/test',
+        commit: 'sha',
+        patchFiles: [],
+        timings: { installMs: 0, validateMs: 1 },
+        result: { status } as ValidationResult,
+      }),
+    );
+    await expect(validator({ repoPath: '/test' })).rejects.toThrow('Container did not complete');
+    expect(trial.containerMs).toBeGreaterThanOrEqual(0);
+  }
 });
