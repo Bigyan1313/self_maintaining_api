@@ -1,0 +1,2 @@
+Estimated model cost: $0–$5.70 (100 maximum calls, assuming 8k input/4096 output tokens each; actual prompts vary). Hard budget: $5.00. Existing billed/reserved: $0.000000.
+Live run requires interactive confirmation or --yes
