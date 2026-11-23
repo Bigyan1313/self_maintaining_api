@@ -1,0 +1,10 @@
+api: param-library-header
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: required_param_added
+    method: GET
+    path: /books
+    param: x-library
+    in: header
+    default_value: central

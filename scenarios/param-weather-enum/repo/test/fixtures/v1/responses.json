@@ -1,0 +1,28 @@
+[
+  {
+    "path": "/stations/{id}/forecast",
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "42"
+      }
+    ],
+    "requestParameters": {},
+    "body": {
+      "temperature": 21
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

@@ -1,0 +1,25 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "rename-tickets-generated",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/tickets/{id}",
+      "category": "field_renamed",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "field": "event_name",
+      "replacement": "title"
+    },
+    {
+      "method": "GET",
+      "path": "/tickets/{id}",
+      "field": "title",
+      "category": "other",
+      "classification": "safe",
+      "mappingStatus": "unconfirmed"
+    }
+  ]
+}

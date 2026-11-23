@@ -1,0 +1,15 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "removed-tickets-refuse",
+  "expectedOutcome": "refuse",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/tickets/{id}/resale",
+      "category": "endpoint_removed",
+      "classification": "breaking",
+      "mappingStatus": "unconfirmed"
+    }
+  ]
+}

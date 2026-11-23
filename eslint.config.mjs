@@ -15,6 +15,8 @@ export default tseslint.config(
       'apps/server/drizzle/**',
       // Standalone consumer repo (stands in for a developer's own project); it has its own tooling.
       'demo/consumer/**',
+      'scenarios/*/repo/**',
+      'scenarios/templates/**',
     ],
   },
   js.configs.recommended,

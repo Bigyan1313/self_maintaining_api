@@ -1,0 +1,10 @@
+api: rename-tickets-generated
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: field_renamed
+    method: GET
+    path: /tickets/{id}
+    location: response
+    old: event_name
+    new: title

@@ -1,0 +1,17 @@
+id: param-library-header
+category: required_param_added
+difficulty: moderate
+description: Required library header
+callPatterns:
+  - axios_static
+target:
+  method: GET
+  path: /books
+  operationId: getParamLibraryHeader
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: repair

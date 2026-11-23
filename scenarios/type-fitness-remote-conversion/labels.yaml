@@ -1,0 +1,18 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "type-fitness-remote-conversion",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/sessions/{id}",
+      "category": "field_type_changed",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "field": "distance",
+      "oldType": "number",
+      "newType": "string"
+    }
+  ]
+}

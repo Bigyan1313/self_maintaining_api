@@ -1,0 +1,32 @@
+[
+  {
+    "path": "/workouts",
+    "parameters": [
+      {
+        "name": "level",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "all",
+            "beginner"
+          ]
+        },
+        "example": "all"
+      }
+    ],
+    "requestParameters": {},
+    "body": {
+      "count": 2
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

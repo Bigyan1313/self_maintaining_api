@@ -1,0 +1,22 @@
+openapi: 3.0.3
+info:
+  title: removed-fitness-refuse
+  version: 2.0.0
+servers:
+  - url: https://api.example.test
+paths:
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+              example:
+                ok: true

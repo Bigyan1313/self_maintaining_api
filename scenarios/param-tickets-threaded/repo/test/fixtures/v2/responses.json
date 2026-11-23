@@ -1,0 +1,76 @@
+[
+  {
+    "path": "/events/42/tickets",
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "42"
+      },
+      {
+        "name": "region",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "us",
+            "eu"
+          ]
+        },
+        "example": "us"
+      }
+    ],
+    "requestParameters": {
+      "region": "us"
+    },
+    "body": {
+      "count": 6
+    }
+  },
+  {
+    "path": "/events/43/tickets",
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "42"
+      },
+      {
+        "name": "region",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "us",
+            "eu"
+          ]
+        },
+        "example": "us"
+      }
+    ],
+    "requestParameters": {
+      "region": "eu"
+    },
+    "body": {
+      "count": 9
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

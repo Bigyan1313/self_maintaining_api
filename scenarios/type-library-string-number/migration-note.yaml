@@ -1,0 +1,11 @@
+api: type-library-string-number
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: field_type_changed
+    method: GET
+    path: /books/{id}
+    field: pages
+    old_type: string
+    new_type: number
+    conversion: String(value)

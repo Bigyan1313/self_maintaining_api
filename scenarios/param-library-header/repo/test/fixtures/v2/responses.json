@@ -1,0 +1,28 @@
+[
+  {
+    "path": "/books",
+    "parameters": [
+      {
+        "name": "x-library",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "central"
+      }
+    ],
+    "requestParameters": {},
+    "body": {
+      "count": 4
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

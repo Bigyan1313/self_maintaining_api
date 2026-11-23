@@ -1,0 +1,41 @@
+[
+  {
+    "path": "/stations/{id}/forecast",
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "42"
+      },
+      {
+        "name": "units",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "metric",
+            "imperial"
+          ]
+        },
+        "example": "metric"
+      }
+    ],
+    "requestParameters": {},
+    "body": {
+      "temperature": 21
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

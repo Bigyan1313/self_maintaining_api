@@ -1,0 +1,11 @@
+api: type-fitness-remote-conversion
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: field_type_changed
+    method: GET
+    path: /sessions/{id}
+    field: distance
+    old_type: number
+    new_type: string
+    conversion: Number(value)

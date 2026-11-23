@@ -1,0 +1,311 @@
+{
+  "schemaVersion": 1,
+  "mode": "host",
+  "manifest": {
+    "schemaVersion": 1,
+    "scenarios": [
+      {
+        "id": "param-fitness-axios-instance",
+        "sha256": "3f38ee418d3a48e73402d7c7fb6733681f31c904f699ab9fc9b7a1b40f853df6",
+        "repoCommit": "7390c280ae7621ef4a13eafa8c71dde7bc9749dd"
+      },
+      {
+        "id": "param-library-header",
+        "sha256": "bd254e059469ce44978101e9fc5301f84b3202eadfa262e044bd12ced08597c1",
+        "repoCommit": "50ed201744b4f40d622c3deb51c11084aeb06130"
+      },
+      {
+        "id": "param-shop-query",
+        "sha256": "089f03476c90c9caa74bc2f50d5e1b686fdbb98e5b54966c1e8041298022bdb5",
+        "repoCommit": "fcde217ddf6a71b2cff055f90c91ff955996ee73"
+      },
+      {
+        "id": "param-tickets-threaded",
+        "sha256": "3e8ad527e6fa325725c684a387fe1601d252a1494d4f0a6044d69906bb702941",
+        "repoCommit": "33e1b0adea15043842d0c8d42a88f3f29d9222b5"
+      },
+      {
+        "id": "param-weather-enum",
+        "sha256": "2499163a6b4e81ebdbe2d36127473f016c94a73688a0ab9a00a734cb0c449ca5",
+        "repoCommit": "276aab93fab9974b7f7507c7424132760ea86e0f"
+      },
+      {
+        "id": "removed-fitness-refuse",
+        "sha256": "528a645b0147975c3c040f2ba70409a4eaa390c121a12be0f1fa30b35aca43ca",
+        "repoCommit": "6c8b1f6779060de29f5d02dfc9599e512dcca999"
+      },
+      {
+        "id": "removed-library-replacement",
+        "sha256": "dc45884511ebb722f28464f401317d2d3934d0ef60dfca81a3ad7191a06f40a5",
+        "repoCommit": "baa5930a19c7fd4727c3302deae4bb102e073912"
+      },
+      {
+        "id": "removed-shop-replacement",
+        "sha256": "921d75b3bb2c6ec88a04bcfe57ff442385030aee306aa3be63af43a7bb43a469",
+        "repoCommit": "988dc987915e134e8cce3b47b58a099cf8fba4b5"
+      },
+      {
+        "id": "removed-tickets-refuse",
+        "sha256": "2208703c51af4e39071a579e0d3467d9222f26b77f38aa3bd438fe9ea9e73855",
+        "repoCommit": "deff34e61b3fc4b53f8554e821726c5efd318f33"
+      },
+      {
+        "id": "removed-weather-refuse",
+        "sha256": "c30097ebc47bfef417bda324a796e773919b5bed34f380ee9975d9473d797faa",
+        "repoCommit": "47f8898a129ca7c224ef2fd62daa78c56437a4d3"
+      },
+      {
+        "id": "rename-fitness-destructure",
+        "sha256": "2afac9fe7c9ea47f0d084b035b59b0bcabeea3d8dbce216d238e7a0a1a172a67",
+        "repoCommit": "69e7977e8375d253b97bbf263743f8a3e9af6093"
+      },
+      {
+        "id": "rename-library-nested",
+        "sha256": "677e3701824a516167f770919cd1c52012aee0e4653e073c778f8264d337a219",
+        "repoCommit": "e3bd0242d77a99bd30a8b31b83387d20a13a8d5b"
+      },
+      {
+        "id": "rename-shop-flat",
+        "sha256": "b844cd8c74dadcabd91062c1722e5052ba09d814739c73397816f72a2980034e",
+        "repoCommit": "7688db443d7e2397330c5a9ae91458db2a9ad87e"
+      },
+      {
+        "id": "rename-tickets-generated",
+        "sha256": "2cca07c5d2540e2112d9701341545175442807bf3eff291242b225e3a5d0cbcf",
+        "repoCommit": "eba43b8c249f2683e33f840e981ae3767fcaa791"
+      },
+      {
+        "id": "rename-weather-two-files",
+        "sha256": "461c55a7e6d3ccc6b589c3b8586a2408546a3290a732def4a4999e6306d5a147",
+        "repoCommit": "95011efa38215e1dc277348b720b18b1a1ef088c"
+      },
+      {
+        "id": "type-fitness-remote-conversion",
+        "sha256": "f9379b427b3268362ecb46ee1b444e13bae314eb756d5802c2304bf3e0f2adbc",
+        "repoCommit": "89fec370a39ad999d7080e3a49096b5310fe5e86"
+      },
+      {
+        "id": "type-library-string-number",
+        "sha256": "b345807abcbb76d62d25c10962fe6beeed4da5a3cf32d04f81eddd7f4c4f9982",
+        "repoCommit": "22f3a66771111c477fa07ae59b898e7df9e028d9"
+      },
+      {
+        "id": "type-shop-number-string",
+        "sha256": "644f66e3cbcc6e92bb49f6dc2517ef7d04c7bd7821b76b7175f4e5a5d8306187",
+        "repoCommit": "523d73fc2219bfbec78dd1f2d1a22dd2ba78a1c2"
+      },
+      {
+        "id": "type-tickets-boolean-enum",
+        "sha256": "d304237d1cf2e91674909f294ba66208c37402e274c303cb4f531926f4b4fa72",
+        "repoCommit": "5340168513e219c46dd6dddd9f1f8823f8796154"
+      },
+      {
+        "id": "type-weather-timestamp",
+        "sha256": "75011d9999c65988527220d3be4658363d9e3a3be6d042d750bcc2577f65494c",
+        "repoCommit": "316a54685ce42abec210059ba61755016298194b"
+      }
+    ]
+  },
+  "results": [
+    {
+      "id": "param-fitness-axios-instance",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 1
+    },
+    {
+      "id": "param-library-header",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 1
+    },
+    {
+      "id": "param-shop-query",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 1
+    },
+    {
+      "id": "param-tickets-threaded",
+      "admissible": true,
+      "beforePassed": 3,
+      "beforeTotal": 3,
+      "afterPassed": 1,
+      "afterTotal": 3,
+      "detected": 1,
+      "located": 1
+    },
+    {
+      "id": "param-weather-enum",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 1
+    },
+    {
+      "id": "removed-fitness-refuse",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 1
+    },
+    {
+      "id": "removed-library-replacement",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 2,
+      "located": 1
+    },
+    {
+      "id": "removed-shop-replacement",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 2,
+      "located": 1
+    },
+    {
+      "id": "removed-tickets-refuse",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 2
+    },
+    {
+      "id": "removed-weather-refuse",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 1
+    },
+    {
+      "id": "rename-fitness-destructure",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 2,
+      "located": 1
+    },
+    {
+      "id": "rename-library-nested",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 2,
+      "located": 1
+    },
+    {
+      "id": "rename-shop-flat",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 2,
+      "located": 1
+    },
+    {
+      "id": "rename-tickets-generated",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 2,
+      "located": 2
+    },
+    {
+      "id": "rename-weather-two-files",
+      "admissible": true,
+      "beforePassed": 3,
+      "beforeTotal": 3,
+      "afterPassed": 1,
+      "afterTotal": 3,
+      "detected": 2,
+      "located": 2
+    },
+    {
+      "id": "type-fitness-remote-conversion",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 1
+    },
+    {
+      "id": "type-library-string-number",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 1
+    },
+    {
+      "id": "type-shop-number-string",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 1
+    },
+    {
+      "id": "type-tickets-boolean-enum",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 2,
+      "located": 2
+    },
+    {
+      "id": "type-weather-timestamp",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2,
+      "detected": 1,
+      "located": 1
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+openapi: 3.0.3
+info:
+  title: removed-shop-replacement
+  version: 1.0.0
+servers:
+  - url: https://api.example.test
+paths:
+  /orders/{id}/invoice:
+    get:
+      operationId: getRemovedShopReplacement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "42"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - invoice
+                properties:
+                  invoice:
+                    type: string
+              example:
+                invoice: INV-42
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+              example:
+                ok: true
