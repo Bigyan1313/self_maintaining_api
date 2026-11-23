@@ -2,5 +2,10 @@
   "name": "@sma/eval",
   "version": "0.1.0",
   "private": true,
-  "description": "Evaluation script and results (B1/B2/B3 baselines)."
+  "description": "Evaluation script and results (B1/B2/B3 baselines).",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  }
 }

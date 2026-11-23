@@ -29,5 +29,9 @@ export async function listEvaluationResults(
     .select()
     .from(evaluationResults)
     .where(eq(evaluationResults.evalLabel, evalLabel))
-    .orderBy(asc(evaluationResults.scenarioId), asc(evaluationResults.baseline));
+    .orderBy(
+      asc(evaluationResults.scenarioId),
+      asc(evaluationResults.baseline),
+      asc(evaluationResults.repeat),
+    );
 }

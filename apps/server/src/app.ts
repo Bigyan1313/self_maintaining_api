@@ -1,3 +1,4 @@
+import { registerResultsRoutes } from './http/results-routes.js';
 import { registerClassifyRoutes } from './http/classify-routes.js';
 /**
  * HTTP application factory for the Self-Maintaining APIs server.
@@ -50,6 +51,7 @@ export function buildApp(opts: FastifyServerOptions = {}, deps?: AppDependencies
 
   if (deps) {
     const { orchestrator } = deps;
+    void app.register(registerResultsRoutes, { db: deps.db });
     void app.register(registerIngestRoutes, {
       ...deps,
       ...(orchestrator && !deps.checkSpec

@@ -14,3 +14,10 @@ exports/
 test-results/
 apps/web/test-results/
 apps/web/playwright-report/
+
+# Evaluation transient files; selected result artifacts may be committed.
+eval/results/**/.lock
+eval/results/**/*.tmp
+
+# Evaluation outputs are local by default; acceptance snapshots are explicitly committed.
+eval/results/
