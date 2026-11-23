@@ -1,0 +1,1850 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.317
+           Opus 5.5 · Claude Pro
+ ▘▘   ▝▝   ~/Desktop/self_maintaining_api
+
+
+❯ /clear                                                                        
+
+❯ start increment 13                                                            
+
+⏺ I'll start by reading the required context files.
+
+  Listed 1 directory (ctrl+o to expand)
+
+⏺ The increment 13 prompt already exists. Let me check the inc12 PR state, the
+  issue assignment, and read the prompt.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Issue #10 is assigned to Bigyan1313 and PR #27 is merged. Running the
+  start-of-increment steps.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now let me survey the existing code that the orchestrator must wire together.
+
+  Read 5 files, ran 2 shell commands (ctrl+o to expand)
+
+⏺ Issue #10 is assigned to you and the branch feat/inc13-orchestrator is set up;
+  I'm reading the existing stage functions so I can wire them together, then
+  I'll check the locate and repair input shapes before writing the orchestrator.
+
+  Listed 1 directory, ran 5 shell commands (ctrl+o to expand)
+
+⏺ Survey is done; one gap found: if detect fails after a new spec is ingested,
+  re-checking returns "no change", so the orchestrator will trigger detect on
+  any ingested version that differs from baseline. Checking the sandbox env
+  allow-list next, then writing the orchestrator.
+
+  Searched for 1 pattern, ran 3 shell commands (ctrl+o to expand)
+
+⏺ Starting implementation. First the schema change: a nullable failure_stage on
+  spec_checks, so a detect/classify failure in the spec-check flow is recorded
+  with its stage (UC-02 postcondition).
+
+⏺ Update(apps/server/src/infra/db/schema.ts)
+  ⎿  Added 10 lines
+      155      outcome: specCheckOutcomeEnum('outcome').notNull(),
+      156      specVersionId: uuid('spec_version_id').references(() => sp
+           ecVersions.id),
+      157      errorDetail: text('error_detail'),
+      158 +    /** Stage that failed (ingest, detect or classify); set ex
+          +actly when the check failed (UC-02). */                       
+      159 +    failureStage: stageEnum('failure_stage'),                 
+      160    },
+      161    (t) => [
+      162      check(
+      163        'spec_checks_failed_has_error_detail',
+      164        sql`${t.outcome} <> 'failed' OR ${t.errorDetail} IS NOT 
+           NULL`,
+      165      ),
+      166 +    check(                                                    
+      167 +      'spec_checks_failed_iff_failure_stage',                 
+      168 +      sql`(${t.outcome} = 'failed') = (${t.failureStage} IS NO
+          +T NULL)`,                                                     
+      169 +    ),                                                        
+      170 +    check(                                                    
+      171 +      'spec_checks_failure_stage_in_check',                   
+      172 +      sql`${t.failureStage} IS NULL OR ${t.failureStage} IN ('
+          +ingest', 'detect', 'classify')`,                              
+      173 +    ),                                                        
+      174      index('spec_checks_api_id_idx').on(t.apiId),
+      175      index('spec_checks_spec_version_id_idx').on(t.specVersionI
+           d),
+      176    ],
+
+⏺ Bash(npm run db:generate -- --name spec_check_failure_stage 2>&1 | tail -5 &&
+      ls apps/server/drizzle && cat apps/server/drizzle/0002_*.sql)
+  ⎿  runs 19 columns 3 indexes 3 fks
+     spec_checks 8 columns 2 indexes 2 fks
+     spec_versions 7 columns 1 indexes 1 fks
+     … +14 lines (ctrl+o to expand)
+  ⎿  Created apps/server/drizzle/0002_sloppy_microchip.sql (+3 -0)
+      1 +ALTER TABLE "spec_checks" ADD COLUMN "failure_stage" "stage";-->
+        + statement-breakpoint                                           
+      2 +ALTER TABLE "spec_checks" ADD CONSTRAINT "spec_checks_failed_iff
+        +_failure_stage" CHECK (("spec_checks"."outcome" = 'failed') = ("
+        +spec_checks"."failure_stage" IS NOT NULL));--> statement-breakpo
+        +int                                                             
+      3 +ALTER TABLE "spec_checks" ADD CONSTRAINT "spec_checks_failure_st
+        +age_in_check" CHECK ("spec_checks"."failure_stage" IS NULL OR "s
+        +pec_checks"."failure_stage" IN ('ingest', 'detect', 'classify'))
+        +;                                                               
+  ⎿  Updated apps/server/drizzle/meta/_journal.json (+7 -0)
+      15        "when": 1793645137375,
+      16        "tag": "0001_append_only_triggers",
+      17        "breakpoints": true
+      18 +    },                                                         
+      19 +    {                                                          
+      20 +      "idx": 2,                                                
+      21 +      "version": "7",                                          
+      22 +      "when": 1795372794362,                                   
+      23 +      "tag": "0002_sloppy_microchip",                          
+      24 +      "breakpoints": true                                      
+      25      }
+      26    ]
+      27  }
+  ⎿  … 1 more file changed
+
+⏺ The --name flag didn't pass through; I'll rename the file and journal tag, and
+  add a backfill so existing failed checks satisfy the new constraint.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api/apps/server/drizzle && mv
+      0002_sloppy_microchip.sql 0002_spec_check_failure_stage.sql && sed -i ''
+      's/0002_sloppy_m…)
+  ⎿  -- Records WHICH stage a failed spec check failed in (UC-02 postcondit
+     ion, NFR-02).
+     -- Checks that failed before this migration all failed in ingest (only
+     … +14 lines (ctrl+o to expand)
+  ⎿  Deleted apps/server/drizzle/0002_sloppy_microchip.sql (+0 -3)
+      1 -ALTER TABLE "spec_checks" ADD COLUMN "failure_stage" "stage";-->
+        - statement-breakpoint                                           
+      2 -ALTER TABLE "spec_checks" ADD CONSTRAINT "spec_checks_failed_iff
+        -_failure_stage" CHECK (("spec_checks"."outcome" = 'failed') = ("
+        -spec_checks"."failure_stage" IS NOT NULL));--> statement-breakpo
+        -int                                                             
+      3 -ALTER TABLE "spec_checks" ADD CONSTRAINT "spec_checks_failure_st
+        -age_in_check" CHECK ("spec_checks"."failure_stage" IS NULL OR "s
+        -pec_checks"."failure_stage" IN ('ingest', 'detect', 'classify'))
+        -;                                                               
+  ⎿  Created apps/server/drizzle/0002_spec_check_failure_stage.sql (+6 -0)
+      1 +-- Records WHICH stage a failed spec check failed in (UC-02 post
+        +condition, NFR-02).                                             
+      2 +-- Checks that failed before this migration all failed in ingest
+        + (only ingest wrote checks).                                    
+      3 +ALTER TABLE "spec_checks" ADD COLUMN "failure_stage" "stage";-->
+        + statement-breakpoint                                           
+      4 +UPDATE "spec_checks" SET "failure_stage" = 'ingest' WHERE "outco
+        +me" = 'failed';--> statement-breakpoint                         
+      5 +ALTER TABLE "spec_checks" ADD CONSTRAINT "spec_checks_failed_iff
+        +_failure_stage" CHECK (("spec_checks"."outcome" = 'failed') = ("
+        +spec_checks"."failure_stage" IS NOT NULL));--> statement-breakpo
+        +int                                                             
+      6 +ALTER TABLE "spec_checks" ADD CONSTRAINT "spec_checks_failure_st
+        +age_in_check" CHECK ("spec_checks"."failure_stage" IS NULL OR "s
+        +pec_checks"."failure_stage" IN ('ingest', 'detect', 'classify'))
+        +;                                                               
+  ⎿  Updated apps/server/drizzle/meta/_journal.json (+1 -1)
+      20        "idx": 2,
+      21        "version": "7",
+      22        "when": 1795372794362,
+      23 -      "tag": "0002_sloppy_microchip",                          
+      23 +      "tag": "0002_spec_check_failure_stage",                  
+      24        "breakpoints": true
+      25      }
+      26    ]
+
+⏺ Now update ingest() to set failureStage: 'ingest' on failed checks, and the
+  contract to carry the labeled stage.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api && python3 - <<'EOF'
+      p='apps/server/src/pipeline/ingest.ts'…)
+  ⎿  apps/server/src/pipeline/ingest.ts:12:  type IngestResponse,
+     apps/server/src/pipeline/ingest.ts:50:): Promise<IngestResponse> {
+  ⎿  Updated apps/server/src/http/ingest-routes.ts (+4 -0)
+       5    IdParamsSchema,
+       6    MAX_SPEC_BYTES,
+       7    SPEC_CHECK_OUTCOME_LABELS,
+       8 +  STAGE_LABELS,                                                
+       9    type FieldErrors,
+      10  } from '@sma/core';
+      11  import {
+     ...
+      145      return checks.map((c) => ({
+      146        ...c,
+      147        outcome: { value: c.outcome, label: SPEC_CHECK_OUTCOME_L
+           ABELS[c.outcome] },
+      148 +      failureStage: c.failureStage                            
+      149 +        ? { value: c.failureStage, label: STAGE_LABELS[c.failu
+          +reStage] }                                                    
+      150 +        : null,                                               
+      151      }));
+      152    });
+      153    app.post<{ Params: { id: string } }>('/api/apis/:id/check', 
+           async (request, reply) => {
+  ⎿  Updated apps/server/src/pipeline/ingest.ts (+5 -0)
+       8    parseSpec,
+       9    SPEC_CHECK_OUTCOME_LABELS,
+      10    SOURCE_MODE_LABELS,
+      11 +  STAGE_LABELS,                                                
+      12    type IngestResponse,
+      13    type SourceMode,
+      14    type SpecError,
+     ...
+      145            outcome,
+      146            specVersionId: versionId,
+      147            errorDetail,
+      148 +          failureStage: outcome === 'failed' ? 'ingest' : null
+          +,                                                             
+      149            startedAt: started.time,
+      150            finishedAt: sql`clock_timestamp()`,
+      151          })
+     ...
+      158          startedAt: check.startedAt.toISOString(),
+      159          finishedAt: check.finishedAt?.toISOString() ?? null,
+      160          outcome: { value: outcome, label: SPEC_CHECK_OUTCOME_L
+           ABELS[outcome] },
+      161 +        failureStage: check.failureStage                      
+      162 +          ? { value: check.failureStage, label: STAGE_LABELS[c
+          +heck.failureStage] }                                          
+      163 +          : null,                                             
+      164        },
+      165        baselineVersionId,
+      166        sourceMode: { value: mode, label: SOURCE_MODE_LABELS[mod
+           e] },
+  ⎿  Updated packages/core/src/api/contract.ts (+17 -1)
+       83    outcome: labeled(enums.SPEC_CHECK_OUTCOMES, enums.SPEC_CHECK
+           _OUTCOME_LABELS),
+       84    specVersionId: id.nullable(),
+       85    errorDetail: z.string().nullable(),
+       86 +  /** Stage a failed check failed in (ingest, detect or classi
+          +fy). @implementedIn inc13 */                                  
+       87 +  failureStage: labeled(enums.STAGES, enums.STAGE_LABELS).null
+          +able().optional(),                                            
+       88  });
+       89  /** Check history returned by GET /api/apis/:id/checks. @imple
+           mentedIn inc04 */
+       90  export const SpecChecksSchema = z.array(SpecCheckSchema);
+       89 -/** Upload/check response. @implementedIn inc04 */            
+       91 +/**                                                           
+       92 + * What the spec-check flow did after ingest (UC-02 steps 3 to
+          + 6): how many classified changes                              
+       93 + * the pair has, whether the baseline advanced, and the stage 
+          +failure, if any. @implementedIn inc13                         
+       94 + */                                                           
+       95 +export const SpecPipelineSchema = z.object({                  
+       96 +  changeIds: z.array(id),                                     
+       97 +  baselineAdvanced: z.boolean(),                              
+       98 +  failure: z                                                  
+       99 +    .object({ stage: labeled(enums.STAGES, enums.STAGE_LABELS)
+          +, detail: z.string() })                                       
+      100 +    .nullable(),                                              
+      101 +});                                                           
+      102 +/** Spec-check pipeline summary. */                           
+      103 +export type SpecPipeline = z.infer<typeof SpecPipelineSchema>;
+      104 +/** Upload/check response. `pipeline` is present when the orch
+          +estrator ran. @implementedIn inc04 */                         
+      105  export const IngestResponseSchema = z.object({
+      106    check: SpecCheckSchema,
+      107    baselineVersionId: id.nullable(),
+      108    sourceMode: labeled(enums.SOURCE_MODES, enums.SOURCE_MODE_LA
+           BELS),
+      109 +  pipeline: SpecPipelineSchema.optional(),                    
+      110  });
+      111  /** Serialized ingestion response. */
+      112  export type IngestResponse = z.infer<typeof IngestResponseSche
+           ma>;
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+⏺ I'll adjust those two existing tests minimally (add failureStage: 'ingest') so
+  each still tests exactly one constraint.
+
+⏺ Bash(python3 - <<'EOF'
+      p='apps/server/test/db-happy-path.test.ts'…)
+  ⎿  [⣷] applying migrations...[✓] migrations applied successfully!
+  ⎿  Updated apps/server/test/db-constraints.test.ts (+1 -1)
+      309  
+      310    it('rejects a spec_check "failed" with no error_detail (FR-1
+           1)', async () => {
+      311      await expectDbRejects(
+      312 -      insertSpecCheck(client.db, { apiId: chain.api.id, outcom
+          -e: 'failed' }),                                               
+      312 +      insertSpecCheck(client.db, { apiId: chain.api.id, outcom
+          +e: 'failed', failureStage: 'ingest' }),                       
+      313        check('spec_checks_failed_has_error_detail'),
+      314      );
+      315    });
+  ⎿  Updated apps/server/test/db-happy-path.test.ts (+1 -0)
+      81        apiId: api.id,
+      82        outcome: 'failed',
+      83        errorDetail: 'HTTP 503 from provider',
+      84 +      failureStage: 'ingest',                                  
+      85        finishedAt: new Date(),
+      86      });
+      87      expect((await listSpecChecks(db, api.id)).map((c) => c.outc
+          ome).sort()).toEqual([
+
+⏺ Schema done. Now the pure mapping helpers (DB change row → locate target and
+  repair input).
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(apps/server/src/pipeline/run-inputs.ts)
+  ⎿  Wrote 166 lines to apps/server/src/pipeline/run-inputs.ts
+       1 /**
+       2  * Pure mapping from stored rows to the inputs the stage functio
+         ns take. The orchestrator never
+       3  * accepts change evidence from a client: everything comes from 
+         the stored change (BR-04).
+       4  * @packageDocumentation
+       5  */
+       6 import {
+       7   HTTP_METHODS,
+       8   MigrationMappingSchema,
+     … +158 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(apps/server/src/pipeline/run-detail.ts)
+  ⎿  Wrote 278 lines to apps/server/src/pipeline/run-detail.ts
+       1 /**
+       2  * Run records as the wire contract shows them (RunSchema, RunDe
+         tailSchema): every outcome as a
+       3  * `{ value, label }` pair (FR-42), every timestamp as ISO-8601,
+          and every string scrubbed of
+       4  * credentials (NFR-04). The Run Detail endpoint and the JSON/HT
+         ML export use the same builder,
+       5  * so the export always matches what is stored (FR-41).
+       6  * @packageDocumentation
+       7  */
+     … +271 lines (ctrl+o to expand)
+
+⏺ Now the export module (JSON + self-contained HTML + safe file writing).
+⏺ Write(apps/server/src/pipeline/export.ts)
+  ⎿  Wrote 286 lines to apps/server/src/pipeline/export.ts
+       1 /**
+       2  * Run export (FR-41, DR-05): the whole run record as JSON and a
+         s one readable, self-contained
+       3  * HTML page. Both are built from {@link RunDetail}, the same sc
+         rubbed record the Run Detail
+       4  * endpoint returns, so an export never holds a credential (NFR-
+         04) and always matches the DB.
+       5  * @packageDocumentation
+       6  */
+       7 import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
+     … +279 lines (ctrl+o to expand)
+
+⏺ Fix a gap: if the second rename fails, the first file would already be in
+  place. Roll that back too.
+
+⏺ Bash(python3 - <<'EOF'
+      p='apps/server/src/pipeline/export.ts'…)
+  ⎿  Updated apps/server/src/pipeline/export.ts (+9 -2)
+      271      { final: `${base}.json`, temp: `${base}.json.tmp-${process
+           .pid}`, body: exportRunJson(detail) },
+      272      { final: `${base}.html`, temp: `${base}.html.tmp-${process
+           .pid}`, body: renderRunHtml(detail) },
+      273    ];
+      274 +  const placed: string[] = [];                                
+      275    try {
+      276      await mkdir(root, { recursive: true });
+      277      for (const f of files) await writeFile(f.temp, f.body, { e
+           ncoding: 'utf8', flag: 'w' });
+      277 -    for (const f of files) await rename(f.temp, f.final);     
+      278 +    for (const f of files) {                                  
+      279 +      await rename(f.temp, f.final);                          
+      280 +      placed.push(f.final);                                   
+      281 +    }                                                         
+      282    } catch (cause) {
+      279 -    await Promise.all(files.map((f) => rm(f.temp, { force: tru
+          -e }).catch(() => undefined)));                                
+      283 +    // No half-saved report: remove temporaries and anything t
+          +his call already put in place.                                
+      284 +    await Promise.all(                                        
+      285 +      [...files.map((f) => f.temp), ...placed].map((p) => rm(p
+          +, { force: true }).catch(() => undefined)),                   
+      286 +    );                                                        
+      287      const code = (cause as { code?: string }).code;
+      288      throw new ExportWriteError(
+      289        `Could not write the run report${code ? ` (${code})` : '
+           '}; it was not saved.`,
+
+⏺ Now the orchestrator itself. Let me check the adapter's factory export for
+  production wiring.
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+⏺ RUN_TOKEN_CEILING already exists in .env.example; I'll use it. Writing the
+  orchestrator now.
+
+⏺ Write(apps/server/src/pipeline/orchestrator.ts)
+  ⎿  Wrote 665 lines to apps/server/src/pipeline/orchestrator.ts
+       1 /**
+       2  * Pipeline orchestrator (FR-38, FR-39, NFR-01, NFR-02, BR-06).
+       3  *
+       4  * - **Spec-check flow** (per API, UC-02): ingest → if the inges
+         ted version is not the baseline:
+       5  *   detect + classify → **then** advance the baseline. A failed
+          detect/classify is recorded as a
+       6  *   failed spec check naming its stage, and the baseline is lef
+         t alone.
+       7  * - **Run flow** (per change × repository): create the run → lo
+     … +659 lines (~24 KB) (ctrl+o to expand)
+
+⏺ Now the HTTP routes and the contract mode field.
+
+⏺ Bash(python3 - <<'EOF'
+      p='packages/core/src/api/contract.ts'…)
+  ⎿  22:    '/api/runs/:id/export',
+  ⎿  Updated packages/core/src/api/contract.ts (+12 -1)
+      152  export const ConfirmMappingRequestSchema = z
+      153    .object({ mapping: z.record(z.string(), json), confirmedBy: 
+           text })
+      154    .strict();
+      155 +/** Repair modes: `full` (B3, default) or `single_shot` (B2, e
+          +valuation only). @implementedIn inc13 */                      
+      156 +export const RUN_MODES = ['full', 'single_shot'] as const;    
+      157  /** Start one run. @implementedIn inc13 */
+      156 -export const StartRunRequestSchema = z.object({ changeId: id, 
+          -repositoryId: id }).strict();                                 
+      158 +export const StartRunRequestSchema = z                        
+      159 +  .object({ changeId: id, repositoryId: id, mode: z.enum(RUN_M
+          +ODES).optional() })                                           
+      160 +  .strict();                                                  
+      161  /** Run metadata with text labels for every outcome. @implemen
+           tedIn inc13 */
+      162  export const RunSchema = z.object({
+      163    id,
+     ...
+      245  export const ExportQuerySchema = z.object({ format: z.enum(['j
+           son', 'html']) });
+      246  /** HTML export response. @implementedIn inc13 */
+      247  export const HtmlExportSchema = z.string();
+      248 +/** Response of POST /api/runs/:id/export: both files were wri
+          +tten (DR-05). @implementedIn inc13 */                         
+      249 +export const SavedExportSchema = z.object({                   
+      250 +  saved: z.literal(true),                                     
+      251 +  json: z.string(),                                           
+      252 +  html: z.string(),                                           
+      253 +});                                                           
+      254  /** Evaluation label selector (omitted means latest). @impleme
+           ntedIn inc16 */
+      255  export const ResultsQuerySchema = z.object({ label: text.optio
+           nal() });
+      256  /** Persisted scenario evaluation row. @implementedIn inc16 */
+     ...
+      323    export: {
+      324      path: '/api/runs/:id/export',
+      325      GET: { query: ExportQuerySchema, response: z.union([RunDet
+           ailSchema, HtmlExportSchema]) },
+      326 +    POST: { request: RunActionRequestSchema, response: SavedEx
+          +portSchema },                                                 
+      327    },
+      328    results: { path: '/api/results', GET: { query: ResultsQueryS
+           chema, response: ResultsSchema } },
+      329  } as const;
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Contract is fine. Now run-routes.ts:
+
+⏺ Write(apps/server/src/http/run-routes.ts)
+  ⎿  Wrote 166 lines to apps/server/src/http/run-routes.ts
+       1 /**
+       2  * Run endpoints (`@implementedIn inc13` in the API contract): s
+         tart, list, detail, reanalyze,
+       3  * retry delivery, and export (FR-38 to FR-41, DR-05).
+       4  *
+       5  * Starting a run returns `202 Accepted` with the `running` run 
+         as soon as its row exists; the
+       6  * stages continue in the background and the client polls `GET /
+         api/runs/:id`. A second start
+       7  * while a run is in flight gets `409` (one run at a time, SRS 2
+     … +160 lines (~6 KB) (ctrl+o to expand)
+
+⏺ Now wire ingest routes to the spec-check flow (opt-in) and register run routes
+  in app.ts.
+
+⏺ Bash(python3 - <<'EOF'
+      p='apps/server/src/http/ingest-routes.ts'…)
+  ⎿  > @sma/server@0.1.0 pretypecheck
+     > npm run build:core
+     … +11 lines (ctrl+o to expand)
+  ⎿  Updated .env.example (+3 -0)
+      21  
+      22  # Maximum tokens per repair run; exceeding it aborts the run (F
+          R-24)
+      23  RUN_TOKEN_CEILING=200000
+      24 +                                                               
+      25 +# Optional: API_VERSION passed into the validation container (t
+         +he demo consumer uses v1/v2 fixtures)                          
+      26 +# SMA_VALIDATOR_API_VERSION=v2                                 
+  ⎿  Updated .gitignore (+1 -0)
+       8  docs/api/
+       9  *.tsbuildinfo
+      10  .DS_Store
+      11 +exports/                                                       
+  ⎿  Updated apps/server/src/app.ts (+26 -3)
+       5   * @packageDocumentation
+       6   */
+       7  import { registerIngestRoutes, type IngestDependencies } from '
+          ./http/ingest-routes.js';
+       8 +import { registerRunRoutes, type RunRouteDependencies } from '.
+         +/http/run-routes.js';                                          
+       9 +import type { Orchestrator } from './pipeline/orchestrator.js';
+      10 +                                                               
+      11 +/** Services for the whole API. Without `orchestrator`, only In
+         +crement 04/06 routes exist. */                                 
+      12 +export type AppDependencies = IngestDependencies & {           
+      13 +  orchestrator?: Orchestrator;                                 
+      14 +  exportDir?: RunRouteDependencies['exportDir'];               
+      15 +  env?: RunRouteDependencies['env'];                           
+      16 +};                                                             
+      17  import Fastify, { LogController, type FastifyInstance, type Fas
+          tifyServerOptions } from 'fastify';
+      18  
+      19  /** Body returned by `GET /health`. */
+     ...
+      26   * `app.inject()` directly.
+      27   *
+      28   * @param opts - Fastify server options (for example `{ logger:
+           true }`).
+      20 - * @param deps - Optional Ingest services; omitted for health-o
+         -nly tests.                                                     
+      29 + * @param deps - Optional services; omitted for health-only tes
+         +ts. With an `orchestrator`,                                    
+      30 + *   spec checks run the full spec-check flow and the run endpo
+         +ints are registered.                                           
+      31   * @returns A configured, not-yet-listening Fastify instance.
+      32   */
+      33  export function buildApp(
+      34    opts: FastifyServerOptions = {},
+      25 -  deps?: IngestDependencies,                                   
+      35 +  deps?: AppDependencies,                                      
+      36  ): FastifyInstance {
+      37    const app = Fastify({
+      38      ...opts,
+     ...
+      52    app.get('/health', async (): Promise<HealthResponse> => ({ st
+          atus: 'ok' }));
+      53  
+      54    if (deps) {
+      45 -    void app.register(registerIngestRoutes, deps);             
+      55 +    const { orchestrator } = deps;                             
+      56 +    void app.register(registerIngestRoutes, {                  
+      57 +      ...deps,                                                 
+      58 +      ...(orchestrator && !deps.checkSpec                      
+      59 +        ? { checkSpec: (id: string, source) => orchestrator.che
+         +ckSpec(id, source) }                                           
+      60 +        : {}),                                                 
+     … 12 more lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/http/ingest-routes.ts (+11 -3)
+       7    SPEC_CHECK_OUTCOME_LABELS,
+       8    STAGE_LABELS,
+       9    type FieldErrors,
+      10 +  type IngestResponse,                                         
+      11  } from '@sma/core';
+      12  import {
+      13    type Db,
+     ...
+      17    listSpecChecks,
+      18  } from '../infra/db/index.js';
+      19  import { apis, repositories } from '../infra/db/schema.js';
+      19 -import { ingest, ApiNotFoundError } from '../pipeline/ingest.js
+         -';                                                             
+      20 +import { ingest, ApiNotFoundError, type IngestSource } from '..
+         +/pipeline/ingest.js';                                          
+      21  import {
+      22    validateApi,
+      23    validateRepository,
+     ...
+      32    retrieve?: SpecRetriever;
+      33    probeRepository?: RepositoryProbe;
+      34    polling?: boolean;
+      35 +  /**                                                          
+      36 +   * The full spec-check flow (ingest → detect → classify → adv
+         +ance baseline, inc13). When set,                               
+      37 +   * uploads, URL checks and scheduled checks run it instead of
+         + ingest alone.                                                 
+      38 +   */                                                          
+      39 +  checkSpec?: (apiId: string, source: IngestSource) => Promise<
+         +IngestResponse>;                                               
+      40  }
+      41  
+      42  /** Register only Increment 04 HTTP endpoints. Later contract e
+          ndpoints remain unimplemented. */
+     ...
+      46  ): Promise<void> {
+      47    const { db } = deps;
+      48    const queue = new CheckQueue();
+      43 -  const check = (id: string) => ingest(db, id, { mode: 'retriev
+         -ed' }, deps.retrieve);                                         
+      49 +  const run = (id: string, source: IngestSource) =>            
+      50 +    deps.checkSpec ? deps.checkSpec(id, source) : ingest(db, id
+         +, source, deps.retrieve);                                      
+      51 +  const check = (id: string) => run(id, { mode: 'retrieved' });
+      52    const poller = new SpecPoller(queue, () => db.select().from(a
+          pis), check);
+      53    let timer: ReturnType<typeof setInterval> | undefined;
+      54    let polling: Promise<void> = Promise.resolve();
+     ...
+      196              .code(400)
+      197              .send([{ field: 'body', message: 'Upload a raw JSO
+           N or YAML document' }]);
+      198          const result = await queue.run(() =>
+      191 -          ingest(db, params.data.id, { mode: 'uploaded', text:
+          - request.body as string }),                                   
+     … 4 more lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/main.ts (+21 -2)
+       1  import { buildApp } from './app.js';
+       2  import { createDbClient } from './infra/db/client.js';
+       3  import { loadRootEnv } from './infra/db/env.js';
+       4 +import { AnthropicLlmAdapter } from './infra/llm/adapter.js';  
+       5 +import { DEFAULT_TOKEN_CEILING, Orchestrator } from './pipeline
+         +/orchestrator.js';                                             
+       6  
+       7  loadRootEnv();
+       8  const client = createDbClient();
+       9  const port = Number(process.env.PORT ?? 3000);
+      10  const host = process.env.HOST ?? '127.0.0.1';
+       9 -const app = buildApp({ logger: true }, { db: client.db });     
+      10 -app.addHook('onClose', () => client.close());                  
+      11 +const ceiling = Number(process.env.RUN_TOKEN_CEILING ?? DEFAULT
+         +_TOKEN_CEILING);                                               
+      12 +const apiVersion = process.env.SMA_VALIDATOR_API_VERSION?.trim(
+         +);                                                             
+      13 +const orchestrator = new Orchestrator(                         
+      14 +  { db: client.db, llm: new AnthropicLlmAdapter() },           
+      15 +  {                                                            
+      16 +    tokenCeiling: Number.isSafeInteger(ceiling) && ceiling > 0 
+         +? ceiling : DEFAULT_TOKEN_CEILING,                             
+      17 +    ...(apiVersion ? { sandboxEnv: { API_VERSION: apiVersion } 
+         +} : {}),                                                       
+      18 +  },                                                           
+      19 +);                                                             
+      20 +const app = buildApp({ logger: true }, { db: client.db, orchest
+         +rator });                                                      
+      21 +app.addHook('onReady', async () => {                           
+      22 +  const recovered = await orchestrator.recoverInterruptedRuns()
+         +;                                                              
+      23 +  if (recovered.length)                                        
+      24 +    app.log.warn(`${recovered.length} interrupted run(s) record
+         +ed as stage failures`);                                        
+      25 +});                                                            
+      26 +app.addHook('onClose', async () => {                           
+      27 +  await orchestrator.idle();                                   
+      28 +  await client.close();                                        
+      29 +});                                                            
+      30  for (const signal of ['SIGINT', 'SIGTERM'] as const)
+      31    process.once(signal, () => {
+      32      void app.close();
+
+⏺ Typecheck passes. Now tests. Let me see how the inc11 unit tests mock the
+  validator so I reuse the same shapes.
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+⏺ CI has both oasdiff and Docker, so the tests use the real oasdiff binary.
+  Writing the shared test helpers.
+
+⏺ Write(apps/server/test/orchestrator-helpers.ts)
+  ⎿  Wrote 227 lines to apps/server/test/orchestrator-helpers.ts
+       1 /** Shared setup for the orchestrator and run-route tests. */
+       2 import { execFile } from 'node:child_process';
+       3 import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from 'nod
+         e:fs/promises';
+       4 import { tmpdir } from 'node:os';
+       5 import { dirname, join } from 'node:path';
+       6 import { promisify } from 'node:util';
+       7 import { vi } from 'vitest';
+       8 import { ok, type ValidationResult } from '@sma/core';
+       9 import type { Db } from '../src/infra/db/client.js';
+     … +218 lines (ctrl+o to expand)
+
+⏺ Now the main orchestrator test suite (real DB + real oasdiff, fake
+  LLM/validator/GitHub).
+
+⏺ Write(apps/server/test/orchestrator.test.ts)
+  ⎿  Wrote 540 lines to apps/server/test/orchestrator.test.ts
+       1 /**
+       2  * Orchestrator (FR-38, FR-39, NFR-01, NFR-02, BR-06) on the rea
+         l test database with the real
+       3  * oasdiff binary, the scripted FakeLlmAdapter, a mocked validat
+         or (no Docker) and a mocked
+       4  * GitHub API. The same happy path runs against the real Docker 
+         validator in
+       5  * orchestrator.integration.test.ts.
+       6  */
+       7 import { afterAll, beforeAll, describe, expect, it, vi } from 'v
+     … +534 lines (~23 KB) (ctrl+o to expand)
+
+⏺ Removing a stray workcopy option in the Docker-down test, then running the new
+  suite.
+
+⏺ Bash(python3 - <<'EOF'
+      p='apps/server/test/orchestrator.test.ts'…)
+  ⎿   RUN  v5.0.5 /Users/turbo/Desktop/self_maintaining_api/apps/server
+     … +4 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/orchestrator.test.ts (+0 -1)
+      296        {
+      297          tokenCeiling: 100_000,
+      298          docker: { env: { DOCKER_HOST: 'unix:///nonexistent/sma
+           -docker.sock' } },
+      299 -        workcopy: { workRoot: consumerPath + '-work' },       
+      299        },
+      300      );
+      301      const final = await (
+  ⎿  (timeout 5m)
+
+⏺ All 23 pass. Let me commit this foundation in logical pieces before writing
+  the export, route, and Docker tests.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api && npx prettier --write
+      apps/server/src apps/server/test packages/core/src >/dev/null && git add
+      apps/server/drizzl…)
+  ⎿  554e7cc feat(pipeline): orchestrator with spec-check flow, run flow, s
+     tage failures, one-run lock
+     7e8c4fd feat(db): spec_checks.failure_stage names the stage a spec che
+     … +2 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/app.ts (+1 -4)
+      30   *   spec checks run the full spec-check flow and the run endpo
+          ints are registered.
+      31   * @returns A configured, not-yet-listening Fastify instance.
+      32   */
+      33 -export function buildApp(                                      
+      34 -  opts: FastifyServerOptions = {},                             
+      35 -  deps?: AppDependencies,                                      
+      36 -): FastifyInstance {                                           
+      33 +export function buildApp(opts: FastifyServerOptions = {}, deps?
+         +: AppDependencies): FastifyInstance {                          
+      34    const app = Fastify({
+      35      ...opts,
+      36      logController: new LogController({ disableRequestLogging: t
+          rue }),
+  ⎿  Updated apps/server/src/pipeline/export.ts (+22 -4)
+      139        ['JSON pointer', `<code>${e(change.jsonPointer)}</code>`
+           ],
+      140      ]),
+      141    );
+      142 -  out.push('<h3>Before</h3>', pre(change.evidenceBefore), '<h3
+          ->After</h3>', pre(change.evidenceAfter));                     
+      142 +  out.push(                                                   
+      143 +    '<h3>Before</h3>',                                        
+      144 +    pre(change.evidenceBefore),                               
+      145 +    '<h3>After</h3>',                                         
+      146 +    pre(change.evidenceAfter),                                
+      147 +  );                                                          
+      148  
+      149    out.push('<h2>Mapping source</h2>');
+      150    out.push(
+     ...
+      205    out.push('<h2>Attempts</h2>');
+      206    out.push(
+      207      table(
+      203 -      ['#', 'Outcome', 'Guard', 'Compile errors', 'Tests', 'To
+          -kens in/out', 'Cost', 'Model', 'Duration (ms)'],              
+      208 +      [                                                       
+      209 +        '#',                                                  
+      210 +        'Outcome',                                            
+      211 +        'Guard',                                              
+      212 +        'Compile errors',                                     
+      213 +        'Tests',                                              
+      214 +        'Tokens in/out',                                      
+      215 +        'Cost',                                               
+      216 +        'Model',                                              
+      217 +        'Duration (ms)',                                      
+      218 +      ],                                                      
+      219        detail.attempts.map((a) => [
+      220          e(a.attemptNumber),
+      221          labeled(a.outcome),
+     ...
+      235      out.push('<h3>Patch</h3>', a.patch ? pre(a.patch) : '<p><e
+           m>No patch.</em></p>');
+      236      out.push('<h3>Validation output</h3>', pre(a.validationOut
+           put ?? 'No validation output.'));
+      237    }
+      223 -  if (!detail.attempts.length) out.push('<h2>Patch</h2><p><em>
+          -No repair attempt was made.</em></p>');                       
+      238 +  if (!detail.attempts.length)                                
+      239 +    out.push('<h2>Patch</h2><p><em>No repair attempt was made.
+          +</em></p>');                                                  
+      240  
+      241    return `<!doctype html>
+      242  <html lang="en">
+     … 10 more lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/pipeline/orchestrator.ts (+6 -11)
+      246      opts: CheckSpecOptions = {},
+      247    ): Promise<SpecCheckResult> {
+      248      return this.checks.run(async () => {
+      249 -      const response = await ingest(                          
+      250 -        this.db,                                              
+      251 -        apiId,                                                
+      252 -        source,                                               
+      253 -        this.ports.specSource ?? retrieveSpec,                
+      254 -      );                                                      
+      249 +      const response = await ingest(this.db, apiId, source, th
+          +is.ports.specSource ?? retrieveSpec);                         
+      250        if (response.check.outcome.value === 'failed')
+      251          return {
+      252            ...response,
+     ...
+      558        if (patch === undefined) throw new Error('Repair reporte
+           d success without a patch');
+      559        const note = change.migrationNoteId
+      560          ? ((
+      566 -            await db.select().from(migrationNotes).where(eq(mi
+          -grationNotes.id, change.migrationNoteId))                     
+      561 +            await db                                          
+      562 +              .select()                                       
+      563 +              .from(migrationNotes)                           
+      564 +              .where(eq(migrationNotes.id, change.migrationNot
+          +eId))                                                         
+      565            )[0] ?? null)
+      566          : null;
+      567        const evidence = buildDeliveryEvidence({
+     ...
+      573          attempts: await listAttempts(db, run.id),
+      574          patch,
+      575        });
+      578 -      await deliver(                                          
+      579 -        { db, runId: run.id, repository, patch, evidence },   
+      580 -        this.ports.github ?? {},                              
+      581 -      );                                                      
+      576 +      await deliver({ db, runId: run.id, repository, patch, ev
+          +idence }, this.ports.github ?? {});                           
+      577        return (await getRunById(db, run.id))!;
+      578      } catch (cause) {
+      579        return this.recordStageFailure(run.id, stage, cause, rep
+           ository);
+  ⎿  Updated apps/server/src/pipeline/run-detail.ts (+3 -1)
+      263    const change = await getChangeById(db, run.changeId);
+      264    if (!change) throw new Error('Run references a missing chang
+           e');
+      265    const note = change.migrationNoteId
+      266 -    ? (await db.select().from(migrationNotes).where(eq(migrati
+          -onNotes.id, change.migrationNoteId)))[0]                      
+      266 +    ? (                                                       
+      267 +        await db.select().from(migrationNotes).where(eq(migrat
+          +ionNotes.id, change.migrationNoteId))                         
+      268 +      )[0]                                                    
+      269      : undefined;
+      270    const detail: RunDetail = {
+      271      run: serializeRun(run),
+  ⎿  Updated apps/server/src/pipeline/run-inputs.ts (+1 -2)
+      30   */
+      31  export function locateTarget(change: Change): LocateTarget | nu
+          ll {
+      32    const method = change.method?.toUpperCase();
+      33 -  if (!method || !(HTTP_METHODS as readonly string[]).includes(
+         -method) || !change.path)                                       
+      34 -    return null;                                               
+      33 +  if (!method || !(HTTP_METHODS as readonly string[]).includes(
+         +method) || !change.path) return null;                          
+      34    const target: LocateTarget = { method: method as HttpMethod, 
+          path: change.path };
+      35    const mapping = confirmedMapping(change);
+      36    const field =
+  ⎿  … 3 more files changed
+
+⏺ Prettier reformatted those files; that's expected. Now unit tests for the
+  export module and the mapping helpers (pure, no DB).
+
+⏺ Write(apps/server/test/export.test.ts)
+  ⎿  Wrote 285 lines to apps/server/test/export.test.ts
+       1 /** Run export (FR-41, DR-05, BR-06, NFR-04): pure rendering plu
+         s file writing. No database. */
+       2 import { chmod, mkdtemp, readFile, readdir, rm, writeFile } from
+          'node:fs/promises';
+       3 import { tmpdir } from 'node:os';
+       4 import { join } from 'node:path';
+       5 import { afterAll, describe, expect, it } from 'vitest';
+       6 import { RunDetailSchema, type RunDetail } from '@sma/core';
+       7 import {
+       8   ExportWriteError,
+     … +277 lines (ctrl+o to expand)
+
+⏺ Write(apps/server/test/run-inputs.test.ts)
+  ⎿  Wrote 168 lines to apps/server/test/run-inputs.test.ts
+       1 /** Pure mapping from stored rows to stage inputs (no database).
+          */
+       2 import { describe, expect, it } from 'vitest';
+       3 import { repairPreconditionReason } from '@sma/core';
+       4 import type { Attempt, CallSite, Change, MigrationNote } from '.
+         ./src/infra/db/index.js';
+       5 import {
+       6   affectedFiles,
+       7   buildDeliveryEvidence,
+       8   confirmedMapping,
+     … +160 lines (ctrl+o to expand)
+
+⏺ Two lines in those tests are needlessly convoluted; simplifying them before
+  running.
+⏺ Bash(python3 - <<'EOF'
+      p='apps/server/test/run-inputs.test.ts'…)
+  ⎿   RUN  v5.0.5 /Users/turbo/Desktop/self_maintaining_api/apps/server
+     … +4 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/test/export.test.ts (+2 -1)
+      180        expect(html).toContain(`<h2>${heading}</h2>`);
+      181      expect(html).toContain('Outcome: Repaired (awaiting review
+           )');
+      182      expect(html).toContain('<a href="https://github.com/acme/c
+           onsumer/pull/1">');
+      183 -    expect(html).toContain('customer_name → full_name'.split('
+          - → ')[0]);                                                    
+      183 +    expect(html).toContain('customer_name');                  
+      184 +    expect(html).toContain('Confirmed by migration note');    
+      185      expect(html).toContain(escapeHtml(CORRECT_PATCH.split('\n'
+           )[0]));
+      186    });
+      187  
+  ⎿  Updated apps/server/test/run-inputs.test.ts (+1 -1)
+      81      });
+      82      expect(
+      83        locateTarget(change({ category: 'endpoint_removed', metho
+          d: 'delete', mapping: null })),
+      84 -    ).toEqual({ method: 'DELETE', path: '/orders/{id}'.replace(
+         -'/orders/{id}', '/customers/{id}') });                         
+      84 +    ).toEqual({ method: 'DELETE', path: '/customers/{id}' });  
+      85    });
+      86    it('returns null when the change is not tied to one operation
+          ', () => {
+      87      expect(locateTarget(change({ method: null }))).toBeNull();
+
+⏺ Now the HTTP route tests.
+
+⏺ Write(apps/server/test/run-routes.test.ts)
+  ⎿  Wrote 267 lines to apps/server/test/run-routes.test.ts
+       1 /**
+       2  * Run endpoints (inc13 contract) through `app.inject()` on the 
+         real test database, with the
+       3  * orchestrator's fakes (no Docker, mocked GitHub). Also checks 
+         that spec uploads run the full
+       4  * spec-check flow when the app has an orchestrator.
+       5  */
+       6 import { chmod, mkdtemp, readFile, readdir, rm } from 'node:fs/p
+         romises';
+       7 import { tmpdir } from 'node:os';
+     … +260 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Routes pass. Now the Docker end-to-end test (real validator, real oasdiff,
+  FakeLlm, mocked GitHub), the acceptance check AT-07/AT-08 names.
+
+⏺ Write(apps/server/test/orchestrator.integration.test.ts)
+  ⎿  Wrote 100 lines to apps/server/test/orchestrator.integration.test.ts
+       1 /**
+       2  * End to end (AT-08): demo spec v1 → v2 with the migration note
+          → changes classified →
+       3  * baseline advanced → a run on the `field_renamed` change → rep
+         aired → PR (mocked GitHub).
+       4  * Real database, real oasdiff, the REAL Docker validator and gu
+         ards, the scripted FakeLlm.
+       5  *
+       6  * The repository is a committed copy of the rename-only consume
+         r (v1 fixtures plus the v2
+     … +94 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ 18 s for the full Docker path, so I'll also run NFR-01's "three in a row"
+  against the real validator, not just the fakes.
+
+⏺ Update(apps/server/test/orchestrator.integration.test.ts)
+  ⎿  Added 33 lines
+       97        expect(JSON.parse(exportRunJson(detail))).toEqual(detail
+           );
+       98      },
+       99    );
+      100 +                                                              
+      101 +  it(                                                         
+      102 +    'NFR-01: the same scenario three times in a row, each repa
+          +ired with full evidence',                                     
+      103 +    { timeout: TIMEOUT },                                     
+      104 +    async () => {                                             
+      105 +      const llm = new FakeLlmAdapter(Array.from({ length: 3 },
+          + () => patchAnswer(CORRECT_PATCH)));                          
+      106 +      const github = fakeGitHubPort();                        
+      107 +      const orchestrator = new Orchestrator(                  
+      108 +        { db: client.db, llm, github: github.deps },          
+      109 +        { tokenCeiling: 100_000, sandboxEnv: { API_VERSION: 'v
+          +2' }, env: { GITHUB_TOKEN: TOKEN } },                         
+      110 +      );                                                      
+      111 +      const demo = await demoApi(client.db, orchestrator);    
+      112 +      const repo = await registerRepo(client.db, await renameO
+          +nlyRepo());                                                   
+      113 +      const prs = new Set<string>();                          
+      114 +      for (let i = 0; i < 3; i++) {                           
+      115 +        const final = await (                                 
+      116 +          await orchestrator.startRun({ changeId: demo.rename.
+          +id, repositoryId: repo.id })                                  
+      117 +        ).done;                                               
+      118 +        expect(final.status, final.failureDetail ?? '').toBe('
+          +repaired');                                                   
+      119 +        const detail = RunDetailSchema.parse(await loadRunDeta
+          +il(client.db, final.id));                                     
+      120 +        expect(detail.stageResults.map((s) => s.stage.value)).
+          +toEqual([                                                     
+      121 +          'locate',                                           
+      122 +          'validate',                                         
+      123 +          'repair',                                           
+      124 +          'deliver',                                          
+      125 +        ]);                                                   
+      126 +        expect(detail.attempts[0]).toMatchObject({ testsPassed
+          +: 12, testsTotal: 12 });                                      
+      127 +        expect(detail.attempts[0]?.validationOutput).toBeTruth
+          +y();                                                          
+      128 +        prs.add(final.prUrl!);                                
+      129 +      }                                                       
+      130 +      expect(prs.size).toBe(3);                               
+      131 +    },                                                        
+      132 +  );                                                          
+      133  });
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Adding DB-level tests for the two new spec_checks constraints.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api && python3 - <<'EOF'
+      p='apps/server/test/orchestrator.test.ts'…)
+  ⎿   Test Files  1 passed (1)
+           Tests  24 passed (24)
+        Start at  12:51:45
+        Duration  4.44s (tests 85%, import 13%, transform 2%)
+  ⎿  Updated apps/server/test/orchestrator.test.ts (+24 -1)
+      25  } from '../src/pipeline/orchestrator.js';
+      26  import { loadRunDetail, stageResultsInOrder } from '../src/pipe
+          line/run-detail.js';
+      27  import { FakeLlmAdapter } from '../src/infra/llm/fake.js';
+      28 -import { insertApi, insertRun } from '../src/infra/db/index.js'
+         -;                                                              
+      28 +import { insertApi, insertRun, insertSpecCheck } from '../src/i
+         +nfra/db/index.js';                                             
+      29  import { PG, expectDbRejects, openTestDb, randomCommitSha, uid 
+          } from './db-helpers.js';
+      30  import {
+      31    NOTE_YAML,
+     ...
+      156    });
+      157  });
+      158  
+      159 +describe('spec_checks.failure_stage constraints (migration 000
+          +2)', () => {                                                  
+      160 +  it('rejects a failed check without a stage, a stage on a non
+          +-failed check, and a run stage', async () => {                
+      161 +    const api = await insertApi(client.db, { name: `constraint
+          +-${uid()}` });                                                
+      162 +    await expectDbRejects(                                    
+      163 +      insertSpecCheck(client.db, { apiId: api.id, outcome: 'fa
+          +iled', errorDetail: 'x' }),                                   
+      164 +      { code: PG.checkViolation, constraint: 'spec_checks_fail
+          +ed_iff_failure_stage' },                                      
+      165 +    );                                                        
+      166 +    await expectDbRejects(                                    
+      167 +      insertSpecCheck(client.db, { apiId: api.id, outcome: 'no
+          +_change', failureStage: 'detect' }),                          
+      168 +      { code: PG.checkViolation, constraint: 'spec_checks_fail
+          +ed_iff_failure_stage' },                                      
+      169 +    );                                                        
+      170 +    await expectDbRejects(                                    
+      171 +      insertSpecCheck(client.db, {                            
+      172 +        apiId: api.id,                                        
+      173 +        outcome: 'failed',                                    
+      174 +        errorDetail: 'x',                                     
+      175 +        failureStage: 'repair',                               
+      176 +      }),                                                     
+      177 +      { code: PG.checkViolation, constraint: 'spec_checks_fail
+          +ure_stage_in_check' },                                        
+      178 +    );                                                        
+      179 +  });                                                         
+      180 +});                                                           
+      181 +                                                              
+      182  describe('run flow (UC-03, UC-04)', () => {
+      183    it('field_renamed → repaired → PR (mocked); every stage wrot
+           e a row, in order (FR-38)', async () => {
+      184      const repo = await registerRepo(client.db, consumerPath);
+  ⎿  (timeout 3m 20s)
+
+⏺ Now the full verification: format, lint, typecheck, and the whole test suite.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api && npx prettier --write
+      apps/server packages/core/src .env.example .gitignore >/dev/null 2>&1; npm
+      run lint 2>&1 |…)
+  ⎿  > self-maintaining-apis@0.1.0 lint
+     > eslint .
+
+     typecheck exit:
+  ⎿  Updated apps/server/test/export.test.ts (+3 -1)
+       98          excerpt: 'const res = await fetch(`/customers/${id}`) 
+           && a < b;',
+       99        },
+      100      ],
+      101 -    coverage: [{ id: ID, runId: ID, filePath: 'README.md', ins
+          -pected: false, skipReason: 'not TS' }],                       
+      101 +    coverage: [                                               
+      102 +      { id: ID, runId: ID, filePath: 'README.md', inspected: f
+          +alse, skipReason: 'not TS' },                                 
+      103 +    ],                                                        
+      104      attempts: [
+      105        {
+      106          id: ID,
+  ⎿  Updated apps/server/test/run-inputs.test.ts (+3 -1)
+      106    });
+      107    it('a human confirmation is not passed as a migration-note e
+           ntry', () => {
+      108      expect(
+      109 -      migrationNoteEntry(change({ mappingSource: 'human', conf
+          -irmedBy: 'Ada', confirmedAt: new Date() })),                  
+      109 +      migrationNoteEntry(                                     
+      110 +        change({ mappingSource: 'human', confirmedBy: 'Ada', c
+          +onfirmedAt: new Date() }),                                    
+      111 +      ),                                                      
+      112      ).toBeNull();
+      113    });
+      114  });
+  ⎿  Updated apps/server/test/run-routes.test.ts (+8 -5)
+      49    await rm(exportDir, { recursive: true, force: true });
+      50  });
+      51  
+      52 -function appWith(script = [patchAnswer(CORRECT_PATCH)], over: P
+         -arameters<typeof makeOrchestrator>[2] = {}) {                  
+      52 +function appWith(                                              
+      53 +  script = [patchAnswer(CORRECT_PATCH)],                       
+      54 +  over: Parameters<typeof makeOrchestrator>[2] = {},           
+      55 +) {                                                            
+      56    const made = makeOrchestrator(client.db, script, over);
+      57    const app = buildApp(
+      58      {},
+     ...
+      207      const { app, run } = await finishedRun();
+      208      const res = await app.inject({ method: 'GET', url: `/api/r
+           uns/${run.id}/export?format=html` });
+      209      expect(res.headers['content-type']).toMatch(/^text\/html/)
+           ;
+      207 -    expect(res.headers['content-security-policy']).toBe("defau
+          -lt-src 'none'; style-src 'unsafe-inline'");                   
+      210 +    expect(res.headers['content-security-policy']).toBe(      
+      211 +      "default-src 'none'; style-src 'unsafe-inline'",        
+      212 +    );                                                        
+      213      expect(res.body).not.toMatch(/<script/i);
+      214      expect(res.body).toContain(FIXTURE_BANNER);
+      215      expect(res.body).not.toContain(TOKEN);
+     ...
+      264      const body = IngestResponseSchema.parse(res.json());
+      265      expect(body.pipeline?.baselineAdvanced).toBe(true);
+      266      expect(body.pipeline?.changeIds.length).toBeGreaterThanOrE
+           qual(5);
+      262 -    expect((await getApiById(client.db, api.id))?.baselineVers
+          -ionId).toBe(                                                  
+      263 -      body.check.specVersionId,                               
+      264 -    );                                                        
+      267 +    expect((await getApiById(client.db, api.id))?.baselineVers
+          +ionId).toBe(body.check.specVersionId);                        
+      268      await app.close();
+      269    });
+      270  });
+  ⎿  (timeout 5m)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Several failures appear only in the full parallel run. Let me look at the
+  actual errors before guessing.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The root cause is in the test itself: it calls recoverInterruptedRuns(), which
+  finishes every running run in the shared test DB, including other files'
+  in-flight runs. I'm adding a repository scope so the test touches only its own
+  run, and making the ordering assertion robust to concurrent runs.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api && python3 - <<'EOF'
+      p='apps/server/src/pipeline/orchestrator.ts'…)
+  ⎿  648:   * Finishes runs left `running` by a stopped server (DR-01, NFR-
+     02): each gets a `failed` row
+     649-   * for the stage it had reached (unless one exists) and ends as
+     … +14 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/pipeline/orchestrator.ts (+11 -2)
+      648     * Finishes runs left `running` by a stopped server (DR-01, 
+           NFR-02): each gets a `failed` row
+      649     * for the stage it had reached (unless one exists) and ends
+            as `stage_failure` of that stage.
+      650     * Call once at startup, before any new run starts.
+      651 +   * @param scope - Limit recovery to one repository (tests, o
+          +r a deployment that shares one                                
+      652 +   *   database between servers). Default: every running run. 
+      653     * @returns The ids of the runs that were finished.
+      654     */
+      653 -  async recoverInterruptedRuns(): Promise<string[]> {         
+      655 +  async recoverInterruptedRuns(scope: { repositoryId?: string 
+          +} = {}): Promise<string[]> {                                  
+      656      if (this.busy) throw new RunBusyError();
+      655 -    const stale = await this.db.select().from(runs).where(eq(r
+          -uns.status, 'running'));                                      
+      657 +    const stale = await this.db                               
+      658 +      .select()                                               
+      659 +      .from(runs)                                             
+      660 +      .where(                                                 
+      661 +        scope.repositoryId                                    
+      662 +          ? and(eq(runs.status, 'running'), eq(runs.repository
+          +Id, scope.repositoryId))                                      
+      663 +          : eq(runs.status, 'running'),                       
+      664 +      );                                                      
+      665      for (const run of stale)
+      666        await this.recordStageFailure(run.id, run.stageReached, 
+           new Error(INTERRUPTED_REASON));
+      667      return stale.map((r) => r.id);
+  ⎿  Updated apps/server/test/orchestrator.test.ts (+3 -1)
+      502        isFixture: true,
+      503      });
+      504      const { orchestrator } = makeOrchestrator(client.db);
+      505 -    expect(await orchestrator.recoverInterruptedRuns()).toCont
+          -ain(stale.id);                                                
+      505 +    expect(await orchestrator.recoverInterruptedRuns({ reposit
+          +oryId: repo.id })).toEqual([                                  
+      506 +      stale.id,                                               
+      507 +    ]);                                                       
+      508      const after = await getRunById(client.db, stale.id);
+      509      expect(after).toMatchObject({ status: 'stage_failure', fai
+           lureStage: 'repair' });
+      510      expect(after?.failureDetail).toContain(INTERRUPTED_REASON)
+           ;
+  ⎿  Updated apps/server/test/run-routes.test.ts (+4 -1)
+      152    it('lists runs newest first and returns the full detail', as
+           ync () => {
+      153      const { app, run } = await finishedRun();
+      154      const list = RunsSchema.parse((await app.inject({ method: 
+           'GET', url: '/api/runs' })).json());
+      155 -    expect(list[0]?.id).toBe(run.id);                         
+      155 +    // Other test files add runs concurrently: check membershi
+          +p and order, not position.                                    
+      156 +    expect(list.map((r) => r.id)).toContain(run.id);          
+      157 +    const starts = list.map((r) => Date.parse(r.startedAt));  
+      158 +    expect(starts).toEqual([...starts].sort((a, b) => b - a));
+      159      const res = await app.inject({ method: 'GET', url: `/api/r
+           uns/${run.id}` });
+      160      expect(res.json()).toEqual(await loadRunDetail(client.db, 
+           run.id));
+      161      expect((await app.inject({ method: 'GET', url: '/api/runs/
+           nope' })).statusCode).toBe(400);
+
+⏺ Rerunning the full server suite to confirm the fix and check whether the
+  earlier "four failed attempts" failure persists.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ All 30 files and 361 server tests pass. The two live smoke tests also ran
+  because .env holds the GitHub and Anthropic keys, so each full run opens a
+  real PR on sma-demo-consumer and makes one model call, which I'll note in the
+  report. Next are the docs checks from 17a and the pipeline index export.
+
+⏺ Bash(cd /Users/turbo/Desktop/self_maintaining_api && cat >
+      apps/server/src/pipeline/index.ts <<'EOF'
+      /**…)
+  ⎿  > self-maintaining-apis@0.1.0 docs:check
+     > tsx scripts/diagrams/check.ts
+     … +9 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/src/pipeline/index.ts (+8 -2)
+      1 -// Pipeline orchestrator (7 stages, FR-38) is added in Increment
+        - 13.                                                            
+      2 -export {};                                                      
+      1 +/**                                                             
+      2 + * Pipeline stages and the orchestrator that runs them in order 
+        +(FR-38).                                                        
+      3 + * @packageDocumentation                                        
+      4 + */                                                             
+      5 +export * from './orchestrator.js';                              
+      6 +export * from './export.js';                                    
+      7 +export * from './run-detail.js';                                
+      8 +export * from './run-inputs.js';                                
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Adding the new modules to the TypeDoc entry points so the warnings go away.
+
+⏺ Bash(python3 - <<'EOF'
+      p='apps/server/typedoc.json'…)
+  ⎿  [warning] DeliverDeps, defined in @sma/server/src/pipeline/deliver.ts,
+      is referenced by pipeline/orchestrator.OrchestratorPorts.github but n
+     ot included in the documentation
+     … +3 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/typedoc.json (+6 -1)
+      25      "src/pipeline/guarded-validate.ts",
+      26      "src/infra/llm/adapter.ts",
+      27      "src/infra/llm/fake.ts",
+      28 -    "src/pipeline/repair.ts"                                   
+      28 +    "src/pipeline/repair.ts",                                  
+      29 +    "src/pipeline/orchestrator.ts",                            
+      30 +    "src/pipeline/run-inputs.ts",                              
+      31 +    "src/pipeline/run-detail.ts",                              
+      32 +    "src/pipeline/export.ts",                                  
+      33 +    "src/http/run-routes.ts"                                   
+      34    ],
+      35    "tsconfig": "tsconfig.build.json"
+      36  }
+  ⎿  (timeout 5m)
+
+⏺ Bash(sed -i '' 's|    "src/pipeline/orchestrator.ts",|
+      "src/pipeline/deliver.ts",\n    "src/pipeline/orchestrator.ts",|'
+      apps/server/typedoc.json && npm run docs…)
+  ⎿  [warning] SafeGitHubClient, defined in @sma/server/src/infra/github/cl
+     ient.ts, is referenced by pipeline/deliver.DeliverDeps.createClient.__
+     type but not included in the documentation
+     … +13 lines (ctrl+o to expand)
+  ⎿  Updated apps/server/typedoc.json (+1 -0)
+      26      "src/infra/llm/adapter.ts",
+      27      "src/infra/llm/fake.ts",
+      28      "src/pipeline/repair.ts",
+      29 +    "src/pipeline/deliver.ts",                                 
+      30      "src/pipeline/orchestrator.ts",
+      31      "src/pipeline/run-inputs.ts",
+      32      "src/pipeline/run-detail.ts",
+  ⎿  (timeout 5m)
+
+⏺ The chain continues into increment 12's GitHub and materialize modules (they
+  were never added to TypeDoc). Adding them too, since they're documented
+  exports.
+
+⏺ Bash(sed -i '' 's|    "src/pipeline/deliver.ts",|
+      "src/infra/github/client.ts",\n    "src/infra/workcopy/materialize.ts",\n
+        "src/pipeline/deliver.ts",|' apps/s…)
+  ⎿  done
+  ⎿  Updated apps/server/typedoc.json (+2 -0)
+      26      "src/infra/llm/adapter.ts",
+      27      "src/infra/llm/fake.ts",
+      28      "src/pipeline/repair.ts",
+      29 +    "src/infra/github/client.ts",                              
+      30 +    "src/infra/workcopy/materialize.ts",                       
+      31      "src/pipeline/deliver.ts",
+      32      "src/pipeline/orchestrator.ts",
+      33      "src/pipeline/run-inputs.ts",
+  ⎿  (timeout 5m)
+⏺ TypeDoc builds with no warnings. Now the decisions log and the progress line.
+
+⏺ Write(docs/decisions/inc13.md)
+  ⎿  Wrote 25 lines to docs/decisions/inc13.md
+      1 # Decisions — Increment 13: Pipeline orchestrator + run records +
+         export
+      2 
+      3 | Date       | Decision | Why |
+      4 | ---------- | -------- | --- |
+      5 | 2026-11-22 | **New migration `0002_spec_check_failure_stage`**:
+         `spec_checks.failure_stage` (the `stage` enum), set exactly when
+         `outcome = 'failed'` and only to `ingest`, `detect` or `classify
+        ` (two CHECK constraints). The migration backfills existing faile
+        d checks as `ingest` (only ingest wrote checks before). `ingest()
+     … +21 lines (~8 KB) (ctrl+o to expand)
+
+⏺ Bash(python3 - <<'EOF'
+      p='docs/PROGRESS.md'…)
+  ⎿  [warn] docs/decisions/inc13.md
+     [warn] Code style issues found in the above file. Run Prettier with --
+     write to fix.
+     … +16 lines (ctrl+o to expand)
+  ⎿  Updated docs/PROGRESS.md (+1 -1)
+      17  | 10  | LLM adapter + context assembly                         
+                                                  | FR-19, C-06, NFR-04, 
+          NFR-08              | Standard                  | Done        |
+           #7    |
+      18  | 11  | Repair loop (retries, error feedback, token ceiling, co
+          st)                                     | FR-18, FR-20–24      
+                              | **CRITICAL**              | Done        |
+           #8    |
+      19  | 12  | Delivery: branch + PR, flagged findings                
+                                                  | FR-33–37, C-02       
+                              | Standard                  | Done        |
+           #9    |
+      20 -| 13  | Pipeline orchestrator + run records + JSON/HTML export 
+         -                                        | FR-38, FR-39, FR-41  
+         -                    | Standard                  | Not started |
+         - #10   |                                                       
+      20 +| 13  | Pipeline orchestrator + run records + JSON/HTML export 
+         +                                        | FR-38, FR-39, FR-41  
+         +                    | Standard                  | Done        |
+         + #10   |                                                       
+      21  | 14  | Dashboard (5 views, text labels)                       
+                                                  | UI-01–04, FR-40, FR-4
+          2                   | Standard                  | Not started |
+           #11   |
+      22  | 15  | 20 frozen scenarios + failing-before check             
+                                                  | EV-01, EV-02         
+                              | **CRITICAL**              | Not started |
+           #12   |
+      23  | 16  | Evaluation script: B1/B2/B3, results file, generated ta
+          bles                                    | EV-03–09             
+                              | **CRITICAL**              | Not started |
+           #13   |
+  ⎿  Updated docs/decisions/inc13.md (+23 -23)
+       1  # Decisions — Increment 13: Pipeline orchestrator + run records
+           + export
+       2  
+       3 -| Date       | Decision | Why |                                
+       4 -| ---------- | -------- | --- |                                
+       5 -| 2026-11-22 | **New migration `0002_spec_check_failure_stage`*
+         -*: `spec_checks.failure_stage` (the `stage` enum), set exactly 
+         -when `outcome = 'failed'` and only to `ingest`, `detect` or `cl
+         -assify` (two CHECK constraints). The migration backfills existi
+         -ng failed checks as `ingest` (only ingest wrote checks before).
+         - `ingest()` now sets it. A detect/classify failure is a **secon
+         -d** spec-check row (`failed`, same `spec_version_id`) after the
+         - ingest row (`changed`). | UC-02's postcondition is "the failur
+         -e **and its stage** are recorded"; the error text alone would m
+         -ake the stage untyped. Additive, nullable for non-failures, no 
+         -existing migration edited (rule 9). |                          
+       6 -| 2026-11-22 | Spec-check trigger is **"ingested version ≠ base
+         -line"**, not ingest's `changed` outcome. | `decideCheckOutcome`
+         - returns `no_change` for any hash already stored. After a detec
+         -t failure the new version is stored but the baseline is not adv
+         -anced, so with an outcome-based trigger a retry would never det
+         -ect it (FR-11 says failures must be retryable). Tested. |      
+       7 -| 2026-11-22 | Stage attribution in the spec-check flow: typed 
+         -oasdiff/parse errors → `detect`; an invalid migration note or a
+         - failure after oasdiff returned (classification, persistence, a
+         -dvancing the baseline) → `classify`. The flow wraps the oasdiff
+         - runner to know which side of that line a thrown error came fro
+         -m, and reuses `detectAndClassify` unchanged. | FR-38 / NFR-02 b
+         -lame the right stage, without copying inc06 logic. |           
+       8 -| 2026-11-22 | `checkSpec(apiId, source, { migrationNote })` st
+         -ores an optional migration note for the (baseline → new) pair *
+         -*before** classification. | A note can only confirm mappings du
+         -ring classification, and changes are immutable afterwards (FR-3
+         -9; the trigger lets only human-confirmation columns change). UC
+         --01 step 3 attaches the note with the configuration. Over HTTP,
+         - a later note cannot reclassify; the dashboard (inc14) can use 
+         -the human confirm-mapping route. |                             
+       9 -| 2026-11-22 | The inc04 upload / URL-check / polling routes ru
+         -n the full spec-check flow **only when the app has an orchestra
+         -tor** (`IngestDependencies.checkSpec`). Responses gain an optio
+         -nal `pipeline` object (`changeIds`, `baselineAdvanced`, `failur
+         -e`). | Keeps inc04's own tests (which expect the baseline to st
+         -ay put) valid, while the production server (`main.ts`) does UC-
+         -02 end to end. Additive contract change. |                     
+      10 -| 2026-11-22 | **One run at a time: a second request gets `409`
+         -** (`RunBusyError`), not a queue. Start/reanalyze/retry-deliver
+         -y share the lock; spec checks keep their own serial queue. | A 
+         -run can take many minutes (four Docker validations); a hidden q
+         -ueue would make a request hang with no feedback. 409 tells the 
+         -dashboard to retry later. |                                    
+      11 -| 2026-11-22 | `POST /api/runs` and `POST /api/runs/:id/reanaly
+         -ze` return **`202 Accepted`** with the `running` run as soon as
+         - its row exists; stages continue in the background, the client 
+         -polls `GET /api/runs/:id`. `retry-delivery` is synchronous (Git
+         -Hub calls only). | Validation can take up to 10 minutes per att
+         -empt. |                                                        
+      12 -| 2026-11-22 | A run is refused **before any row exists** (404/
+         -422) for an unknown change or repository, a repository without 
+         -`local_path`, or a path that is not a git repository with a com
+         -mit. A dirty repository is accepted and fails in Locate (`stage
+         -_failure`, stage `locate`). | `runs.commit_sha` is NOT NULL and
+         - must be a real commit; inventing one would be false evidence. 
+         -A dirty tree is an "unreadable repository" case NFR-02 wants re
+         -ported as a stage failure. |                                   
+      13 -| 2026-11-22 | `is_fixture` = either spec version of the change
+         - has `source_mode = 'fixture'`. | BR-06; the change is fixture-
+         -derived if either side is. |                                   
+      14 -| 2026-11-22 | `not_affected` and `needs_review` runs store Loc
+         -ate's reason in `flagged_reason`. A change with no HTTP method 
+         -→ `needs_review` with a `skipped` locate row (never `not_affect
+         -ed`). | UI-03 wants "the PR link or the reason none exists"; C-
+         -01 forbids treating unknowns as not affected. |                
+      15 -| 2026-11-22 | `single_shot` runs (B2) are **never delivered**:
+         - a passing one finishes `repaired` with a `skipped` deliver row
+         - and the reason "Single-shot evaluation run (B2): the patch was
+         - scored, not delivered." | B2 has no cheat guards; opening a PR
+         - from an unguarded patch would contradict FR-27–31. Mode exists
+         - for the evaluation (inc16). The contract gains an optional `mo
+         -de` on `StartRunRequest`. |                                    
+      16 -| 2026-11-22 | Any thrown error inside a stage → a `failed` row
+         - for that stage (unless the stage already wrote one) and the ru
+         -n finished as `stage_failure` with `failure_stage`/`failure_det
+         -ail`. Details are scrubbed with `redactForDelivery` plus every 
+         -env value whose name looks like a secret (`TOKEN`, `KEY`, `SECR
+         -ET`, `PASSWORD`, …), the repository's `credential_ref` value, a
+         -nd the `DATABASE_URL` password; capped at 4,000 characters. | N
+         -FR-02 (no false success, stage named), NFR-04. |               
+      17 -| 2026-11-22 | At startup `main.ts` calls `recoverInterruptedRu
+         -ns()`: any run still `running` (the server died mid-run) gets a
+         - `failed` row for its `stage_reached` and ends as `stage_failur
+         -e`. Optional `{ repositoryId }` scope, used by the tests becaus
+         -e the test database is shared by parallel test files. | Without
+         - it a run could stay "Running" forever after a restart (DR-01, 
+         -NFR-02). |                                                     
+      18 -| 2026-11-22 | Run Detail, JSON export and HTML export are buil
+         -t by one function (`loadRunDetail`): contract shapes, `{ value,
+         - label }` for every enum, ISO timestamps, and every string scru
+         -bbed. Stage results are ordered by `finished_at` (each stage fi
+         -nished before the next began; repair's row starts before its ba
+         -seline-validate row but finishes after it). JSON export sorts k
+         -eys at every level. | One builder means the export always match
+         -es the DB and the endpoint (FR-41, AT-08). |                   
+      19 -| 2026-11-22 | HTML export: inline CSS, a `Content-Security-Pol
+         -icy: default-src 'none'; style-src 'unsafe-inline'` meta tag (a
+         -nd header on the GET), no scripts, no external resources; every
+         - value HTML-escaped; only `https://` PR URLs become links. Each
+         - attempt shows its patch and validation output. | "No external 
+         -requests, no scripts"; a stored `javascript:` URL can never bec
+         -ome a link. |                                                  
+      20 -| 2026-11-22 | `POST /api/runs/:id/export` writes `run-<id>.jso
+         -n` and `run-<id>.html` into `exports/` (gitignored). Both are w
+         -ritten to temp names, then renamed; any failure removes temps a
+         -nd anything already renamed, and returns `500` `[{ field: 'expo
+         -rt', … "was not saved" }]`. Success returns `201 { saved: true,
+         - json, html }` with file names only (no host paths). | DR-05: a
+         - report that is not fully written is never reported as saved. `
+         -SavedExportSchema` added to the contract. |                    
+      21 -| 2026-11-22 | `GET /api/runs` lists newest first. | The Runs v
+         -iew (inc14) shows the latest run first. |                      
+      22 -| 2026-11-22 | Default token ceiling 200,000 (`RUN_TOKEN_CEILIN
+         -G`, already in `.env.example`). Optional `SMA_VALIDATOR_API_VER
+         -SION` passes `API_VERSION` into the validation container (allow
+         --listed in inc08). | The demo consumer selects v1/v2 fixtures b
+         -y `API_VERSION`; real repositories do not need it. |           
+      23 -| 2026-11-22 | The end-to-end Docker test uses a **committed gi
+         -t copy of the rename-only consumer** (as inc11 did), real oasdi
+         -ff, the real Docker validator and guards, the FakeLlm (wrong pa
+         -tch, then the correct one) and the mocked GitHub. A second Dock
+         -er test runs the same scenario three times in a row (NFR-01). |
+         - On the full five-change v2 one correct rename cannot pass the 
+         -whole suite (inc11 decision). A git copy is needed because Loca
+         -te records the commit and requires a clean tree. |             
+      24 -| 2026-11-22 | DR-01 (survives a restart): automated as "a new 
+         -pool and new orchestrator read the identical record". A real Po
+         -stgres container restart was done by hand on the dev database (
+         -see the increment report). | Restarting the shared Postgres ins
+         -ide the parallel test suite would break the other test files. |
+      25 -| 2026-11-22 | Added the inc12 modules (`deliver`, `github/clie
+         -nt`, `workcopy/materialize`) and the new inc13 modules to `apps
+         -/server/typedoc.json`. | TypeDoc warned that the orchestrator's
+         - public types referenced undocumented modules. |               
+       3 +| Date       | Decision                                        
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                         | Why                                 
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                |                              
+       4 +| ---------- | ------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +------------------------ | ------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +---------------------------------------------------------------
+         +------------------------------- |                              
+       5 +| 2026-11-22 | **New migration `0002_spec_check_failure_stage`*
+         +*: `spec_checks.failure_stage` (the `stage` enum), set exactly 
+         +when `outcome = 'failed'` and only to `ingest`, `detect` or `cl
+         +assify` (two CHECK constraints). The migration backfills existi
+         +ng failed checks as `ingest` (only ingest wrote checks before).
+         + `ingest()` now sets it. A detect/classify failure is a **secon
+         +d** spec-check row (`failed`, same `spec_version_id`) after the
+         + ingest row (`changed`). | UC-02's postcondition is "the failur
+         +e **and its stage** are recorded"; the error text alone would m
+         +ake the stage untyped. Additive, nullable for non-failures, no 
+         +existing migration edited (rule 9).                            
+         +                                                               
+         +                                |                              
+       6 +| 2026-11-22 | Spec-check trigger is **"ingested version ≠ base
+         +line"**, not ingest's `changed` outcome.                       
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                         | `decideCheckOutcome` returns `no_cha
+         +nge` for any hash already stored. After a detect failure the ne
+         +w version is stored but the baseline is not advanced, so with a
+         +n outcome-based trigger a retry would never detect it (FR-11 sa
+         +ys failures must be retryable). Tested.                        
+         +                                |                              
+       7 +| 2026-11-22 | Stage attribution in the spec-check flow: typed 
+         +oasdiff/parse errors → `detect`; an invalid migration note or a
+         + failure after oasdiff returned (classification, persistence, a
+         +dvancing the baseline) → `classify`. The flow wraps the oasdiff
+         + runner to know which side of that line a thrown error came fro
+         +m, and reuses `detectAndClassify` unchanged.                   
+         +                                                               
+         +                         | FR-38 / NFR-02 blame the right stage
+         +, without copying inc06 logic.                                 
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                |                              
+       8 +| 2026-11-22 | `checkSpec(apiId, source, { migrationNote })` st
+         +ores an optional migration note for the (baseline → new) pair *
+         +*before** classification.                                      
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                         | A note can only confirm mappings dur
+         +ing classification, and changes are immutable afterwards (FR-39
+         +; the trigger lets only human-confirmation columns change). UC-
+         +01 step 3 attaches the note with the configuration. Over HTTP, 
+         +a later note cannot reclassify; the dashboard (inc14) can use t
+         +he human confirm-mapping route. |                              
+       9 +| 2026-11-22 | The inc04 upload / URL-check / polling routes ru
+         +n the full spec-check flow **only when the app has an orchestra
+         +tor** (`IngestDependencies.checkSpec`). Responses gain an optio
+         +nal `pipeline` object (`changeIds`, `baselineAdvanced`, `failur
+         +e`).                                                           
+         +                                                               
+         +                                                               
+         +                         | Keeps inc04's own tests (which expec
+         +t the baseline to stay put) valid, while the production server 
+         +(`main.ts`) does UC-02 end to end. Additive contract change.   
+         +                                                               
+         +                                                               
+         +                                |                              
+      10 +| 2026-11-22 | **One run at a time: a second request gets `409`
+         +** (`RunBusyError`), not a queue. Start/reanalyze/retry-deliver
+         +y share the lock; spec checks keep their own serial queue.     
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                         | A run can take many minutes (four Do
+         +cker validations); a hidden queue would make a request hang wit
+         +h no feedback. 409 tells the dashboard to retry later.         
+         +                                                               
+         +                                                               
+         +                                |                              
+      11 +| 2026-11-22 | `POST /api/runs` and `POST /api/runs/:id/reanaly
+         +ze` return **`202 Accepted`** with the `running` run as soon as
+         + its row exists; stages continue in the background, the client 
+         +polls `GET /api/runs/:id`. `retry-delivery` is synchronous (Git
+         +Hub calls only).                                               
+         +                                                               
+         +                                                               
+         +                         | Validation can take up to 10 minutes
+         + per attempt.                                                  
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                |                              
+      12 +| 2026-11-22 | A run is refused **before any row exists** (404/
+         +422) for an unknown change or repository, a repository without 
+         +`local_path`, or a path that is not a git repository with a com
+         +mit. A dirty repository is accepted and fails in Locate (`stage
+         +_failure`, stage `locate`).                                    
+         +                                                               
+         +                                                               
+         +                         | `runs.commit_sha` is NOT NULL and mu
+         +st be a real commit; inventing one would be false evidence. A d
+         +irty tree is an "unreadable repository" case NFR-02 wants repor
+         +ted as a stage failure.                                        
+         +                                                               
+         +                                |                              
+      13 +| 2026-11-22 | `is_fixture` = either spec version of the change
+         + has `source_mode = 'fixture'`.                                
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                                               
+         +                         | BR-06; the change is fixture-derived
+         + if either side is.                                            
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                |                              
+      14 +| 2026-11-22 | `not_affected` and `needs_review` runs store Loc
+         +ate's reason in `flagged_reason`. A change with no HTTP method 
+         +→ `needs_review` with a `skipped` locate row (never `not_affect
+         +ed`).                                                          
+         +                                                               
+         +                                                               
+         +                                                               
+         +                         | UI-03 wants "the PR link or the reas
+         +on none exists"; C-01 forbids treating unknowns as not affected
+         +.                                                              
+         +                                                               
+         +                                                               
+         +                                |                              
+      15 +| 2026-11-22 | `single_shot` runs (B2) are **never delivered**:
+         + a passing one finishes `repaired` with a `skipped` deliver row
+         + and the reason "Single-shot evaluation run (B2): the patch was
+         + scored, not delivered."                                       
+         +                                                               
+         +                                                               
+         +                                                               
+         +                         | B2 has no cheat guards; opening a PR
+         + from an unguarded patch would contradict FR-27–31. Mode exists
+         + for the evaluation (inc16). The contract gains an optional `mo
+         +de` on `StartRunRequest`.                                      
+         +                                                               
+         +                                |                              
+      16 +| 2026-11-22 | Any thrown error inside a stage → a `failed` row
+         + for that stage (unless the stage already wrote one) and the ru
+         +n finished as `stage_failure` with `failure_stage`/`failure_det
+         +ail`. Details are scrubbed with `redactForDelivery` plus every 
+         +env value whose name looks like a secret (`TOKEN`, `KEY`, `SECR
+         +ET`, `PASSWORD`, …), the repository's `credential_ref` value, a
+         +nd the `DATABASE_URL` password; capped at 4,000 characters.    
+         +                         | NFR-02 (no false success, stage name
+         +d), NFR-04.                                                    
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                |                              
+      17 +| 2026-11-22 | At startup `main.ts` calls `recoverInterruptedRu
+         +ns()`: any run still `running` (the server died mid-run) gets a
+         + `failed` row for its `stage_reached` and ends as `stage_failur
+         +e`. Optional `{ repositoryId }` scope, used by the tests becaus
+         +e the test database is shared by parallel test files.          
+         +                                                               
+         +                                                               
+         +                         | Without it a run could stay "Running
+         +" forever after a restart (DR-01, NFR-02).                     
+         +                                                               
+         +                                                               
+         +                                                               
+         +                                |                              
+     … 8 more lines (ctrl+o to expand)
+
+⏺ Committing in logical pieces.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now a live smoke test against the real server and dev database, including a
+  real Postgres restart for DR-01. Checking what repository registration probes
+  first.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ I'll register the existing demo repo to run the DELETE /orders/{id} change,
+  which should end as flagged with no model call or GitHub write, and then run
+  the smoke script.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ The registration validator needs a local main branch, so I'm renaming the
+  scratch repo's master and rerunning. The spec-check flow over HTTP already
+  passed, with 9 changes and the baseline advanced.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The live flow works, with the 202 and 409 responses, flagged reasons, stage
+  rows, HTML report and export all in place. The missing "FIXTURE" string is
+  expected for an uploaded spec, so I'm restarting Postgres and the server next
+  to compare the stored run.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ DR-01 verified with a real Postgres restart: the run record is identical.
+  exports/ is gitignored. Now rule 12: merge the latest main and re-run
+  everything.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ All 847 tests pass across workspaces, and typecheck, lint, and format are
+  clean on my files. I'm checking whether CI runs a repo-wide format check,
+  since docs/decisions/inc11.md already on main has a prettier warning.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ CI doesn't run a format check, so the old inc11.md warning isn't a blocker and
+  I'll leave it alone. Pushing and opening the PR, as CLAUDE.md rule 13
+  requires.
+
+  Created PR #29, ran 1 shell command (ctrl+o to expand)
+
+⏺ CI is running (the Docker tests take a few minutes). I'll watch it in the
+  background.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Increment 13 is built and the PR is open:
+  https://github.com/Bigyan1313/self_maintaining_api/pull/29. Everything passes
+  locally; CI is still running and I'm watching it.
+
+  INCREMENT 13 REPORT
+  Status: DONE (CI pending)
+  Built:
+  - Orchestrator (apps/server/src/pipeline/orchestrator.ts). Every external 
+  dependency is passed in (db, spec source, oasdiff, LLM, validator, GitHub, 
+  clock), so tests swap in fakes.
+  - Spec check: ingest → detect + classify → then advance the baseline. A failed
+  detect or classify is recorded as a failed check naming its stage, the 
+  baseline stays where it was, and checking again retries.
+  - Run: locate → repair (validation runs inside) → deliver a PR, or record a 
+  flagged finding. Each stage writes its result row before the next starts. Any 
+  failure is recorded as a stage failure naming the stage, with credentials 
+  removed from the detail.
+  - One run at a time: a second request gets 409. Reanalysis creates a new run 
+  linked by parent_run_id. Runs left "running" by a server crash are closed as 
+  stage failures at startup.
+  - Six run endpoints: start, list, detail (text labels), reanalyze, retry 
+  delivery, export (GET json|html; POST writes both files to exports/).
+  - Export: JSON with stable key order, and a self-contained HTML page (all 
+  values escaped, no scripts, FIXTURE / DEMO RUN banner). A failed write leaves 
+  no partial files and is never reported as saved.
+  - New migration 0002: spec_checks.failure_stage. Contract additions only 
+  (nothing removed or renamed).
+  Tests: 847/847, typecheck: ok, lint: ok
+  Commands to verify:
+  - npm run typecheck && npm run lint && npm test
+  - cd apps/server && npx vitest run test/orchestrator.integration.test.ts   
+  (real Docker validator, about 50 s)
+  Decisions logged: docs/decisions/inc13.md (19 entries)
+  SRS requirements covered: FR-38, FR-39, FR-41, DR-01, DR-02, DR-05, NFR-01, 
+  NFR-02, BR-06 (+ FR-11, FR-36, FR-37, UC-02)
+  Problems / things the human must do:
+  - Run /export docs/chat-logs/inc13-bigyan.txt and I'll commit it to this 
+  branch
+
+  Things worth knowing:
+
+  - Bug in the existing ingest code (inc04). Re-checking a spec that's already
+    stored returns "no change". So after a failed detect, the new version would
+    never have been detected again. The orchestrator now runs detect whenever
+    the ingested version differs from the baseline, and a test covers the retry.
+  - The migration note has to come with the spec. Classification only reads a
+    note that already exists for that pair of versions, and changes can't be
+    edited afterwards. So checkSpec takes the note together with the new spec.
+    Uploading v2 over HTTP can't attach a note yet, so its changes stay
+    unconfirmed until someone confirms them by hand. Increment 14 (dashboard)
+    will need to handle this.
+  - Bibek's or Sishir's PRs: if either also adds a migration, whoever merges
+    second must regenerate theirs after 0002_spec_check_failure_stage (rule 9).
+  - Live tests ran during my test runs. Your .env has a GitHub token,
+    SMA_DEMO_REPO and an Anthropic key, so npm test also runs the increment
+    11/12 live tests. Each full run made one small paid model call and opened a
+    real, never-merged PR on sma-demo-consumer. I ran the suite three times, so
+    there are a few new open PRs there you may want to close.
+  - Data survives a restart (DR-01), checked by hand. On the dev database I ran
+    a flagged run, restarted the Postgres container and the server, and the run
+    record was identical. That left a Bigyan1313/sma-demo-consumer repository
+    entry in the dev DB whose local path is in my scratch folder, plus one
+    report in exports/ (gitignored).
+
+  I'll report the CI result when it finishes.
+
+✻ Brewed for 31m 30s · done 1:06 PM
+
+※ recap: Increment 13 (pipeline orchestrator, run records, export) is built, passing locally, and up as PR #29; CI is still running. Next, you run /export docs/chat-logs/inc13-bigyan.txt so I can commit the chat log to the branch.
+
+⏺ Background command "Wait for PR CI checks to finish" completed (exit code 0)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ CI passed on PR #29: both checks are green (6m26s and 7m43s), and they include
+  the Docker end-to-end tests.
+  https://github.com/Bigyan1313/self_maintaining_api/pull/29
+
+  The PR is still missing the chat log. Run /export 
+  docs/chat-logs/inc13-bigyan.txt and I'll commit it to the branch. After that a
+  teammate can merge it with "Create a merge commit".
+
+✻ Brewed for 8s · done 1:14 PM

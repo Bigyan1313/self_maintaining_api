@@ -155,11 +155,21 @@ export const specChecks = pgTable(
     outcome: specCheckOutcomeEnum('outcome').notNull(),
     specVersionId: uuid('spec_version_id').references(() => specVersions.id),
     errorDetail: text('error_detail'),
+    /** Stage that failed (ingest, detect or classify); set exactly when the check failed (UC-02). */
+    failureStage: stageEnum('failure_stage'),
   },
   (t) => [
     check(
       'spec_checks_failed_has_error_detail',
       sql`${t.outcome} <> 'failed' OR ${t.errorDetail} IS NOT NULL`,
+    ),
+    check(
+      'spec_checks_failed_iff_failure_stage',
+      sql`(${t.outcome} = 'failed') = (${t.failureStage} IS NOT NULL)`,
+    ),
+    check(
+      'spec_checks_failure_stage_in_check',
+      sql`${t.failureStage} IS NULL OR ${t.failureStage} IN ('ingest', 'detect', 'classify')`,
     ),
     index('spec_checks_api_id_idx').on(t.apiId),
     index('spec_checks_spec_version_id_idx').on(t.specVersionId),

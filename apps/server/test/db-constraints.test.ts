@@ -309,7 +309,11 @@ describe('locate, checks, stage results, evaluation', () => {
 
   it('rejects a spec_check "failed" with no error_detail (FR-11)', async () => {
     await expectDbRejects(
-      insertSpecCheck(client.db, { apiId: chain.api.id, outcome: 'failed' }),
+      insertSpecCheck(client.db, {
+        apiId: chain.api.id,
+        outcome: 'failed',
+        failureStage: 'ingest',
+      }),
       check('spec_checks_failed_has_error_detail'),
     );
   });
