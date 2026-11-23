@@ -1,0 +1,28 @@
+[
+  {
+    "path": "/forecasts/{id}",
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "42"
+      }
+    ],
+    "requestParameters": {},
+    "body": {
+      "observed_at": "2023-11-14T22:13:20.000Z"
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

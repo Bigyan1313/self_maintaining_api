@@ -1,0 +1,10 @@
+api: param-shop-query
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: required_param_added
+    method: GET
+    path: /orders
+    param: status
+    in: query
+    default_value: all

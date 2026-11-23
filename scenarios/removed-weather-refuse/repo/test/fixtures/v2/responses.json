@@ -1,0 +1,10 @@
+[
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

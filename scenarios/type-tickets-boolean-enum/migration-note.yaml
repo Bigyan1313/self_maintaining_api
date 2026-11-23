@@ -1,0 +1,11 @@
+api: type-tickets-boolean-enum
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: field_type_changed
+    method: GET
+    path: /tickets/{id}
+    field: available
+    old_type: boolean
+    new_type: string
+    conversion: value === 'available'

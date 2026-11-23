@@ -1,0 +1,30 @@
+[
+  {
+    "path": "/books/{id}",
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "42"
+      }
+    ],
+    "requestParameters": {},
+    "body": {
+      "author": {
+        "name": "Ursula"
+      }
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

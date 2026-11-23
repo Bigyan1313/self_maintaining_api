@@ -1,0 +1,17 @@
+id: param-fitness-axios-instance
+category: required_param_added
+difficulty: moderate
+description: Required parameter on a configured axios instance
+callPatterns:
+  - axios_instance
+target:
+  method: GET
+  path: /workouts
+  operationId: getParamFitnessAxiosInstance
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: repair

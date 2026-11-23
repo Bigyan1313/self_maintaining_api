@@ -1,0 +1,11 @@
+api: type-shop-number-string
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: field_type_changed
+    method: GET
+    path: /orders/{id}
+    field: total
+    old_type: number
+    new_type: string
+    conversion: Number(value)

@@ -1,0 +1,28 @@
+[
+  {
+    "path": "/stations/{id}",
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "42"
+      }
+    ],
+    "requestParameters": {},
+    "body": {
+      "display_name": "Austin"
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

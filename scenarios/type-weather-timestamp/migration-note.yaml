@@ -1,0 +1,11 @@
+api: type-weather-timestamp
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: field_type_changed
+    method: GET
+    path: /forecasts/{id}
+    field: observed_at
+    old_type: integer
+    new_type: string
+    conversion: Date.parse(value) / 1000

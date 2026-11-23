@@ -1,0 +1,18 @@
+id: removed-tickets-refuse
+category: endpoint_removed
+difficulty: high
+description: Resale endpoint removed without replacement
+callPatterns:
+  - generated_client
+  - fetch
+target:
+  method: GET
+  path: /tickets/{id}/resale
+  operationId: getRemovedTicketsRefuse
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: refuse

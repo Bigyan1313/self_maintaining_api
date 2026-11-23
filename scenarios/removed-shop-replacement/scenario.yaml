@@ -1,0 +1,17 @@
+id: removed-shop-replacement
+category: endpoint_removed
+difficulty: high
+description: Invoice endpoint has a documented replacement
+callPatterns:
+  - fetch
+target:
+  method: GET
+  path: /orders/{id}/invoice
+  operationId: getRemovedShopReplacement
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: repair

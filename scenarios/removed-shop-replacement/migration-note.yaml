@@ -1,0 +1,10 @@
+api: removed-shop-replacement
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: endpoint_removed
+    method: GET
+    path: /orders/{id}/invoice
+    replacement:
+      method: GET
+      path: /invoices/{id}

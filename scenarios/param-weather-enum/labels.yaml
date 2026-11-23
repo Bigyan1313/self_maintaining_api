@@ -1,0 +1,17 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "param-weather-enum",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/stations/{id}/forecast",
+      "category": "required_param_added",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "parameter": "units",
+      "location": "query"
+    }
+  ]
+}

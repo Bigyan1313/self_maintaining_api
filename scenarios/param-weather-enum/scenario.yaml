@@ -1,0 +1,17 @@
+id: param-weather-enum
+category: required_param_added
+difficulty: moderate
+description: Enum query next to a path parameter
+callPatterns:
+  - fetch
+target:
+  method: GET
+  path: /stations/{id}/forecast
+  operationId: getParamWeatherEnum
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: repair

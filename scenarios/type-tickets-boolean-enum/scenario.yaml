@@ -1,0 +1,18 @@
+id: type-tickets-boolean-enum
+category: field_type_changed
+difficulty: moderate
+description: Availability boolean becomes an enum
+callPatterns:
+  - generated_client
+  - fetch
+target:
+  method: GET
+  path: /tickets/{id}
+  operationId: getTypeTicketsBooleanEnum
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: repair

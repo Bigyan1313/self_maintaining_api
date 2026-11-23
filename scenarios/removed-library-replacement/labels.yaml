@@ -1,0 +1,23 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "removed-library-replacement",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/books/{id}/availability",
+      "category": "endpoint_removed",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "replacement": "/availability/{id}"
+    },
+    {
+      "method": "GET",
+      "path": "/availability/{id}",
+      "category": "other",
+      "classification": "safe",
+      "mappingStatus": "unconfirmed"
+    }
+  ]
+}

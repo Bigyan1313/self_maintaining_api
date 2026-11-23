@@ -1,0 +1,10 @@
+api: rename-fitness-destructure
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: field_renamed
+    method: GET
+    path: /workouts/{id}
+    location: response
+    old: workout_name
+    new: label

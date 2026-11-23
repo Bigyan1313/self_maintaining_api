@@ -1,0 +1,46 @@
+openapi: 3.0.3
+info:
+  title: type-fitness-remote-conversion
+  version: 2.0.0
+servers:
+  - url: https://api.example.test
+paths:
+  /sessions/{id}:
+    get:
+      operationId: getTypeFitnessRemoteConversion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "42"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - distance
+                properties:
+                  distance:
+                    type: string
+              example:
+                distance: "5.25"
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+              example:
+                ok: true

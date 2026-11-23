@@ -98,3 +98,23 @@ jobs:
             apps/web/test-results
             apps/web/playwright-report
           if-no-files-found: warn
+
+      # EV-01/02: regenerate byte-for-byte and verify all twenty cases using inc08.
+      - name: Frozen scenario build is deterministic
+        run: |
+          npm run scenarios:build
+          git diff --exit-code -- scenarios
+      - name: Verify scenario admission in Docker
+        run: npm run scenarios:verify -- --container
+      - name: Preserve scenario verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scenario-verification
+          path: scenarios/verification.json
+          if-no-files-found: warn
+      - name: Scenario verifier cleaned up
+        if: always()
+        run: |
+          test -z "$(docker ps --all --quiet --filter label=sma.validator=1)"
+          git diff --exit-code -- scenarios ':!scenarios/verification.json'

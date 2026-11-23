@@ -1,0 +1,18 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "type-weather-timestamp",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/forecasts/{id}",
+      "category": "field_type_changed",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "field": "observed_at",
+      "oldType": "integer",
+      "newType": "string"
+    }
+  ]
+}

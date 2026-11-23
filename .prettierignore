@@ -16,3 +16,12 @@ docs/acceptance
 apps/web/public/mockServiceWorker.js
 apps/web/playwright-report
 apps/web/test-results
+# Frozen scenario bytes are owned by the deterministic builder
+scenarios/*/repo
+scenarios/*/specs
+scenarios/*/labels.yaml
+scenarios/*/scenario.yaml
+scenarios/*/migration-note.yaml
+scenarios/manifest.json
+scenarios/verification.json
+scenarios/templates

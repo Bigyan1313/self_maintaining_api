@@ -1,0 +1,32 @@
+[
+  {
+    "path": "/orders",
+    "parameters": [
+      {
+        "name": "status",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "all",
+            "open"
+          ]
+        },
+        "example": "all"
+      }
+    ],
+    "requestParameters": {},
+    "body": {
+      "count": 3
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

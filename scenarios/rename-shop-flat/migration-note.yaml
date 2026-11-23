@@ -1,0 +1,10 @@
+api: rename-shop-flat
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: field_renamed
+    method: GET
+    path: /customers/{id}
+    location: response
+    old: customer_name
+    new: full_name

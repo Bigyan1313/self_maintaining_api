@@ -1,0 +1,28 @@
+[
+  {
+    "path": "/sessions/{id}/ranking",
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "42"
+      }
+    ],
+    "requestParameters": {},
+    "body": {
+      "rank": 7
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

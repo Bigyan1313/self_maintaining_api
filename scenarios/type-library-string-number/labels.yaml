@@ -1,0 +1,18 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "type-library-string-number",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/books/{id}",
+      "category": "field_type_changed",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "field": "pages",
+      "oldType": "string",
+      "newType": "number"
+    }
+  ]
+}

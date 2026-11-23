@@ -1,0 +1,17 @@
+id: rename-weather-two-files
+category: field_renamed
+difficulty: low
+description: Station name read by two independent modules
+callPatterns:
+  - fetch
+target:
+  method: GET
+  path: /stations/{id}
+  operationId: getRenameWeatherTwoFiles
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: repair

@@ -1,0 +1,18 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "type-shop-number-string",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/orders/{id}",
+      "category": "field_type_changed",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "field": "total",
+      "oldType": "number",
+      "newType": "string"
+    }
+  ]
+}

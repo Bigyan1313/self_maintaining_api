@@ -1,0 +1,17 @@
+id: type-shop-number-string
+category: field_type_changed
+difficulty: moderate
+description: Price becomes a decimal string
+callPatterns:
+  - fetch
+target:
+  method: GET
+  path: /orders/{id}
+  operationId: getTypeShopNumberString
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: repair
