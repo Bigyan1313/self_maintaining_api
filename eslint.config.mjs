@@ -11,6 +11,9 @@ export default tseslint.config(
       '**/dist/**',
       '**/coverage/**',
       'docs/api/**',
+      'apps/web/public/mockServiceWorker.js',
+      'apps/web/playwright-report/**',
+      'apps/web/test-results/**',
       '.work/**',
       'apps/server/drizzle/**',
       // Standalone consumer repo (stands in for a developer's own project); it has its own tooling.

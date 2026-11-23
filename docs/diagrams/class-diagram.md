@@ -472,7 +472,7 @@ classDiagram
     class WebApp {
       <<module>>
       +App() JSX
-      +HealthState
+      +Routes
     }
   }
 
@@ -583,7 +583,7 @@ classDiagram
   AnthropicLlmAdapter ..> repairContext
 
   %% ---- View ----
-  WebApp ..> httpApp : HTTP GET /health
+  WebApp ..> httpApp : HTTP API via shared contract
 ```
 
 ## Every node and the file it lives in
@@ -669,7 +669,7 @@ every symbol in backticks appears in it. It also checks that every node in the d
 | `LlmResult`             | type      | `LlmResult` `refusal`                                                                                                                                              | `apps/server/src/infra/llm/types.ts`                |
 | `AnthropicLlmAdapter`   | class     | `class AnthropicLlmAdapter implements LlmAdapter`                                                                                                                  | `apps/server/src/infra/llm/adapter.ts`              |
 | `FakeLlmAdapter`        | class     | `class FakeLlmAdapter implements LlmAdapter` `calls`                                                                                                               | `apps/server/src/infra/llm/fake.ts`                 |
-| `WebApp`                | module    | `export function App` `HealthState`                                                                                                                                | `apps/web/src/App.tsx`                              |
+| `WebApp`                | module    | `export function App` `Routes`                                                                                                                                     | `apps/web/src/App.tsx`                              |
 
 Node names that differ from the file name were changed to avoid name clashes in Mermaid. For
 example, `classifyModule` is `classify.ts` in core and `classifyStage` is `classify.ts` in the
