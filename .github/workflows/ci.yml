@@ -71,3 +71,30 @@ jobs:
       - run: npm run consumer:install
       - run: npm run consumer:typecheck
       - run: npm run consumer:test:v1
+      - name: Build dashboard
+        run: npm run build -w @sma/web
+      - name: Install Chromium for browser acceptance
+        run: npx playwright install --with-deps chromium
+      - name: Dashboard fixture workflow and screenshots
+        run: npm run e2e
+      - name: Dashboard real-server smoke test
+        run: |
+          node --import tsx apps/server/src/main.ts > /tmp/dashboard-server.log 2>&1 &
+          dashboard_server_pid=$!
+          trap 'kill "$dashboard_server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/health; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:3000/health
+          npm run e2e:real
+      - name: Save dashboard acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-acceptance
+          path: |
+            docs/acceptance/screenshots/inc14
+            apps/web/test-results
+            apps/web/playwright-report
+          if-no-files-found: warn

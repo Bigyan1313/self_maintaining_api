@@ -9,3 +9,7 @@ docs/api/
 *.tsbuildinfo
 .DS_Store
 exports/
+
+# Browser test diagnostics (screenshots under docs/acceptance are committed)
+apps/web/test-results/
+apps/web/playwright-report/

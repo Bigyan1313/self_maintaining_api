@@ -33,7 +33,9 @@
     "test:scripts": "vitest run --root scripts",
     "diagrams": "npm run docs:check && tsx scripts/diagrams/render.ts",
     "acceptance": "npm run build -w @sma/core && tsx scripts/acceptance/run.ts",
-    "docs:check": "tsx scripts/diagrams/check.ts"
+    "docs:check": "tsx scripts/diagrams/check.ts",
+    "e2e": "npm run build -w @sma/core && npm run e2e -w @sma/web",
+    "e2e:real": "npm run build -w @sma/core && npm run e2e:real -w @sma/web"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -49,5 +51,10 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
     "vitest": "5.0.5"
+  },
+  "msw": {
+    "workerDirectory": [
+      "apps/web/public"
+    ]
   }
 }
