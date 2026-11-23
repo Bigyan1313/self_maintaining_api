@@ -179,6 +179,8 @@ export async function verifyOne(
 
 /** Full twenty-case admission check. Default container mode is mandatory for evaluation. */
 export async function verify(root: string, mode: 'container' | 'host'): Promise<Verification[]> {
+  // Never leave a previous successful report behind if this run fails during preflight.
+  await rm(join(root, 'verification.json'), { force: true });
   const manifest = await readManifest(root);
   const counts = new Map<string, number>();
   let refusals = 0;

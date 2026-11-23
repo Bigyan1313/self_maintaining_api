@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { parse } from 'yaml';
 import type { ValidationResult } from '@sma/core';
 import { assertFrozen, hashFolder, readManifest } from './integrity.js';
-import { assess, verifyOne } from './verify.js';
+import { assess, verify, verifyOne } from './verify.js';
 import { fixtures, specification } from './build.js';
 import { snapshotCommit } from './snapshot.js';
 import rename from './definitions/rename-shop-flat.js';
@@ -140,6 +140,16 @@ describe('frozen cohort', () => {
     const entry = (await readManifest(root)).scenarios[0]!;
     expect(await snapshotCommit(join(root, entry.id, 'repo'))).toBe(entry.repoCommit);
     expect(await snapshotCommit(join(root, entry.id, 'repo'))).toBe(entry.repoCommit);
+  });
+  it('removes stale success evidence when manifest preflight fails', async () => {
+    const dir = await temp();
+    await writeFile(join(dir, 'verification.json'), '{"results":[{"admissible":true}]}');
+    await writeFile(
+      join(dir, 'manifest.json'),
+      JSON.stringify({ schemaVersion: 1, scenarios: [] }),
+    );
+    await expect(verify(dir, 'container')).rejects.toThrow('exactly 20');
+    await expect(readFile(join(dir, 'verification.json'))).rejects.toThrow();
   });
   it('rejects a shortened manifest', async () => {
     const dir = await temp();
