@@ -1,0 +1,40 @@
+openapi: 3.0.3
+info:
+  title: param-shop-query
+  version: 1.0.0
+servers:
+  - url: https://api.example.test
+paths:
+  /orders:
+    get:
+      operationId: getParamShopQuery
+      parameters: []
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                properties:
+                  count:
+                    type: number
+              example:
+                count: 3
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+              example:
+                ok: true

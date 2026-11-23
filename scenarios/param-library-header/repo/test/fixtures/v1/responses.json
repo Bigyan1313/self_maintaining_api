@@ -1,0 +1,18 @@
+[
+  {
+    "path": "/books",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "count": 4
+    }
+  },
+  {
+    "path": "/health",
+    "parameters": [],
+    "requestParameters": {},
+    "body": {
+      "ok": true
+    }
+  }
+]

@@ -1,0 +1,10 @@
+api: rename-weather-two-files
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: field_renamed
+    method: GET
+    path: /stations/{id}
+    location: response
+    old: station_name
+    new: display_name

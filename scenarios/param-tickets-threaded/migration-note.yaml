@@ -1,0 +1,10 @@
+api: param-tickets-threaded
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: required_param_added
+    method: GET
+    path: /events/{id}/tickets
+    param: region
+    in: query
+    default_value: us

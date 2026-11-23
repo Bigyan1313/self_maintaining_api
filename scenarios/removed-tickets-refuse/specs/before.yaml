@@ -1,0 +1,46 @@
+openapi: 3.0.3
+info:
+  title: removed-tickets-refuse
+  version: 1.0.0
+servers:
+  - url: https://api.example.test
+paths:
+  /tickets/{id}/resale:
+    get:
+      operationId: getRemovedTicketsRefuse
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "42"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - price
+                properties:
+                  price:
+                    type: number
+              example:
+                price: 80
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+              example:
+                ok: true

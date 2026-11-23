@@ -1,0 +1,17 @@
+id: removed-fitness-refuse
+category: endpoint_removed
+difficulty: high
+description: Ranking removed without replacement
+callPatterns:
+  - axios_instance
+target:
+  method: GET
+  path: /sessions/{id}/ranking
+  operationId: getRemovedFitnessRefuse
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: refuse

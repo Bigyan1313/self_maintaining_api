@@ -1,0 +1,68 @@
+openapi: 3.0.3
+info:
+  title: param-tickets-threaded
+  version: 2.0.0
+servers:
+  - url: https://api.example.test
+paths:
+  /events/{id}/tickets:
+    get:
+      operationId: getParamTicketsThreaded
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "42"
+        - name: region
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - us
+              - eu
+          example: us
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                properties:
+                  count:
+                    type: number
+              examples:
+                "42":
+                  value:
+                    count: 6
+                  x-request:
+                    path: /events/42/tickets
+                    parameters:
+                      region: us
+                "43":
+                  value:
+                    count: 9
+                  x-request:
+                    path: /events/43/tickets
+                    parameters:
+                      region: eu
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+              example:
+                ok: true

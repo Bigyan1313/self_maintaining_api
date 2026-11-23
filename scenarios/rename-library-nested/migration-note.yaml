@@ -1,0 +1,10 @@
+api: rename-library-nested
+from: 1.0.0
+to: 2.0.0
+mappings:
+  - kind: field_renamed
+    method: GET
+    path: /books/{id}
+    location: response
+    old: author/name
+    new: author/display_name

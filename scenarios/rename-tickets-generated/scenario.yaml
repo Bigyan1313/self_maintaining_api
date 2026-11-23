@@ -1,0 +1,18 @@
+id: rename-tickets-generated
+category: field_renamed
+difficulty: low
+description: Event name through a generated client
+callPatterns:
+  - generated_client
+  - fetch
+target:
+  method: GET
+  path: /tickets/{id}
+  operationId: getRenameTicketsGenerated
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: repair

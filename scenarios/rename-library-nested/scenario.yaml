@@ -1,0 +1,17 @@
+id: rename-library-nested
+category: field_renamed
+difficulty: low
+description: Nested author name
+callPatterns:
+  - axios_static
+target:
+  method: GET
+  path: /books/{id}
+  operationId: getRenameLibraryNested
+validationEnv:
+  before:
+    API_VERSION: v1
+  after:
+    API_VERSION: v2
+expected:
+  outcome: repair

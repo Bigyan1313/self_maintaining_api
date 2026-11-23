@@ -1,0 +1,52 @@
+openapi: 3.0.3
+info:
+  title: rename-library-nested
+  version: 1.0.0
+servers:
+  - url: https://api.example.test
+paths:
+  /books/{id}:
+    get:
+      operationId: getRenameLibraryNested
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "42"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - author
+                properties:
+                  author:
+                    type: object
+                    required:
+                      - name
+                    properties:
+                      name:
+                        type: string
+              example:
+                author:
+                  name: Ursula
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+              example:
+                ok: true
