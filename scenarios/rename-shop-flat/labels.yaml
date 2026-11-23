@@ -1,0 +1,25 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "rename-shop-flat",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/customers/{id}",
+      "category": "field_renamed",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "field": "customer_name",
+      "replacement": "full_name"
+    },
+    {
+      "method": "GET",
+      "path": "/customers/{id}",
+      "field": "full_name",
+      "category": "other",
+      "classification": "safe",
+      "mappingStatus": "unconfirmed"
+    }
+  ]
+}

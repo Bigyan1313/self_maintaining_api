@@ -1,0 +1,17 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "param-library-header",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/books",
+      "category": "required_param_added",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "parameter": "X-Library",
+      "location": "header"
+    }
+  ]
+}

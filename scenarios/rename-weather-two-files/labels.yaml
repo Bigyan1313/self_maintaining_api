@@ -1,0 +1,25 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "rename-weather-two-files",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/stations/{id}",
+      "category": "field_renamed",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "field": "station_name",
+      "replacement": "display_name"
+    },
+    {
+      "method": "GET",
+      "path": "/stations/{id}",
+      "field": "display_name",
+      "category": "other",
+      "classification": "safe",
+      "mappingStatus": "unconfirmed"
+    }
+  ]
+}

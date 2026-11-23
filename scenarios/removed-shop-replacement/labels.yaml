@@ -1,0 +1,23 @@
+# Hand-authored ground truth, committed before system runs (EV-04).
+{
+  "schemaVersion": 1,
+  "id": "removed-shop-replacement",
+  "expectedOutcome": "repair",
+  "differences": [
+    {
+      "method": "GET",
+      "path": "/orders/{id}/invoice",
+      "category": "endpoint_removed",
+      "classification": "breaking",
+      "mappingStatus": "confirmed",
+      "replacement": "/invoices/{id}"
+    },
+    {
+      "method": "GET",
+      "path": "/invoices/{id}",
+      "category": "other",
+      "classification": "safe",
+      "mappingStatus": "unconfirmed"
+    }
+  ]
+}
