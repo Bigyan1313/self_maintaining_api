@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { EvaluationSummarySchema } from './evaluation-summary.js';
+export { EvaluationSummarySchema, type EvaluationSummary } from './evaluation-summary.js';
 import * as enums from '../domain/enums.js';
 
 const id = z.uuid();
@@ -275,6 +277,14 @@ export const EvaluationResultSchema = z.object({
 export const ResultsSchema = z.object({
   label: z.string().nullable(),
   results: z.array(EvaluationResultSchema),
+  /** Optional until inc16 publishes server-computed Section 6.4 metrics. */
+  summaries: z.array(EvaluationSummarySchema).optional(),
+  /** Server-scored failures; refusals must not be inferred to be failures by the UI. */
+  failures: z
+    .array(
+      z.object({ scenarioId: z.string(), baseline: z.enum(enums.BASELINES), reason: z.string() }),
+    )
+    .optional(),
 });
 /** Shared endpoint schemas; declaration does not register unimplemented routes. @implementedIn inc04 */
 export const API_CONTRACT = {

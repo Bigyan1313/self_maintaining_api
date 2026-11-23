@@ -14,6 +14,10 @@
     "./api/contract": {
       "types": "./dist/api/contract.d.ts",
       "default": "./dist/api/contract.js"
+    },
+    "./domain/enums": {
+      "types": "./dist/domain/enums.d.ts",
+      "default": "./dist/domain/enums.js"
     }
   },
   "scripts": {
