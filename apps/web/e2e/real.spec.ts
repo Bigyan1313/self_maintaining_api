@@ -103,6 +103,7 @@ test('real configuration, detection, safe unconfirmed run and exports', async ({
   expect(report.run.status.value).toBe('flagged');
   expect(report.attempts).toEqual([]);
   expect(report.run.prUrl).toBeNull();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: resolve('../../docs/acceptance/screenshots/inc14/09-real-unconfirmed-run.png'),
     fullPage: true,

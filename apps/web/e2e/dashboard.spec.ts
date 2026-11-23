@@ -13,6 +13,7 @@ test('configuration → changes → confirmation → run → exports → results
     'aria-invalid',
     'true',
   );
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: resolve(screenshots, '01-configuration-error.png'),
     fullPage: true,
@@ -31,6 +32,7 @@ test('configuration → changes → confirmation → run → exports → results
   });
   await page.getByRole('button', { name: 'Upload spec', exact: true }).click();
   await expect(page.getByText('Baseline established', { exact: true }).first()).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: resolve(screenshots, '02-configuration-baseline.png'),
     fullPage: true,
@@ -47,6 +49,7 @@ test('configuration → changes → confirmation → run → exports → results
   await page.getByRole('link', { name: 'View changes', exact: true }).click();
   await page.getByRole('button', { name: 'View evidence' }).click();
   await expect(page.getByText('Specification evidence')).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: resolve(screenshots, '03-changes.png'), fullPage: true });
   await page.getByRole('button', { name: 'Confirm mapping', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
@@ -61,6 +64,7 @@ test('configuration → changes → confirmation → run → exports → results
     }),
   );
   await page.getByLabel('Confirmed by').fill('Fixture reviewer');
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: resolve(screenshots, '04-confirm-mapping-dialog.png'),
     fullPage: true,
@@ -75,6 +79,7 @@ test('configuration → changes → confirmation → run → exports → results
   await expect(page.getByRole('link', { name: 'Open pull request' })).toBeVisible();
   await page.getByText('Validation output — attempt 1', { exact: true }).click();
   await expect(page.getByText(/Network disabled; non-root container/)).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: resolve(screenshots, '05-run-detail.png'), fullPage: true });
   for (const format of ['JSON', 'HTML']) {
     const download = page.waitForEvent('download');
@@ -85,12 +90,15 @@ test('configuration → changes → confirmation → run → exports → results
   }
   await page.getByRole('link', { name: '← All runs' }).click();
   await expect(page.getByRole('table', { name: 'Recorded runs' })).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: resolve(screenshots, '06-runs.png'), fullPage: true });
   await page.getByRole('link', { name: 'Results' }).click();
   await expect(page.getByRole('heading', { name: 'Failed scenarios' })).toBeVisible();
   await expect(page.getByText(/Excluded: Example/)).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: resolve(screenshots, '07-results.png'), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: resolve(screenshots, '08-results-mobile.png'), fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
