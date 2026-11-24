@@ -33,12 +33,14 @@ export function renderEvaluationReport(study: EvaluationStudy, limitations: stri
     `Git: ${study.environment.gitCommit}; Node: ${study.environment.node}; oasdiff: ${study.environment.oasdiff}; image: ${study.environment.image}.`,
     `Recorded model spend: $${study.spentUsd.toFixed(6)}; uncertain/reserved spend: $${study.reservedUsd.toFixed(6)}.`,
     `Model request settings: maxOutputTokens ${study.environment.maxOutputTokens}; effort ${study.environment.effort}.`,
-    `Model calls: ${study.modelCalls.total}; stopped at max_tokens (truncated): **${study.modelCalls.maxTokensStops}**; stop reasons: ${
-      Object.entries(study.modelCalls.stopReasons)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([reason, n]) => `${reason} ${n}`)
-        .join(', ') || 'none'
-    }.`,
+    study.modelCalls
+      ? `Model calls: ${study.modelCalls.total}; stopped at max_tokens (truncated): **${study.modelCalls.maxTokensStops}**; stop reasons: ${
+          Object.entries(study.modelCalls.stopReasons)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([reason, n]) => `${reason} ${n}`)
+            .join(', ') || 'none'
+        }.`
+      : 'Model calls and stop reasons: not recorded (this artifact predates stop-reason recording).',
     'Repair rate (SRS 6.4) is counted only over scenarios that expect a repair (17 of 20): a trial counts when it passed validation AND its scenario expects a repair. A "repaired" refusal scenario is a wrong action: it fails refusal correctness and is listed under failures. B1 makes no decision, so its refusal correctness is n/a. Cost/time per repair divide by counted repairs.',
     'Repair rate (SRS 6.4) means passed validation, not semantic correctness. Correct repair requires human review. Unreviewed passes remain pending. Cost/time per validation pass include all completed trials, including failures. Container time includes dependency installation and validator orchestration; admission time is outside trial timing.',
   ];
@@ -137,20 +139,25 @@ export function renderEvaluationReport(study: EvaluationStudy, limitations: stri
     const truncated = trials.filter((t) => t.stopReasons.includes('max_tokens'));
     output.push(
       '### Model stop reasons',
-      table(
-        ['Metric', 'Value'],
-        [
-          ['Model calls', trials.reduce((n, t) => n + t.stopReasons.length, 0)],
-          [
-            'Answers stopped at max_tokens (truncated)',
-            trials.reduce((n, t) => n + t.stopReasons.filter((r) => r === 'max_tokens').length, 0),
-          ],
-          [
-            'Trials with a truncated answer',
-            truncated.map((t) => `${t.scenarioId} r${t.repeat}`).join(', ') || 'none',
-          ],
-        ],
-      ),
+      !study.modelCalls
+        ? 'Not recorded (this artifact predates stop-reason recording).'
+        : table(
+            ['Metric', 'Value'],
+            [
+              ['Model calls', trials.reduce((n, t) => n + t.stopReasons.length, 0)],
+              [
+                'Answers stopped at max_tokens (truncated)',
+                trials.reduce(
+                  (n, t) => n + t.stopReasons.filter((r) => r === 'max_tokens').length,
+                  0,
+                ),
+              ],
+              [
+                'Trials with a truncated answer',
+                truncated.map((t) => `${t.scenarioId} r${t.repeat}`).join(', ') || 'none',
+              ],
+            ],
+          ),
     );
     output.push(
       '### Cost and time',

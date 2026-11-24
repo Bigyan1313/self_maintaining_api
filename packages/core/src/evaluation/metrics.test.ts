@@ -256,7 +256,7 @@ describe('evaluation metrics: hand-computed examples', () => {
     const parsed = EvaluationStudySchema.parse(old);
     expect(parsed.environment.effort).toBe('not recorded');
     expect(parsed.trials[0]?.stopReasons).toEqual([]);
-    expect(parsed.modelCalls).toEqual({ total: 0, maxTokensStops: 0, stopReasons: {} });
+    expect(parsed.modelCalls).toBeNull();
   });
   it('keeps incomplete review false-confidence rate null and labels the pending pass', () => {
     const s = study([trial({ review: null })]);

@@ -109,7 +109,8 @@ export const EvaluationStudySchema = z.object({
   reservedUsd: nonnegative,
   /**
    * Every model call's stop reason, counted. `maxTokensStops` makes truncated answers
-   * (`stop_reason: "max_tokens"`) visible on their own.
+   * (`stop_reason: "max_tokens"`) visible on their own. `null` in artifacts written before
+   * calls were recorded (never a fabricated zero).
    */
   modelCalls: z
     .object({
@@ -117,7 +118,8 @@ export const EvaluationStudySchema = z.object({
       maxTokensStops: count,
       stopReasons: z.record(z.string(), count),
     })
-    .default({ total: 0, maxTokensStops: 0, stopReasons: {} }),
+    .nullable()
+    .default(null),
 });
 /** A persisted study. */
 export type EvaluationStudy = z.infer<typeof EvaluationStudySchema>;

@@ -59,7 +59,7 @@ export class BudgetAdapter implements LlmAdapter {
       this.study.spentUsd += usage?.costUsd ?? 0;
     }
     const reason = stopReasonOf(response);
-    const calls = this.study.modelCalls;
+    const calls = (this.study.modelCalls ??= { total: 0, maxTokensStops: 0, stopReasons: {} });
     calls.total++;
     calls.stopReasons[reason] = (calls.stopReasons[reason] ?? 0) + 1;
     if (reason === 'max_tokens') calls.maxTokensStops++;
