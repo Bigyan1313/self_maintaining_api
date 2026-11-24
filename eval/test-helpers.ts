@@ -22,7 +22,8 @@ export function sampleStudy(): EvaluationStudy {
       cpuCores: 2,
       ramBytes: 1024,
       pricing: { input: 2, output: 10 },
-      maxOutputTokens: 4096,
+      maxOutputTokens: 16000,
+      effort: 'high',
     },
     manifest: [{ id: 'x', sha256: 'a'.repeat(64), repoCommit: 'b'.repeat(40) }],
     admissions: [],
@@ -30,6 +31,7 @@ export function sampleStudy(): EvaluationStudy {
     inFlight: null,
     spentUsd: 0,
     reservedUsd: 0,
+    modelCalls: { total: 0, maxTokensStops: 0, stopReasons: {} },
   };
 }
 /** One completed failure is genuine evidence, not an outage. */
@@ -60,6 +62,7 @@ export function sampleTrial(overrides: Partial<EvaluationTrial> = {}): Evaluatio
     review: null,
     completed: true,
     createdAt: '2026-11-23T00:00:00.000Z',
+    stopReasons: [],
     ...overrides,
   };
 }

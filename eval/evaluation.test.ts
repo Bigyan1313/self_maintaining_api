@@ -8,7 +8,12 @@ import { evaluate, type EvaluationPorts } from './engine.js';
 import { BudgetAdapter, maximumCallCost } from './budget.js';
 import { readStudy, saveStudy, lockStudy, studyDirectory } from './store.js';
 import { renderEvaluationReport, writeReport } from './report.js';
-import { parseEvaluationArgs } from './run.js';
+import {
+  DEFAULT_MAX_COST_USD,
+  EVAL_MAX_OUTPUT_TOKENS,
+  estimateMaxCost,
+  parseEvaluationArgs,
+} from './run.js';
 import { sampleStudy, sampleTrial } from './test-helpers.js';
 const temps: string[] = [];
 afterEach(async () => {
@@ -148,6 +153,63 @@ describe('evaluation orchestration and artifacts', () => {
     expect(renderEvaluationReport(study, 'Known limits')).toContain('100.0%');
     expect(renderEvaluationReport(study, 'Known limits')).toContain('wrong semantics');
   });
+  it('shows repair-rate denominators, B1 refusal n/a, wrong actions, cheats by category and stop reasons', () => {
+    const study = sampleStudy();
+    study.trials.push(
+      sampleTrial({ baseline: 'B1', expected: 'refuse', category: 'endpoint_removed' }),
+      sampleTrial({
+        baseline: 'B3',
+        outcome: 'repaired',
+        patch: 'diff',
+        stopReasons: ['end_turn'],
+      }),
+      sampleTrial({
+        baseline: 'B3',
+        scenarioId: 'y',
+        outcome: 'failed',
+        stopReasons: ['max_tokens', 'end_turn'],
+      }),
+      sampleTrial({
+        baseline: 'B3',
+        scenarioId: 'z',
+        expected: 'refuse',
+        category: 'endpoint_removed',
+        outcome: 'repaired',
+        patch: 'diff',
+      }),
+      sampleTrial({
+        baseline: 'B3',
+        scenarioId: 'c',
+        category: 'field_type_changed',
+        outcome: 'cheating_rejected',
+        guard: 'type_suppression',
+      }),
+    );
+    study.modelCalls = { total: 4, maxTokensStops: 1, stopReasons: { end_turn: 3, max_tokens: 1 } };
+    const report = renderEvaluationReport(study, 'Known limits');
+    expect(report).toContain(
+      '| Repair rate (passed validation, expected-repair scenarios) | 33.3% (1/3) |',
+    );
+    expect(report).toContain('| Refusal correctness | n/a (B1 makes no decision) |');
+    expect(report).toContain('| Refusal correctness | 0.0% (0/1) |');
+    expect(report).toContain('| Wrong actions (repaired a refusal scenario) | 1 |');
+    expect(report).toContain('| field_type_changed | type_suppression | 1 |');
+    expect(report).toContain('Wrong action: repaired a refusal scenario');
+    expect(report).toContain('maxOutputTokens 16000; effort high');
+    expect(report).toContain('stopped at max_tokens (truncated): **1**');
+    expect(report).toContain('| Trials with a truncated answer | y r1 |');
+  });
+  it('defaults to a $50 budget and estimates with the configured output limit', () => {
+    expect(DEFAULT_MAX_COST_USD).toBe(50);
+    expect(parseEvaluationArgs(['--label', 'x']).maxCost).toBe(50);
+    expect(EVAL_MAX_OUTPUT_TOKENS).toBe(16000);
+    expect(estimateMaxCost(10, { input: 2, output: 10 }, 16000)).toBeCloseTo(
+      (10 * (8000 * 2 + 16000 * 10)) / 1e6,
+    );
+    expect(estimateMaxCost(1, { input: 0, output: 10 }, 16000)).toBeGreaterThan(
+      estimateMaxCost(1, { input: 0, output: 10 }, 4096),
+    );
+  });
   it('validates CLI choices and never implies paid authorization', () => {
     expect(parseEvaluationArgs(['--label', 'x']).yes).toBe(false);
     expect(parseEvaluationArgs(['--label', 'x', '--repeat', '3', '--max-cost', '0']).repeat).toBe(
@@ -210,5 +272,35 @@ describe('cost guard', () => {
     await adapter.generatePatch(context, opts);
     expect(study.reservedUsd).toBeGreaterThan(0);
     expect(adapter.modelMs).toBe(150);
+  });
+  it('counts every call by stop reason and max_tokens stops separately', async () => {
+    const study = sampleStudy();
+    const usage = { tokensIn: 1, tokensOut: 1, costUsd: 0, modelId: 'm' };
+    const reasons: string[] = [];
+    const adapter = new BudgetAdapter(
+      new FakeLlmAdapter([
+        { kind: 'patch', patch: 'p', ...usage, durationMs: 1, stopReason: 'end_turn' },
+        {
+          kind: 'error',
+          errorKind: 'invalid_output',
+          message: 'truncated',
+          durationMs: 1,
+          usage,
+          stopReason: 'max_tokens',
+        },
+        { kind: 'error', errorKind: 'timeout', message: 't', durationMs: 1 },
+      ]),
+      study,
+      async () => {},
+      () => false,
+      (r) => reasons.push(r.kind),
+    );
+    for (let i = 0; i < 3; i++) await adapter.generatePatch(context, opts);
+    expect(study.modelCalls).toEqual({
+      total: 3,
+      maxTokensStops: 1,
+      stopReasons: { end_turn: 1, max_tokens: 1, no_response: 1 },
+    });
+    expect(reasons).toHaveLength(3);
   });
 });

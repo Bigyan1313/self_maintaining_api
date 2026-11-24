@@ -34,7 +34,7 @@ import { assertFrozen } from '../scenarios/integrity.js';
 import { verifyOne, containerPair } from '../scenarios/verify.js';
 import type { ManifestEntry } from '../scenarios/types.js';
 import { runOasdiff } from '../apps/server/src/infra/oasdiff/runner.js';
-import { BudgetAdapter } from './budget.js';
+import { BudgetAdapter, stopReasonOf } from './budget.js';
 const exec = promisify(execFile);
 const metadataSchema = z.object({
   category: z.enum(CHANGE_CATEGORIES),
@@ -208,6 +208,7 @@ export async function runTrial(input: {
     review: null,
     completed: false,
     createdAt: new Date().toISOString(),
+    stopReasons: [],
   };
   trial.reason = 'Trial in progress';
   study.trials.push(trial);
@@ -246,6 +247,7 @@ export async function runTrial(input: {
           trial.tokensOut += usage?.tokensOut ?? 0;
           trial.costUsd += usage?.costUsd ?? 0;
           trial.attemptsUsed++;
+          trial.stopReasons.push(stopReasonOf(response));
           if (response.kind === 'patch') trial.patch = response.patch;
         },
       );

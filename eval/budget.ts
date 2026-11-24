@@ -12,6 +12,15 @@ export function maximumCallCost(
     1_000_000
   );
 }
+/**
+ * The stop reason to record for one model call: the provider's, `no_response` when nothing
+ * arrived (timeout, network), or `not_reported` (scripted fakes).
+ */
+export function stopReasonOf(response: LlmResult): string {
+  if (response.stopReason) return response.stopReason;
+  if (response.kind === 'error' && !response.usage) return 'no_response';
+  return 'not_reported';
+}
 /** Persist a reservation before calling the provider; crashes cannot reset the spending limit. */
 export class BudgetAdapter implements LlmAdapter {
   modelMs = 0;
@@ -49,6 +58,11 @@ export class BudgetAdapter implements LlmAdapter {
       this.study.reservedUsd = Math.max(0, this.study.reservedUsd - reserve);
       this.study.spentUsd += usage?.costUsd ?? 0;
     }
+    const reason = stopReasonOf(response);
+    const calls = this.study.modelCalls;
+    calls.total++;
+    calls.stopReasons[reason] = (calls.stopReasons[reason] ?? 0) + 1;
+    if (reason === 'max_tokens') calls.maxTokensStops++;
     this.recordResponse(response);
     await this.save();
     return response;
