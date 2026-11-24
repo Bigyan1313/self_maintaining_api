@@ -57,7 +57,10 @@ export async function renderTerminalScreenshots(
   }
   let browser;
   try {
-    browser = await puppeteer.default.launch({ headless: true });
+    browser = await puppeteer.default.launch({
+      headless: true,
+      args: process.env.CI ? ['--no-sandbox'] : [],
+    });
   } catch (e) {
     console.warn(`Cannot start the headless browser; no terminal screenshots (${String(e)}).`);
     return [];

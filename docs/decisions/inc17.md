@@ -16,3 +16,7 @@
 - The archive's final mode uses fetched `origin/main`; explicit draft mode uses the branch HEAD and labels the manifest and filename DRAFT. This lets reviewers inspect unmerged deliverables without claiming they are the submitted main build.
 - Credential-shaped security-test fixtures are assembled from string pieces, preserving their runtime values while allowing a strict byte scan of source archives. The scanner requires a token boundary to avoid mistaking an embedded cache-path substring for a key. No credential scan exceptions are made for source/test directories.
 - All twelve acceptance checks produce records. Controlled regression suites are supplementary evidence; missing live/provider and reviewed-study portions remain PARTIAL, never silently PASS.
+
+- 2026-11-24: merged latest main, including Increment 16. Import its committed `inc16-verified` report verbatim with its FAKE MODEL warning intact; this is not a reviewed model study. CI imports its freshly generated `ci-fake` report.
+- Chromium rendering on the ephemeral GitHub runner needs `--no-sandbox` because its Linux image blocks Chromium user namespaces. This applies only to diagram/transcript rendering in CI, not the Docker validation sandbox or local browser defaults.
+- The original checkout reported truncated Git packfiles. Continue in a fresh clone under `/private/tmp/sma-inc17-clean`, preserving the original checkout and copying only this task's uncommitted documentation changes.

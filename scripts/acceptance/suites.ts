@@ -100,8 +100,8 @@ export const ADDITIONAL_CHECKS: readonly CheckDef[] = [
     'AT-12',
     'Evaluation readiness',
     'EV-01 to EV-09; NFR-01, NFR-05, NFR-07, NFR-09',
-    'scenarios',
+    'eval',
     [],
-    'Frozen-scenario tooling is tested. Increment 16, the reviewed study, three repeated executions and regenerated evaluation metrics must be recorded before AT-12 can pass.',
+    'Evaluation tooling is tested. The reviewed model study and three repeated executions remain required; scripted adapter trials do not establish model repair quality.',
   ),
 ];

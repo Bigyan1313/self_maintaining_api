@@ -23,10 +23,30 @@ try {
       const input = join(tmp, 'diagram.mmd');
       writeFileSync(input, block.source);
       const size = block.source.trimStart().startsWith('classDiagram') ? '3500' : '1600';
+      const browserConfig = join(tmp, 'puppeteer.json');
+      // GitHub's ephemeral Linux runner blocks Chromium user namespaces. Only local diagrams are rendered.
+      writeFileSync(
+        browserConfig,
+        JSON.stringify({ args: process.env.CI ? ['--no-sandbox'] : [] }),
+      );
       execFileSync(
         mmdc,
         // The class diagram is wide: give it a wider page so the PNG stays readable when zoomed.
-        ['-i', input, '-o', join(dir, block.png), '-b', 'white', '-s', '2', '--size', size, '-q'],
+        [
+          '--puppeteerConfigFile',
+          browserConfig,
+          '-i',
+          input,
+          '-o',
+          join(dir, block.png),
+          '-b',
+          'white',
+          '-s',
+          '2',
+          '--size',
+          size,
+          '-q',
+        ],
         { stdio: 'inherit' },
       );
       console.log(`rendered docs/diagrams/${block.png}`);

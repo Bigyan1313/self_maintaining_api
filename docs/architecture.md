@@ -340,7 +340,7 @@ unchanged. Missing mapping, failed validation, and delivery failure retain a spe
 The [dashboard](../apps/web/src/App.tsx) renders five routed views from the shared contract.
 It never authorizes a mapping by similarity or computes evaluation scores. Its
 [client](../apps/web/src/api.ts) validates responses and keeps failed requests visible.
-Only the unimplemented results endpoint is mocked in normal opt-in development; full fixtures
+The Results endpoint serves persisted evaluation evidence; full development fixtures
 require a separate flag and a visible demonstration banner. Production starts no mock worker.
 
 The [scenario set](../scenarios/README.md) contains twenty source snapshots with independently
@@ -351,7 +351,8 @@ estimate of model accuracy.
 
 ## 6. Evaluation and submission limits
 
-Increment 16 is tracked separately. A generated report may be imported only with its label,
+Increment 16 is merged. Its verified report records scripted adapter evidence, not a paid study.
+A generated report may be imported only with its label,
 provenance and limitations intact. Fixture trials establish infrastructure behavior, not paid
 model quality or human-reviewed correctness. The submission builder refuses to call an archive
 final while evaluation or human presentation evidence is absent.
