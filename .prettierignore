@@ -25,3 +25,6 @@ scenarios/*/migration-note.yaml
 scenarios/manifest.json
 scenarios/verification.json
 scenarios/templates
+
+# Tables and JSON are emitted by the evaluation scripts.
+eval/results/

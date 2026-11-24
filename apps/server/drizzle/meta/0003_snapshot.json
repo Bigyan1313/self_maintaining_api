@@ -1,0 +1,1819 @@
+{
+  "id": "f3fbabb6-7af6-449b-9fad-54290d670233",
+  "prevId": "ab200bbd-cfa4-4085-ada7-7164cc912bff",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.apis": {
+      "name": "apis",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spec_source_url": {
+          "name": "spec_source_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "poll_interval_seconds": {
+          "name": "poll_interval_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "baseline_version_id": {
+          "name": "baseline_version_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "apis_baseline_version_id_idx": {
+          "name": "apis_baseline_version_id_idx",
+          "columns": [
+            {
+              "expression": "baseline_version_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "apis_baseline_version_id_spec_versions_id_fk": {
+          "name": "apis_baseline_version_id_spec_versions_id_fk",
+          "tableFrom": "apis",
+          "tableTo": "spec_versions",
+          "columnsFrom": [
+            "baseline_version_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "apis_name_uq": {
+          "name": "apis_name_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "apis_poll_interval_min_60": {
+          "name": "apis_poll_interval_min_60",
+          "value": "\"apis\".\"poll_interval_seconds\" IS NULL OR \"apis\".\"poll_interval_seconds\" >= 60"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.attempts": {
+      "name": "attempts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attempt_number": {
+          "name": "attempt_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "patch": {
+          "name": "patch",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "validation_output": {
+          "name": "validation_output",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "compile_errors": {
+          "name": "compile_errors",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tests_passed": {
+          "name": "tests_passed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tests_total": {
+          "name": "tests_total",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "outcome": {
+          "name": "outcome",
+          "type": "attempt_outcome",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "guard_name": {
+          "name": "guard_name",
+          "type": "guard_name",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tokens_in": {
+          "name": "tokens_in",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tokens_out": {
+          "name": "tokens_out",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_usd": {
+          "name": "cost_usd",
+          "type": "numeric(12, 6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model_id": {
+          "name": "model_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "duration_ms": {
+          "name": "duration_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "attempts_run_id_runs_id_fk": {
+          "name": "attempts_run_id_runs_id_fk",
+          "tableFrom": "attempts",
+          "tableTo": "runs",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "attempts_run_attempt_uq": {
+          "name": "attempts_run_attempt_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "run_id",
+            "attempt_number"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "attempts_number_1_4": {
+          "name": "attempts_number_1_4",
+          "value": "\"attempts\".\"attempt_number\" BETWEEN 1 AND 4"
+        },
+        "attempts_cheating_iff_guard": {
+          "name": "attempts_cheating_iff_guard",
+          "value": "(\"attempts\".\"outcome\" = 'cheating') = (\"attempts\".\"guard_name\" IS NOT NULL)"
+        },
+        "attempts_tests_consistent": {
+          "name": "attempts_tests_consistent",
+          "value": "(\"attempts\".\"tests_passed\" IS NULL OR \"attempts\".\"tests_passed\" >= 0) AND (\"attempts\".\"tests_total\" IS NULL OR \"attempts\".\"tests_total\" >= 0) AND (\"attempts\".\"tests_passed\" IS NULL OR \"attempts\".\"tests_total\" IS NULL OR \"attempts\".\"tests_passed\" <= \"attempts\".\"tests_total\")"
+        },
+        "attempts_usage_non_negative": {
+          "name": "attempts_usage_non_negative",
+          "value": "\"attempts\".\"tokens_in\" >= 0 AND \"attempts\".\"tokens_out\" >= 0 AND \"attempts\".\"cost_usd\" >= 0 AND \"attempts\".\"duration_ms\" >= 0 AND (\"attempts\".\"compile_errors\" IS NULL OR \"attempts\".\"compile_errors\" >= 0)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.call_sites": {
+      "name": "call_sites",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_path": {
+          "name": "file_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "line": {
+          "name": "line",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "column": {
+          "name": "column",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pattern": {
+          "name": "pattern",
+          "type": "call_pattern",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "excerpt": {
+          "name": "excerpt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "call_sites_run_id_idx": {
+          "name": "call_sites_run_id_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "call_sites_run_id_runs_id_fk": {
+          "name": "call_sites_run_id_runs_id_fk",
+          "tableFrom": "call_sites",
+          "tableTo": "runs",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "call_sites_position_positive": {
+          "name": "call_sites_position_positive",
+          "value": "\"call_sites\".\"line\" >= 1 AND \"call_sites\".\"column\" >= 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.changes": {
+      "name": "changes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "api_id": {
+          "name": "api_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "from_version_id": {
+          "name": "from_version_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "to_version_id": {
+          "name": "to_version_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "change_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "oasdiff_rule_id": {
+          "name": "oasdiff_rule_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "classification": {
+          "name": "classification",
+          "type": "classification",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "confidence": {
+          "name": "confidence",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "path": {
+          "name": "path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "method": {
+          "name": "method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "json_pointer": {
+          "name": "json_pointer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "evidence_before": {
+          "name": "evidence_before",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "evidence_after": {
+          "name": "evidence_after",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mapping_status": {
+          "name": "mapping_status",
+          "type": "mapping_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'unconfirmed'"
+        },
+        "mapping_source": {
+          "name": "mapping_source",
+          "type": "mapping_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mapping": {
+          "name": "mapping",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "migration_note_id": {
+          "name": "migration_note_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmed_by": {
+          "name": "confirmed_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmed_at": {
+          "name": "confirmed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "changes_api_id_idx": {
+          "name": "changes_api_id_idx",
+          "columns": [
+            {
+              "expression": "api_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "changes_from_version_id_idx": {
+          "name": "changes_from_version_id_idx",
+          "columns": [
+            {
+              "expression": "from_version_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "changes_to_version_id_idx": {
+          "name": "changes_to_version_id_idx",
+          "columns": [
+            {
+              "expression": "to_version_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "changes_migration_note_id_idx": {
+          "name": "changes_migration_note_id_idx",
+          "columns": [
+            {
+              "expression": "migration_note_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "changes_api_id_apis_id_fk": {
+          "name": "changes_api_id_apis_id_fk",
+          "tableFrom": "changes",
+          "tableTo": "apis",
+          "columnsFrom": [
+            "api_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "changes_from_version_id_spec_versions_id_fk": {
+          "name": "changes_from_version_id_spec_versions_id_fk",
+          "tableFrom": "changes",
+          "tableTo": "spec_versions",
+          "columnsFrom": [
+            "from_version_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "changes_to_version_id_spec_versions_id_fk": {
+          "name": "changes_to_version_id_spec_versions_id_fk",
+          "tableFrom": "changes",
+          "tableTo": "spec_versions",
+          "columnsFrom": [
+            "to_version_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "changes_migration_note_id_migration_notes_id_fk": {
+          "name": "changes_migration_note_id_migration_notes_id_fk",
+          "tableFrom": "changes",
+          "tableTo": "migration_notes",
+          "columnsFrom": [
+            "migration_note_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "changes_confidence_0_1": {
+          "name": "changes_confidence_0_1",
+          "value": "\"changes\".\"confidence\" >= 0 AND \"changes\".\"confidence\" <= 1"
+        },
+        "changes_confirmed_iff_source": {
+          "name": "changes_confirmed_iff_source",
+          "value": "(\"changes\".\"mapping_status\" = 'confirmed') = (\"changes\".\"mapping_source\" IS NOT NULL)"
+        },
+        "changes_human_source_has_confirmer": {
+          "name": "changes_human_source_has_confirmer",
+          "value": "\"changes\".\"mapping_source\" IS DISTINCT FROM 'human' OR (\"changes\".\"confirmed_by\" IS NOT NULL AND \"changes\".\"confirmed_at\" IS NOT NULL)"
+        },
+        "changes_versions_differ": {
+          "name": "changes_versions_differ",
+          "value": "\"changes\".\"from_version_id\" <> \"changes\".\"to_version_id\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.coverage_entries": {
+      "name": "coverage_entries",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_path": {
+          "name": "file_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inspected": {
+          "name": "inspected",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "skip_reason": {
+          "name": "skip_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "coverage_entries_run_id_idx": {
+          "name": "coverage_entries_run_id_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "coverage_entries_run_id_runs_id_fk": {
+          "name": "coverage_entries_run_id_runs_id_fk",
+          "tableFrom": "coverage_entries",
+          "tableTo": "runs",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "coverage_entries_skipped_has_reason": {
+          "name": "coverage_entries_skipped_has_reason",
+          "value": "\"coverage_entries\".\"inspected\" OR \"coverage_entries\".\"skip_reason\" IS NOT NULL"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.evaluation_results": {
+      "name": "evaluation_results",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "eval_label": {
+          "name": "eval_label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repeat": {
+          "name": "repeat",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "scenario_id": {
+          "name": "scenario_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "baseline": {
+          "name": "baseline",
+          "type": "baseline",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "outcome": {
+          "name": "outcome",
+          "type": "run_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attempts_used": {
+          "name": "attempts_used",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_usd": {
+          "name": "cost_usd",
+          "type": "numeric(12, 6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "duration_ms": {
+          "name": "duration_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model_ms": {
+          "name": "model_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "container_ms": {
+          "name": "container_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "review_verdict": {
+          "name": "review_verdict",
+          "type": "review_verdict",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'not_reviewed'"
+        },
+        "excluded": {
+          "name": "excluded",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "exclusion_reason": {
+          "name": "exclusion_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_partial": {
+          "name": "is_partial",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "evaluation_results_label_scenario_baseline_uq": {
+          "name": "evaluation_results_label_scenario_baseline_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "eval_label",
+            "scenario_id",
+            "baseline",
+            "repeat"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "evaluation_repeat_1_3": {
+          "name": "evaluation_repeat_1_3",
+          "value": "\"evaluation_results\".\"repeat\" BETWEEN 1 AND 3"
+        },
+        "evaluation_results_excluded_has_reason": {
+          "name": "evaluation_results_excluded_has_reason",
+          "value": "NOT \"evaluation_results\".\"excluded\" OR \"evaluation_results\".\"exclusion_reason\" IS NOT NULL"
+        },
+        "evaluation_results_attempts_0_4": {
+          "name": "evaluation_results_attempts_0_4",
+          "value": "\"evaluation_results\".\"attempts_used\" BETWEEN 0 AND 4"
+        },
+        "evaluation_results_non_negative": {
+          "name": "evaluation_results_non_negative",
+          "value": "\"evaluation_results\".\"cost_usd\" >= 0 AND \"evaluation_results\".\"duration_ms\" >= 0 AND (\"evaluation_results\".\"model_ms\" IS NULL OR \"evaluation_results\".\"model_ms\" >= 0) AND (\"evaluation_results\".\"container_ms\" IS NULL OR \"evaluation_results\".\"container_ms\" >= 0)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.evaluation_studies": {
+      "name": "evaluation_studies",
+      "schema": "",
+      "columns": {
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "snapshot": {
+          "name": "snapshot",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.migration_notes": {
+      "name": "migration_notes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "api_id": {
+          "name": "api_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "from_version_id": {
+          "name": "from_version_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "to_version_id": {
+          "name": "to_version_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw_yaml": {
+          "name": "raw_yaml",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parsed": {
+          "name": "parsed",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uploaded_at": {
+          "name": "uploaded_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "migration_notes_api_id_idx": {
+          "name": "migration_notes_api_id_idx",
+          "columns": [
+            {
+              "expression": "api_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "migration_notes_from_version_id_idx": {
+          "name": "migration_notes_from_version_id_idx",
+          "columns": [
+            {
+              "expression": "from_version_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "migration_notes_to_version_id_idx": {
+          "name": "migration_notes_to_version_id_idx",
+          "columns": [
+            {
+              "expression": "to_version_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "migration_notes_api_id_apis_id_fk": {
+          "name": "migration_notes_api_id_apis_id_fk",
+          "tableFrom": "migration_notes",
+          "tableTo": "apis",
+          "columnsFrom": [
+            "api_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "migration_notes_from_version_id_spec_versions_id_fk": {
+          "name": "migration_notes_from_version_id_spec_versions_id_fk",
+          "tableFrom": "migration_notes",
+          "tableTo": "spec_versions",
+          "columnsFrom": [
+            "from_version_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "migration_notes_to_version_id_spec_versions_id_fk": {
+          "name": "migration_notes_to_version_id_spec_versions_id_fk",
+          "tableFrom": "migration_notes",
+          "tableTo": "spec_versions",
+          "columnsFrom": [
+            "to_version_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.repositories": {
+      "name": "repositories",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "owner": {
+          "name": "owner",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "default_branch": {
+          "name": "default_branch",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "credential_ref": {
+          "name": "credential_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "local_path": {
+          "name": "local_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "repositories_owner_name_uq": {
+          "name": "repositories_owner_name_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "owner",
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "repositories_credential_ref_is_env_var_name": {
+          "name": "repositories_credential_ref_is_env_var_name",
+          "value": "\"repositories\".\"credential_ref\" IS NULL OR \"repositories\".\"credential_ref\" ~ '^[A-Z_][A-Z0-9_]*$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.run_stage_results": {
+      "name": "run_stage_results",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stage": {
+          "name": "stage",
+          "type": "stage",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "stage_result_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "result": {
+          "name": "result",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "finished_at": {
+          "name": "finished_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "run_stage_results_run_id_runs_id_fk": {
+          "name": "run_stage_results_run_id_runs_id_fk",
+          "tableFrom": "run_stage_results",
+          "tableTo": "runs",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "run_stage_results_run_stage_uq": {
+          "name": "run_stage_results_run_stage_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "run_id",
+            "stage"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "run_stage_results_finished_after_start": {
+          "name": "run_stage_results_finished_after_start",
+          "value": "\"run_stage_results\".\"finished_at\" >= \"run_stage_results\".\"started_at\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.runs": {
+      "name": "runs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "change_id": {
+          "name": "change_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repository_id": {
+          "name": "repository_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "commit_sha": {
+          "name": "commit_sha",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_run_id": {
+          "name": "parent_run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stage_reached": {
+          "name": "stage_reached",
+          "type": "stage",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "run_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'running'"
+        },
+        "failure_stage": {
+          "name": "failure_stage",
+          "type": "stage",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "failure_detail": {
+          "name": "failure_detail",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "flagged_reason": {
+          "name": "flagged_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attempt_count": {
+          "name": "attempt_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "tokens_in": {
+          "name": "tokens_in",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "tokens_out": {
+          "name": "tokens_out",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cost_usd": {
+          "name": "cost_usd",
+          "type": "numeric(12, 6)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "model_id": {
+          "name": "model_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_fixture": {
+          "name": "is_fixture",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "pr_url": {
+          "name": "pr_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "finished_at": {
+          "name": "finished_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "runs_change_id_idx": {
+          "name": "runs_change_id_idx",
+          "columns": [
+            {
+              "expression": "change_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "runs_repository_id_idx": {
+          "name": "runs_repository_id_idx",
+          "columns": [
+            {
+              "expression": "repository_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "runs_parent_run_id_idx": {
+          "name": "runs_parent_run_id_idx",
+          "columns": [
+            {
+              "expression": "parent_run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "runs_change_id_changes_id_fk": {
+          "name": "runs_change_id_changes_id_fk",
+          "tableFrom": "runs",
+          "tableTo": "changes",
+          "columnsFrom": [
+            "change_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "runs_repository_id_repositories_id_fk": {
+          "name": "runs_repository_id_repositories_id_fk",
+          "tableFrom": "runs",
+          "tableTo": "repositories",
+          "columnsFrom": [
+            "repository_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "runs_parent_run_id_runs_id_fk": {
+          "name": "runs_parent_run_id_runs_id_fk",
+          "tableFrom": "runs",
+          "tableTo": "runs",
+          "columnsFrom": [
+            "parent_run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "runs_attempt_count_0_4": {
+          "name": "runs_attempt_count_0_4",
+          "value": "\"runs\".\"attempt_count\" BETWEEN 0 AND 4"
+        },
+        "runs_stage_failure_has_stage": {
+          "name": "runs_stage_failure_has_stage",
+          "value": "\"runs\".\"status\" <> 'stage_failure' OR \"runs\".\"failure_stage\" IS NOT NULL"
+        },
+        "runs_running_iff_unfinished": {
+          "name": "runs_running_iff_unfinished",
+          "value": "(\"runs\".\"status\" = 'running') = (\"runs\".\"finished_at\" IS NULL)"
+        },
+        "runs_finished_after_start": {
+          "name": "runs_finished_after_start",
+          "value": "\"runs\".\"finished_at\" IS NULL OR \"runs\".\"finished_at\" >= \"runs\".\"started_at\""
+        },
+        "runs_commit_sha_format": {
+          "name": "runs_commit_sha_format",
+          "value": "\"runs\".\"commit_sha\" ~ '^[0-9a-f]{40}([0-9a-f]{24})?$'"
+        },
+        "runs_usage_non_negative": {
+          "name": "runs_usage_non_negative",
+          "value": "\"runs\".\"tokens_in\" >= 0 AND \"runs\".\"tokens_out\" >= 0 AND \"runs\".\"cost_usd\" >= 0"
+        },
+        "runs_not_own_parent": {
+          "name": "runs_not_own_parent",
+          "value": "\"runs\".\"parent_run_id\" IS NULL OR \"runs\".\"parent_run_id\" <> \"runs\".\"id\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.spec_checks": {
+      "name": "spec_checks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "api_id": {
+          "name": "api_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "finished_at": {
+          "name": "finished_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "outcome": {
+          "name": "outcome",
+          "type": "spec_check_outcome",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spec_version_id": {
+          "name": "spec_version_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error_detail": {
+          "name": "error_detail",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "failure_stage": {
+          "name": "failure_stage",
+          "type": "stage",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "spec_checks_api_id_idx": {
+          "name": "spec_checks_api_id_idx",
+          "columns": [
+            {
+              "expression": "api_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "spec_checks_spec_version_id_idx": {
+          "name": "spec_checks_spec_version_id_idx",
+          "columns": [
+            {
+              "expression": "spec_version_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "spec_checks_api_id_apis_id_fk": {
+          "name": "spec_checks_api_id_apis_id_fk",
+          "tableFrom": "spec_checks",
+          "tableTo": "apis",
+          "columnsFrom": [
+            "api_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "spec_checks_spec_version_id_spec_versions_id_fk": {
+          "name": "spec_checks_spec_version_id_spec_versions_id_fk",
+          "tableFrom": "spec_checks",
+          "tableTo": "spec_versions",
+          "columnsFrom": [
+            "spec_version_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "spec_checks_failed_has_error_detail": {
+          "name": "spec_checks_failed_has_error_detail",
+          "value": "\"spec_checks\".\"outcome\" <> 'failed' OR \"spec_checks\".\"error_detail\" IS NOT NULL"
+        },
+        "spec_checks_failed_iff_failure_stage": {
+          "name": "spec_checks_failed_iff_failure_stage",
+          "value": "(\"spec_checks\".\"outcome\" = 'failed') = (\"spec_checks\".\"failure_stage\" IS NOT NULL)"
+        },
+        "spec_checks_failure_stage_in_check": {
+          "name": "spec_checks_failure_stage_in_check",
+          "value": "\"spec_checks\".\"failure_stage\" IS NULL OR \"spec_checks\".\"failure_stage\" IN ('ingest', 'detect', 'classify')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.spec_versions": {
+      "name": "spec_versions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "api_id": {
+          "name": "api_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "retrieved_at": {
+          "name": "retrieved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "source_mode": {
+          "name": "source_mode",
+          "type": "source_mode",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_identifier": {
+          "name": "source_identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content_sha256": {
+          "name": "content_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "normalized": {
+          "name": "normalized",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "spec_versions_api_id_idx": {
+          "name": "spec_versions_api_id_idx",
+          "columns": [
+            {
+              "expression": "api_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "spec_versions_api_id_apis_id_fk": {
+          "name": "spec_versions_api_id_apis_id_fk",
+          "tableFrom": "spec_versions",
+          "tableTo": "apis",
+          "columnsFrom": [
+            "api_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "spec_versions_api_hash_uq": {
+          "name": "spec_versions_api_hash_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "api_id",
+            "content_sha256"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "spec_versions_sha256_format": {
+          "name": "spec_versions_sha256_format",
+          "value": "\"spec_versions\".\"content_sha256\" ~ '^[0-9a-f]{64}$'"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.attempt_outcome": {
+      "name": "attempt_outcome",
+      "schema": "public",
+      "values": [
+        "pass",
+        "fail",
+        "cheating",
+        "error",
+        "timeout"
+      ]
+    },
+    "public.baseline": {
+      "name": "baseline",
+      "schema": "public",
+      "values": [
+        "B1",
+        "B2",
+        "B3"
+      ]
+    },
+    "public.call_pattern": {
+      "name": "call_pattern",
+      "schema": "public",
+      "values": [
+        "fetch",
+        "axios_instance",
+        "axios_static",
+        "generated_client"
+      ]
+    },
+    "public.change_category": {
+      "name": "change_category",
+      "schema": "public",
+      "values": [
+        "field_renamed",
+        "field_type_changed",
+        "required_param_added",
+        "endpoint_removed",
+        "other"
+      ]
+    },
+    "public.classification": {
+      "name": "classification",
+      "schema": "public",
+      "values": [
+        "breaking",
+        "safe",
+        "unknown"
+      ]
+    },
+    "public.guard_name": {
+      "name": "guard_name",
+      "schema": "public",
+      "values": [
+        "test_file_changed",
+        "test_count_changed",
+        "type_suppression",
+        "config_changed"
+      ]
+    },
+    "public.mapping_source": {
+      "name": "mapping_source",
+      "schema": "public",
+      "values": [
+        "migration_note",
+        "human"
+      ]
+    },
+    "public.mapping_status": {
+      "name": "mapping_status",
+      "schema": "public",
+      "values": [
+        "confirmed",
+        "unconfirmed"
+      ]
+    },
+    "public.review_verdict": {
+      "name": "review_verdict",
+      "schema": "public",
+      "values": [
+        "correct",
+        "incorrect",
+        "not_reviewed"
+      ]
+    },
+    "public.run_status": {
+      "name": "run_status",
+      "schema": "public",
+      "values": [
+        "running",
+        "not_affected",
+        "needs_review",
+        "flagged",
+        "repaired",
+        "failed",
+        "aborted",
+        "cheating_rejected",
+        "stage_failure"
+      ]
+    },
+    "public.source_mode": {
+      "name": "source_mode",
+      "schema": "public",
+      "values": [
+        "retrieved",
+        "uploaded",
+        "fixture"
+      ]
+    },
+    "public.spec_check_outcome": {
+      "name": "spec_check_outcome",
+      "schema": "public",
+      "values": [
+        "baseline_established",
+        "no_change",
+        "changed",
+        "failed"
+      ]
+    },
+    "public.stage": {
+      "name": "stage",
+      "schema": "public",
+      "values": [
+        "ingest",
+        "detect",
+        "classify",
+        "locate",
+        "repair",
+        "validate",
+        "deliver"
+      ]
+    },
+    "public.stage_result_status": {
+      "name": "stage_result_status",
+      "schema": "public",
+      "values": [
+        "ok",
+        "failed",
+        "skipped"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

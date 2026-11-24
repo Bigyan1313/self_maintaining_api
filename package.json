@@ -39,7 +39,10 @@
     "scenarios:build": "tsx scenarios/build.ts",
     "scenarios:verify": "npm run build -w @sma/core && tsx scenarios/verify.ts",
     "typecheck:scenarios": "tsc -p scenarios/tsconfig.json",
-    "test:scenarios": "vitest run --root scenarios"
+    "test:scenarios": "vitest run --root scenarios",
+    "eval": "npm run build -w @sma/core && tsx eval/run.ts",
+    "eval:report": "npm run build -w @sma/core && tsx eval/report.ts",
+    "eval:review": "npm run build -w @sma/core && tsx eval/review.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

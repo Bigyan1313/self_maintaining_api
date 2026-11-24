@@ -412,6 +412,7 @@ export const evaluationResults = pgTable(
   {
     id: id(),
     evalLabel: text('eval_label').notNull(),
+    repeat: integer('repeat').notNull().default(1),
     scenarioId: text('scenario_id').notNull(),
     baseline: baselineEnum('baseline').notNull(),
     outcome: runStatusEnum('outcome').notNull(),
@@ -431,7 +432,9 @@ export const evaluationResults = pgTable(
       t.evalLabel,
       t.scenarioId,
       t.baseline,
+      t.repeat,
     ),
+    check('evaluation_repeat_1_3', sql`${t.repeat} BETWEEN 1 AND 3`),
     check(
       'evaluation_results_excluded_has_reason',
       sql`NOT ${t.excluded} OR ${t.exclusionReason} IS NOT NULL`,
@@ -443,3 +446,10 @@ export const evaluationResults = pgTable(
     ),
   ],
 );
+
+/** Full file-first evaluation snapshot, including environment, labels, reviews and partial state. */
+export const evaluationStudies = pgTable('evaluation_studies', {
+  label: text('label').primaryKey(),
+  snapshot: jsonb('snapshot').notNull(),
+  updatedAt: tstz('updated_at').notNull().defaultNow(),
+});

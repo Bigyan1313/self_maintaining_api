@@ -558,3 +558,26 @@ describe('NFR-01 and DR-01', () => {
     }
   });
 });
+
+it('evaluation B3 dry-run records would-open-PR without constructing a GitHub client', async () => {
+  const createClient = vi.fn(() => {
+    throw new Error('Evaluation must never contact GitHub');
+  });
+  const llm = new FakeLlmAdapter([patchAnswer(CORRECT_PATCH)]);
+  const orchestrator = new Orchestrator(
+    { db: client.db, llm, validator: fakeValidator(), github: { createClient } },
+    { dryRunDelivery: true },
+  );
+  const repository = await registerRepo(client.db, consumerPath);
+  const final = await (
+    await orchestrator.startRun({ changeId: demo.rename.id, repositoryId: repository.id })
+  ).done;
+  expect(final.status).toBe('repaired');
+  expect(final.prUrl).toBeNull();
+  expect(createClient).not.toHaveBeenCalled();
+  const rows = await stageResultsInOrder(client.db, final.id);
+  expect(rows.find((r) => r.stage === 'deliver')?.result).toMatchObject({
+    wouldOpenPr: true,
+    pullRequest: null,
+  });
+});
