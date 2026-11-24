@@ -16,7 +16,7 @@ FOLDERS = ['1_prompts', '2_acceptance_tests', '3_class_diagram', '4_statecharts'
 def allowed(name):
     """Reject traversal, secret files, dependency trees and generated export directories."""
     path = PurePosixPath(name)
-    return not path.is_absolute() and '..' not in path.parts and not any(
+    return not path.is_absolute() and '..' not in path.parts and not name.endswith(('.lock', '.tmp')) and not any(
         part in BLOCKED or (part.startswith('.env.') and part != '.env.example')
         for part in path.parts
     )
@@ -80,6 +80,7 @@ def build(root, draft=False):
         ('docs/architecture.md', '5_description/architecture.md'),
         ('docs/deliverables.md', '5_description/deliverables.md'),
         ('docs/final-report.md', '5_description/final-report.md'),
+        ('eval/results', '5_description/evaluation'),
         ('docs/SRS.md', '5_description/SRS.md'),
         ('docs/api', '7_api_docs'), ('docs/unit-tests.md', '8_unit_tests/unit-tests.md'),
         ('docs/presentation-outline.md', '10_presentation/outline.md'),

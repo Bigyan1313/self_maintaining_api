@@ -1,8 +1,8 @@
 Increment 17 recorded conversation — Sishir
 Source session: rollout-2026-11-03T10-46-13-01a1a24d-d849-7500-b383-1227cc45e533.jsonl
 Thread: 01a1a24d-d849-7500-b383-1227cc45e533
-Source snapshot SHA-256: 60924d5da25d3cecb26699b4381660c1e5b57f239b1e4f0e1cf0326951175508
-Scope: the request to implement, commit, and push another task through 2026-11-24T00:23:40.290Z.
+Source snapshot SHA-256: 12ff767e82f45dbbd03665c5d536dd013e44e4500c9e95f026f640d7e59160ac
+Scope: the request to implement, commit, and push another task through 2026-11-24T07:08:45.307Z.
 This is an export of recorded user/assistant text, not a retrospective summary.
 Excluded: private reasoning, summaries, system/developer messages, tools, runtime metadata, environment context, and image payloads.
 Credential pattern scan: 0 redactions. Text inspected before commit.
@@ -35,4 +35,42 @@ The new tooling keeps missing evidence visible: it won’t label an incomplete a
 
 [2026-11-24T00:23:40.290Z] ASSISTANT
 The diagrams and TypeDoc build successfully, and the local tests passed with coverage reports for core, dashboard, demo, scripts and scenarios. I also checked that the archive rejects credential-shaped content without printing it. Next I’m pushing the branch so CI can run the server tests and record all twelve acceptance checks.
+
+
+[2026-11-24T00:26:28.715Z] ASSISTANT
+The branch is pushed, and CI has passed typecheck, lint and documentation checks. It’s now running the database and Docker tests with coverage. The draft ZIP also builds with the required numbered folders; its manifest lists the missing evaluation and presentation evidence.
+
+
+[2026-11-24T00:28:34.569Z] ASSISTANT
+The final documentation review caught two details worth fixing: a failed spec check can retry a version already stored in the database, and the single-shot evaluation mode can pass validation without opening a PR. The statecharts now show both paths. CI is still running the container-backed tests.
+
+
+[2026-11-24T00:31:09.710Z] ASSISTANT
+The draft archive contains the required folders and passed the credential scan. I’m waiting for CI’s execution records so I can commit real acceptance results, including any partial or failed checks. The evaluation report, Network screenshot and finished presentation remain explicitly unfinished.
+
+
+[2026-11-24T00:32:46.187Z] ASSISTANT
+The full CI test suite passed with PostgreSQL and Docker enabled. CI is now moving through the browser checks, scenario verification and acceptance recording. Typecheck, lint and documentation checks are also green.
+
+
+[2026-11-24T00:34:59.754Z] ASSISTANT
+The browser checks passed too, including the real-server smoke test. CI is verifying all 20 frozen scenarios next, then it will generate the acceptance records. I’ll leave issue #14 open because the reviewed evaluation and presentation still need to be added.
+
+
+[2026-11-24T07:04:53.842Z] USER
+hey do the increment 17 assigned to me and push it
+
+
+[2026-11-24T07:05:10.174Z] ASSISTANT
+I’ll check the pushed Increment 17 branch and its CI results, finish any fixes, and push the remaining changes.
+
+The earlier attempt to capture GitHub’s Network graph was blocked by automatic approval review because of a usage limit. That screenshot remains a manual task; I’ll continue the repository work.
+
+
+[2026-11-24T07:06:39.609Z] ASSISTANT
+The earlier CI failure came from Chromium’s sandbox setup while rendering diagrams; the application tests passed. I also found corrupt Git data in the original checkout, so I’m using a fresh clone and preserving your existing files. I’ll fix the CI rendering setup and bring the branch up to date with main.
+
+
+[2026-11-24T07:08:45.307Z] ASSISTANT
+Increment 16 has now been merged, so I’ve integrated it and included its generated evaluation report verbatim. The report clearly labels those results as scripted test evidence, not real model performance. The updated branch passes local typecheck, lint, deliverables tests and evaluation tests.
 
