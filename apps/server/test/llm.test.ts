@@ -70,9 +70,29 @@ describe('Anthropic adapter', () => {
     expect(mock.create.mock.calls[0]?.[0]).toEqual({
       model: 'claude-sonnet-5-5',
       max_tokens: 1000,
+      output_config: { effort: 'high' },
       system: ctx.system,
       messages: [{ role: 'user', content: ctx.user }],
     });
+    expect(result).toMatchObject({ stopReason: 'end_turn' });
+  });
+  it('sends no sampling or thinking parameters (400s on claude-sonnet-5-5)', async () => {
+    mock.create.mockResolvedValue(response());
+    await new AnthropicLlmAdapter().generatePatch(ctx, opts);
+    const body = mock.create.mock.calls[0]?.[0] as Record<string, unknown>;
+    for (const key of ['temperature', 'top_p', 'top_k', 'thinking'])
+      expect(body).not.toHaveProperty(key);
+  });
+  it('reports a max_tokens stop as a truncated, billed, unusable answer with its stop reason', async () => {
+    mock.create.mockResolvedValue({ ...response(patch.slice(0, 20)), stop_reason: 'max_tokens' });
+    const result = await new AnthropicLlmAdapter().generatePatch(ctx, opts);
+    expect(result).toMatchObject({
+      kind: 'error',
+      errorKind: 'invalid_output',
+      stopReason: 'max_tokens',
+      usage: { tokensIn: 1000, tokensOut: 100 },
+    });
+    expect(result.kind === 'error' && result.message).toMatch(/truncated at max_tokens \(1000/);
   });
   it('reads credentials at call time and never calls the SDK with a missing key', async () => {
     const adapter = new AnthropicLlmAdapter();
