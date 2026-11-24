@@ -5,6 +5,11 @@ import { resolve, relative } from 'node:path';
 
 const root = resolve('.');
 const groups = ['packages/core', 'apps/server', 'apps/web', 'demo/api', 'scripts', 'scenarios'];
+// Increment 16 owns this workspace; include it automatically once its tests land.
+const evaluation = JSON.parse(readFileSync('eval/package.json', 'utf8')) as {
+  scripts?: { test?: string };
+};
+if (evaluation.scripts?.test) groups.push('eval');
 const selected = process.argv.slice(2);
 if (selected.some((g) => !groups.includes(g))) throw new Error('Unknown test group');
 const rows: string[] = [];

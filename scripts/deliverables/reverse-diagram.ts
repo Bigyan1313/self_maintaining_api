@@ -20,7 +20,12 @@ const declarations = project
         name: c.getName()!,
         kind: 'class',
         file: relative(root, file.getFilePath()),
-        methods: c.getMethods().map((m) => m.getName()),
+        methods: c
+          .getMethods()
+          .map(
+            (m) =>
+              `${m.getScope() === 'private' ? '-' : m.getScope() === 'protected' ? '#' : '+'}${m.getName()}`,
+          ),
       })),
     ...file
       .getInterfaces()
@@ -35,7 +40,7 @@ const declarations = project
         name: c.getName(),
         kind: 'interface',
         file: relative(root, file.getFilePath()),
-        methods: c.getMethods().map((m) => m.getName()),
+        methods: c.getMethods().map((m) => `+${m.getName()}`),
       })),
   ])
   .sort((a, b) => a.file.localeCompare(b.file) || a.name.localeCompare(b.name));
@@ -44,7 +49,7 @@ for (const d of declarations) {
   lines.push(
     `  class ${d.name} {`,
     ...(d.kind === 'interface' ? ['    <<interface>>'] : []),
-    ...d.methods.map((m) => `    +${m}()`),
+    ...d.methods.map((m) => `    ${m}()`),
     '  }',
   );
 }

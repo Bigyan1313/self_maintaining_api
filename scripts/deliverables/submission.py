@@ -34,6 +34,8 @@ def build(root, draft=False):
     files = {}
     gaps = []
     def add(path, target):
+        if path.is_symlink():
+            raise ValueError(f'Symlinks are not permitted: {path.relative_to(root)}')
         if not path.exists():
             gaps.append(str(path.relative_to(root)))
             return
@@ -53,8 +55,8 @@ def build(root, draft=False):
     head = git('rev-parse', 'HEAD').decode().strip()
     if head != main:
         gaps.append('HEAD must equal fetched origin/main for the final submission')
-    if git('status', '--porcelain').strip():
-        gaps.append('Working tree must be clean for the final submission')
+    if git('status', '--porcelain', '--', '.', ':!docs/acceptance', ':!docs/diagrams', ':!docs/unit-tests.md', ':!docs/final-report.md', ':!docs/presentation').strip():
+        gaps.append('Source working tree must be clean for the final submission (fresh evidence outputs are allowed)')
     source_commit = head if draft else main
     source = git('archive', '--format=tar', source_commit)
     with tarfile.open(fileobj=io.BytesIO(source)) as tar:
@@ -76,6 +78,7 @@ def build(root, draft=False):
         ('docs/diagrams/png/reverse-engineered.png', '3_class_diagram/png/reverse-engineered.png'),
         ('docs/diagrams/statecharts.md', '4_statecharts/statecharts.md'),
         ('docs/architecture.md', '5_description/architecture.md'),
+        ('docs/deliverables.md', '5_description/deliverables.md'),
         ('docs/final-report.md', '5_description/final-report.md'),
         ('docs/SRS.md', '5_description/SRS.md'),
         ('docs/api', '7_api_docs'), ('docs/unit-tests.md', '8_unit_tests/unit-tests.md'),
@@ -86,7 +89,7 @@ def build(root, draft=False):
     for path in (root / 'docs/diagrams/png').glob('statechart-*.png'):
         add(path, '4_statecharts/png/' + path.name)
     for name in git('ls-files', '-z').decode().split('\0'):
-        if name.endswith(('.test.ts', '.test.tsx')):
+        if name.endswith(('.test.ts', '.test.tsx')) or (name.startswith('scripts/deliverables/test_') and name.endswith('.py')):
             add(root / name, '8_unit_tests/' + name)
     for name in ['docs/presentation/git-network.png', 'docs/presentation/presentation.pptx']:
         if not (root / name).is_file():
@@ -101,7 +104,8 @@ def build(root, draft=False):
         expected = {f'AT-{i:02}' for i in range(1, 13)}
         if {c['id'] for c in checks} != expected or any(c['verdict'] != 'PASS' for c in checks):
             gaps.append('Acceptance checks are incomplete or not all PASS; review the actual records')
-        if not main.startswith(summary.get('meta', {}).get('commit', 'MISSING')):
+        recorded_commit = summary.get('meta', {}).get('commit', '')
+        if not re.fullmatch(r'[0-9a-f]{12,40}', recorded_commit) or not main.startswith(recorded_commit):
             gaps.append('Acceptance evidence is not from the submitted main commit')
     else:
         gaps.append('Acceptance summary missing')

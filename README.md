@@ -275,3 +275,5 @@ npx vitest run test/repair.test.ts -w @sma/server              # FakeLlmAdapter 
 npx vitest run test/repair.integration.test.ts -w @sma/server  # real Docker validator
 ANTHROPIC_API_KEY=... npx vitest run test/repair.live.test.ts -w @sma/server  # real model (skipped without a key)
 ```
+
+Course submission: see [reproducing deliverables](docs/deliverables.md) for generated diagrams, test coverage, acceptance evidence and draft/final archives.

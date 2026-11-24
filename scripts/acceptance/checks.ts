@@ -1,6 +1,6 @@
 /**
- * The acceptance checks that can run after Increment 10: AT-01, AT-02, AT-03, AT-04, AT-05,
- * AT-07 (guards half), AT-09 and AT-11. Each one drives the real HTTP routes (through
+ * Direct-stage acceptance checks retained from Increment 17a, plus regression-backed
+ * AT-06, AT-08, AT-10 and AT-12 (see suites.ts). Each one drives the real HTTP routes (through
  * `app.inject`, no mocks) or calls the real pipeline functions, against a real PostgreSQL database,
  * the real oasdiff binary and the real Docker sandbox.
  *

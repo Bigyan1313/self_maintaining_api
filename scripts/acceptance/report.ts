@@ -177,7 +177,7 @@ export function renderReadme(
     '',
     'Re-run everything with `npm run acceptance`. It needs Docker (for the sandbox), PostgreSQL',
     '(`npm run db:up`), and oasdiff 1.35.0. It drops and re-creates the `sma_acceptance_test`',
-    'database, never the development database. Outputs go to [output/](output/) and terminal',
+    'database; regression suites also reset `sma_test`, never the development database. Outputs go to [output/](output/) and terminal',
     'screenshots to [screenshots/](screenshots/).',
     '',
   ].join('\n');

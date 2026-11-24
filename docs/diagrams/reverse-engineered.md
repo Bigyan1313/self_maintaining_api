@@ -25,17 +25,17 @@ classDiagram
   }
   class Orchestrator {
     +idle()
-    +secrets()
-    +scrub()
+    -secrets()
+    -scrub()
     +checkSpec()
-    +storeMigrationNote()
-    +failCheck()
-    +acquire()
+    -storeMigrationNote()
+    -failCheck()
+    -acquire()
     +startRun()
     +reanalyze()
-    +begin()
-    +execute()
-    +recordStageFailure()
+    -begin()
+    -execute()
+    -recordStageFailure()
     +retryDelivery()
     +recoverInterruptedRuns()
   }
@@ -62,21 +62,21 @@ classDiagram
   FakeLlmAdapter ..|> LlmAdapter
 ```
 
-| Declaration         | Kind      | Source                                                                                     |
-| ------------------- | --------- | ------------------------------------------------------------------------------------------ |
-| GitHubError         | class     | [apps/server/src/infra/github/client.ts](../../apps/server/src/infra/github/client.ts)     |
-| AnthropicLlmAdapter | class     | [apps/server/src/infra/llm/adapter.ts](../../apps/server/src/infra/llm/adapter.ts)         |
-| FakeLlmAdapter      | class     | [apps/server/src/infra/llm/fake.ts](../../apps/server/src/infra/llm/fake.ts)               |
-| LlmAdapter          | interface | [apps/server/src/infra/llm/types.ts](../../apps/server/src/infra/llm/types.ts)             |
-| ExportWriteError    | class     | [apps/server/src/pipeline/export.ts](../../apps/server/src/pipeline/export.ts)             |
-| ApiNotFoundError    | class     | [apps/server/src/pipeline/ingest.ts](../../apps/server/src/pipeline/ingest.ts)             |
-| Orchestrator        | class     | [apps/server/src/pipeline/orchestrator.ts](../../apps/server/src/pipeline/orchestrator.ts) |
-| OrchestratorPorts   | interface | [apps/server/src/pipeline/orchestrator.ts](../../apps/server/src/pipeline/orchestrator.ts) |
-| RunBusyError        | class     | [apps/server/src/pipeline/orchestrator.ts](../../apps/server/src/pipeline/orchestrator.ts) |
-| RunInputError       | class     | [apps/server/src/pipeline/orchestrator.ts](../../apps/server/src/pipeline/orchestrator.ts) |
-| CheckQueue          | class     | [apps/server/src/pipeline/poller.ts](../../apps/server/src/pipeline/poller.ts)             |
-| SpecPoller          | class     | [apps/server/src/pipeline/poller.ts](../../apps/server/src/pipeline/poller.ts)             |
-| RepoReader          | interface | [packages/core/src/repo/limits.ts](../../packages/core/src/repo/limits.ts)                 |
+| Declaration | Kind | Source |
+| --- | --- | --- |
+| GitHubError | class | [apps/server/src/infra/github/client.ts](../../apps/server/src/infra/github/client.ts) |
+| AnthropicLlmAdapter | class | [apps/server/src/infra/llm/adapter.ts](../../apps/server/src/infra/llm/adapter.ts) |
+| FakeLlmAdapter | class | [apps/server/src/infra/llm/fake.ts](../../apps/server/src/infra/llm/fake.ts) |
+| LlmAdapter | interface | [apps/server/src/infra/llm/types.ts](../../apps/server/src/infra/llm/types.ts) |
+| ExportWriteError | class | [apps/server/src/pipeline/export.ts](../../apps/server/src/pipeline/export.ts) |
+| ApiNotFoundError | class | [apps/server/src/pipeline/ingest.ts](../../apps/server/src/pipeline/ingest.ts) |
+| Orchestrator | class | [apps/server/src/pipeline/orchestrator.ts](../../apps/server/src/pipeline/orchestrator.ts) |
+| OrchestratorPorts | interface | [apps/server/src/pipeline/orchestrator.ts](../../apps/server/src/pipeline/orchestrator.ts) |
+| RunBusyError | class | [apps/server/src/pipeline/orchestrator.ts](../../apps/server/src/pipeline/orchestrator.ts) |
+| RunInputError | class | [apps/server/src/pipeline/orchestrator.ts](../../apps/server/src/pipeline/orchestrator.ts) |
+| CheckQueue | class | [apps/server/src/pipeline/poller.ts](../../apps/server/src/pipeline/poller.ts) |
+| SpecPoller | class | [apps/server/src/pipeline/poller.ts](../../apps/server/src/pipeline/poller.ts) |
+| RepoReader | interface | [packages/core/src/repo/limits.ts](../../packages/core/src/repo/limits.ts) |
 
 The curated diagram includes function-based stage services, database entities and the React view.
 This AST-derived diagram includes exported classes and selected adapter interfaces, with declared
