@@ -37,7 +37,8 @@ stateDiagram-v2
   locate_outcome --> needs_review : outcome needs_review
   locate_outcome --> repair_gate : outcome affected
   repair_gate --> flagged : not breaking, or mapping unconfirmed (FR-18)
-  repair_gate --> delivery : attempt outcome pass
+  repair_gate --> delivery : full mode attempt passes
+  repair_gate --> repaired : B2 single-shot passes, delivery skipped
   delivery --> repaired : branch and PR delivered
   delivery --> stage_failure : delivery failure, failure_stage deliver
   repair_gate --> failed : 4 attempts without pass (FR-22)
@@ -89,6 +90,9 @@ one outcome. `ingest()` in [`apps/server/src/pipeline/ingest.ts`](../../apps/ser
 retrieves and parses the spec, then `decideCheckOutcome()` in
 [`packages/core/src/ingest/spec.ts`](../../packages/core/src/ingest/spec.ts) picks the outcome.
 All checks for one API run one at a time through `CheckQueue`, and `ingest()` locks the API row.
+The flow combines ingestion and orchestration: detector/classifier failures append a separate
+failed check rather than mutating the original ingestion row. A previously stored version that
+differs from the baseline is classified again, so a failed check remains retryable.
 
 ![Spec check](png/statechart-spec-check.png)
 
@@ -105,12 +109,15 @@ stateDiagram-v2
   compare_hash --> changed : new hash, a new spec_versions row, baseline NOT moved — built
   failed --> [*] : baseline unchanged, a later check may retry (FR-11) — built
   baseline_established --> [*]
-  no_change --> [*]
+  no_change --> [*] : version equals baseline
+  no_change --> classified : stored version differs from baseline, retry detectAndClassify succeeds
+  no_change --> classification_failed : retry detectAndClassify fails
   changed --> classified : detectAndClassify succeeds
   classified --> baseline_advanced : advanceBaseline succeeds
   baseline_advanced --> [*]
   changed --> classification_failed : detector or classifier failure
-  classification_failed --> [*] : preserve old baseline; retry on a later check
+  classification_failed --> failed : append failed check with failure_stage; preserve baseline
+  classified --> failed : advancing baseline fails
 ```
 
 | State                  | Kind             | Where it lives in the code                                                                                                                                                        |
@@ -124,7 +131,7 @@ stateDiagram-v2
 
 | `classified` | activity | `detectAndClassify` in `apps/server/src/pipeline/classify.ts` |
 | `baseline_advanced` | activity | `advanceBaseline` in `apps/server/src/pipeline/orchestrator.ts` |
-| `classification_failed` | activity | stage failure in `apps/server/src/pipeline/orchestrator.ts`; the ingest check still records changed |
+| `classification_failed` | activity | `failCheck` in `apps/server/src/pipeline/orchestrator.ts`; appends a failed check and retains the earlier ingest row |
 
 ---
 
@@ -150,8 +157,9 @@ before and after the patch, so it needs the validation result.
 stateDiagram-v2
   direction TB
   [*] --> model_call : attempt n, n ≤ 4
+  model_call --> fail : invalid_output records an unvalidated attempt
   model_call --> path_safety : LlmAdapter.generatePatch() returns a patch
-  path_safety --> error : unsafe path or malformed diff — built
+  path_safety --> fail : unsafe path or malformed diff, patch_invalid — built
   path_safety --> test_file_changed : inspectPatch() and parseUnifiedDiff() ok — built
   test_file_changed --> cheating : adds, edits, deletes or skips a test (FR-27) — built
   test_file_changed --> config_changed : clean — built
@@ -159,7 +167,8 @@ stateDiagram-v2
   config_changed --> type_suppression : clean — built
   type_suppression --> cheating : ts-ignore, ts-expect-error, ts-nocheck, unchecked any, empty catch (FR-29) — built
   type_suppression --> sandbox_validate : clean — built
-  sandbox_validate --> error : typed failure, or result status error — built
+  sandbox_validate --> error : completed result status error
+  sandbox_validate --> [*] : infrastructure error with no result ends stage_failure — built
   sandbox_validate --> timeout : wall-clock limit (10 min) — built
   sandbox_validate --> test_count_changed : result pass or fail — built
   test_count_changed --> cheating : total changed, passing went down, or a test went missing (FR-28) — built

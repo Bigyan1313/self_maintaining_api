@@ -311,9 +311,9 @@ guard needs real test results, so it can only come last.
 5. `FakeLlmAdapter` returns scripted results and records each context, so tests and the
    evaluation can run without a network or a model (NFR-08).
 
-**Why:** the model sees only what it needs, nothing secret, and nothing it could mistake for an
-instruction (NFR-04, AT-10). One adapter file means the provider can be swapped by editing one
-file (C-06).
+**Why:** bounded context, credential filtering and explicit untrusted-data delimiters reduce
+exposure (NFR-04, AT-10). These controls do not prove that a live model can never follow a
+planted instruction. One adapter boundary keeps provider access isolated (C-06).
 
 ---
 
