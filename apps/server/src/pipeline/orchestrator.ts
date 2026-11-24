@@ -94,6 +94,8 @@ export interface OrchestratorPorts {
 
 /** Run settings. */
 export interface OrchestratorOptions {
+  /** Evaluation only: record would-open-PR without accessing GitHub. */
+  dryRunDelivery?: boolean;
   /** Most input + output tokens one run may use (FR-24). Default {@link DEFAULT_TOKEN_CEILING}. */
   tokenCeiling?: number;
   /** Per-call model limits. */
@@ -539,19 +541,23 @@ export class Orchestrator {
         });
 
       stage = 'deliver';
-      if (mode === 'single_shot') {
+      if (mode === 'single_shot' || this.options.dryRunDelivery) {
+        const reason =
+          mode === 'single_shot'
+            ? SINGLE_SHOT_NOT_DELIVERED
+            : 'Dry-run delivery: would open PR; no GitHub request made.';
         const now = this.clock();
         await insertStageResult(db, {
           runId: run.id,
           stage: 'deliver',
           status: 'skipped',
-          result: { reason: SINGLE_SHOT_NOT_DELIVERED, pullRequest: null },
+          result: { reason, pullRequest: null, wouldOpenPr: mode === 'full' },
           startedAt: now,
           finishedAt: now,
         });
         return await finishRun(db, run.id, {
           status: 'repaired',
-          flaggedReason: SINGLE_SHOT_NOT_DELIVERED,
+          flaggedReason: reason,
         });
       }
       const patch = outcome.finalPatch;

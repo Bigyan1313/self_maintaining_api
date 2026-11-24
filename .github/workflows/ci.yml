@@ -122,6 +122,18 @@ jobs:
           test -z "$(docker ps --all --quiet --filter label=sma.validator=1)"
           git diff --exit-code -- scenarios ':!scenarios/verification.json'
 
+      - name: Evaluation FakeLlm end to end (all twenty scenarios)
+        run: |
+          npm run eval -- --label ci-fake --fake
+          npx tsx eval/check-dry.ts ci-fake
+      - name: Preserve evaluation results and generated report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-fake
+          path: eval/results/ci-fake
+          if-no-files-found: warn
+
       - name: Render current diagrams and record acceptance checks
         run: |
           echo "PUPPETEER_EXECUTABLE_PATH=$(node --input-type=module -e "import { chromium } from 'playwright'; console.log(chromium.executablePath())")" >> "$GITHUB_ENV"
@@ -129,7 +141,7 @@ jobs:
       - run: npm run acceptance
       - name: Generate final-report scaffold
         if: always()
-        run: npm run report:final
+        run: npm run report:final -- eval/results/ci-fake/report.md
       - name: Package review draft
         run: npm run submission -- --draft
       - name: Preserve course deliverables and actual execution records

@@ -43,7 +43,10 @@
     "diagrams:reverse": "tsx scripts/deliverables/reverse-diagram.ts",
     "test:coverage": "tsx scripts/deliverables/unit-tests.ts",
     "report:final": "tsx scripts/deliverables/final-report.ts",
-    "submission": "bash scripts/make-submission.sh"
+    "submission": "bash scripts/make-submission.sh",
+    "eval": "npm run build -w @sma/core && tsx eval/run.ts",
+    "eval:report": "npm run build -w @sma/core && tsx eval/report.ts",
+    "eval:review": "npm run build -w @sma/core && tsx eval/review.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

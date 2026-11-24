@@ -3,7 +3,9 @@
  * Uses raw SQL through the pool so no application code is involved.
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { DbClient } from '../src/infra/db/client.js';
+import { createDbClient, type DbClient } from '../src/infra/db/client.js';
+import { loadRootEnv } from '../src/infra/db/env.js';
+import { resetTestDatabase, testDatabaseUrl } from '../src/infra/db/test-db.js';
 import {
   confirmMapping,
   finishRun,
@@ -14,21 +16,20 @@ import {
   insertStageResult,
   updateRunProgress,
 } from '../src/infra/db/index.js';
-import {
-  attemptValues,
-  expectDbRejects,
-  openTestDb,
-  PG,
-  seedChain,
-  type Chain,
-} from './db-helpers.js';
+import { attemptValues, expectDbRejects, PG, seedChain, type Chain } from './db-helpers.js';
 
 let client: DbClient;
 let chain: Chain;
 const appendOnly = { code: PG.raiseException, message: /^append-only:/ };
 
 beforeAll(async () => {
-  client = openTestDb();
+  // TRUNCATE CASCADE takes exclusive locks on the shared table graph. Keep these
+  // trigger checks isolated from concurrently inserting pipeline tests.
+  loadRootEnv();
+  const url = new URL(testDatabaseUrl());
+  url.pathname = '/sma_append_only_test';
+  await resetTestDatabase(url.toString());
+  client = createDbClient(url.toString());
   chain = await seedChain(client);
   await insertAttempt(client.db, attemptValues(chain.run.id, 1));
   await insertStageResult(client.db, {

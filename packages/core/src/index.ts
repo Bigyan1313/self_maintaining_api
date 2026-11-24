@@ -39,3 +39,5 @@ export * from './repair/loop.js';
 export * from './delivery/redact.js';
 export * from './delivery/branch.js';
 export * from './delivery/pr-body.js';
+export * from './evaluation/study.js';
+export * from './evaluation/metrics.js';

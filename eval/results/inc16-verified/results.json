@@ -1,0 +1,3634 @@
+{
+  "schemaVersion": 1,
+  "label": "inc16-verified",
+  "startedAt": "2026-11-23T20:15:28.675Z",
+  "updatedAt": "2026-11-23T20:21:30.979Z",
+  "status": "complete",
+  "stopReason": null,
+  "fake": true,
+  "config": {
+    "baselines": [
+      "B1",
+      "B2",
+      "B3"
+    ],
+    "scenarioIds": [
+      "param-fitness-axios-instance",
+      "param-library-header",
+      "param-shop-query",
+      "param-tickets-threaded",
+      "param-weather-enum",
+      "removed-fitness-refuse",
+      "removed-library-replacement",
+      "removed-shop-replacement",
+      "removed-tickets-refuse",
+      "removed-weather-refuse",
+      "rename-fitness-destructure",
+      "rename-library-nested",
+      "rename-shop-flat",
+      "rename-tickets-generated",
+      "rename-weather-two-files",
+      "type-fitness-remote-conversion",
+      "type-library-string-number",
+      "type-shop-number-string",
+      "type-tickets-boolean-enum",
+      "type-weather-timestamp"
+    ],
+    "repeat": 1,
+    "maxCost": 5
+  },
+  "environment": {
+    "gitCommit": "3dbf1fd45a2db3124be90c2228dc5b80bdee70ab",
+    "modelId": "FakeLlmAdapter",
+    "image": "node:22-bookworm-slim@sha256:4b150b48b4116e2a22f2c39cc27025fbf4f153e2078fd3b14d159fdb5c7279da",
+    "oasdiff": "1.35.0",
+    "node": "v22.19.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpuCores": 10,
+    "ramBytes": 17179869184,
+    "pricing": {
+      "input": 0,
+      "output": 0
+    },
+    "maxOutputTokens": 4096
+  },
+  "manifest": [
+    {
+      "id": "param-fitness-axios-instance",
+      "sha256": "3f38ee418d3a48e73402d7c7fb6733681f31c904f699ab9fc9b7a1b40f853df6",
+      "repoCommit": "7390c280ae7621ef4a13eafa8c71dde7bc9749dd"
+    },
+    {
+      "id": "param-library-header",
+      "sha256": "bd254e059469ce44978101e9fc5301f84b3202eadfa262e044bd12ced08597c1",
+      "repoCommit": "50ed201744b4f40d622c3deb51c11084aeb06130"
+    },
+    {
+      "id": "param-shop-query",
+      "sha256": "089f03476c90c9caa74bc2f50d5e1b686fdbb98e5b54966c1e8041298022bdb5",
+      "repoCommit": "fcde217ddf6a71b2cff055f90c91ff955996ee73"
+    },
+    {
+      "id": "param-tickets-threaded",
+      "sha256": "3e8ad527e6fa325725c684a387fe1601d252a1494d4f0a6044d69906bb702941",
+      "repoCommit": "33e1b0adea15043842d0c8d42a88f3f29d9222b5"
+    },
+    {
+      "id": "param-weather-enum",
+      "sha256": "2499163a6b4e81ebdbe2d36127473f016c94a73688a0ab9a00a734cb0c449ca5",
+      "repoCommit": "276aab93fab9974b7f7507c7424132760ea86e0f"
+    },
+    {
+      "id": "removed-fitness-refuse",
+      "sha256": "528a645b0147975c3c040f2ba70409a4eaa390c121a12be0f1fa30b35aca43ca",
+      "repoCommit": "6c8b1f6779060de29f5d02dfc9599e512dcca999"
+    },
+    {
+      "id": "removed-library-replacement",
+      "sha256": "dc45884511ebb722f28464f401317d2d3934d0ef60dfca81a3ad7191a06f40a5",
+      "repoCommit": "baa5930a19c7fd4727c3302deae4bb102e073912"
+    },
+    {
+      "id": "removed-shop-replacement",
+      "sha256": "921d75b3bb2c6ec88a04bcfe57ff442385030aee306aa3be63af43a7bb43a469",
+      "repoCommit": "988dc987915e134e8cce3b47b58a099cf8fba4b5"
+    },
+    {
+      "id": "removed-tickets-refuse",
+      "sha256": "2208703c51af4e39071a579e0d3467d9222f26b77f38aa3bd438fe9ea9e73855",
+      "repoCommit": "deff34e61b3fc4b53f8554e821726c5efd318f33"
+    },
+    {
+      "id": "removed-weather-refuse",
+      "sha256": "c30097ebc47bfef417bda324a796e773919b5bed34f380ee9975d9473d797faa",
+      "repoCommit": "47f8898a129ca7c224ef2fd62daa78c56437a4d3"
+    },
+    {
+      "id": "rename-fitness-destructure",
+      "sha256": "2afac9fe7c9ea47f0d084b035b59b0bcabeea3d8dbce216d238e7a0a1a172a67",
+      "repoCommit": "69e7977e8375d253b97bbf263743f8a3e9af6093"
+    },
+    {
+      "id": "rename-library-nested",
+      "sha256": "677e3701824a516167f770919cd1c52012aee0e4653e073c778f8264d337a219",
+      "repoCommit": "e3bd0242d77a99bd30a8b31b83387d20a13a8d5b"
+    },
+    {
+      "id": "rename-shop-flat",
+      "sha256": "b844cd8c74dadcabd91062c1722e5052ba09d814739c73397816f72a2980034e",
+      "repoCommit": "7688db443d7e2397330c5a9ae91458db2a9ad87e"
+    },
+    {
+      "id": "rename-tickets-generated",
+      "sha256": "2cca07c5d2540e2112d9701341545175442807bf3eff291242b225e3a5d0cbcf",
+      "repoCommit": "eba43b8c249f2683e33f840e981ae3767fcaa791"
+    },
+    {
+      "id": "rename-weather-two-files",
+      "sha256": "461c55a7e6d3ccc6b589c3b8586a2408546a3290a732def4a4999e6306d5a147",
+      "repoCommit": "95011efa38215e1dc277348b720b18b1a1ef088c"
+    },
+    {
+      "id": "type-fitness-remote-conversion",
+      "sha256": "f9379b427b3268362ecb46ee1b444e13bae314eb756d5802c2304bf3e0f2adbc",
+      "repoCommit": "89fec370a39ad999d7080e3a49096b5310fe5e86"
+    },
+    {
+      "id": "type-library-string-number",
+      "sha256": "b345807abcbb76d62d25c10962fe6beeed4da5a3cf32d04f81eddd7f4c4f9982",
+      "repoCommit": "22f3a66771111c477fa07ae59b898e7df9e028d9"
+    },
+    {
+      "id": "type-shop-number-string",
+      "sha256": "644f66e3cbcc6e92bb49f6dc2517ef7d04c7bd7821b76b7175f4e5a5d8306187",
+      "repoCommit": "523d73fc2219bfbec78dd1f2d1a22dd2ba78a1c2"
+    },
+    {
+      "id": "type-tickets-boolean-enum",
+      "sha256": "d304237d1cf2e91674909f294ba66208c37402e274c303cb4f531926f4b4fa72",
+      "repoCommit": "5340168513e219c46dd6dddd9f1f8823f8796154"
+    },
+    {
+      "id": "type-weather-timestamp",
+      "sha256": "75011d9999c65988527220d3be4658363d9e3a3be6d042d750bcc2577f65494c",
+      "repoCommit": "316a54685ce42abec210059ba61755016298194b"
+    }
+  ],
+  "admissions": [
+    {
+      "id": "param-fitness-axios-instance",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "param-library-header",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "param-shop-query",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "param-tickets-threaded",
+      "admissible": true,
+      "beforePassed": 3,
+      "beforeTotal": 3,
+      "afterPassed": 1,
+      "afterTotal": 3
+    },
+    {
+      "id": "param-weather-enum",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "removed-fitness-refuse",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "removed-library-replacement",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "removed-shop-replacement",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "removed-tickets-refuse",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "removed-weather-refuse",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "rename-fitness-destructure",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "rename-library-nested",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "rename-shop-flat",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "rename-tickets-generated",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "rename-weather-two-files",
+      "admissible": true,
+      "beforePassed": 3,
+      "beforeTotal": 3,
+      "afterPassed": 1,
+      "afterTotal": 3
+    },
+    {
+      "id": "type-fitness-remote-conversion",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "type-library-string-number",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "type-shop-number-string",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "type-tickets-boolean-enum",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    },
+    {
+      "id": "type-weather-timestamp",
+      "admissible": true,
+      "beforePassed": 2,
+      "beforeTotal": 2,
+      "afterPassed": 1,
+      "afterTotal": 2
+    }
+  ],
+  "trials": [
+    {
+      "id": "41965e41-a1b8-4302-baf4-4c2e51db565c",
+      "scenarioId": "param-fitness-axios-instance",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5277.744708000013,
+      "modelMs": 0,
+      "containerMs": 5219.819042000017,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-fitness-axios-instance\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /workouts\n    param: level\n    in: query\n    default_value: all\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/workouts",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "level",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:17:44.592Z"
+    },
+    {
+      "id": "d8d4fe2d-4946-428f-9928-94362f1f11fa",
+      "scenarioId": "param-fitness-axios-instance",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 379.7188329999917,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-fitness-axios-instance\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /workouts\n    param: level\n    in: query\n    default_value: all\n",
+      "runId": "ea13c2dc-ac54-4c64-8383-94dc0f154168",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/workouts",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "level",
+          "location": "query"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/workouts",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "level",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:17:49.926Z"
+    },
+    {
+      "id": "f2a7e331-bbdc-40b3-a59e-5c9bc72e3920",
+      "scenarioId": "param-fitness-axios-instance",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5862.490166999982,
+      "modelMs": 0,
+      "containerMs": 5632.569542000012,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-fitness-axios-instance\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /workouts\n    param: level\n    in: query\n    default_value: all\n",
+      "runId": "94ef312f-8a6a-4261-afa1-5146252927bb",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/workouts",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "level",
+          "location": "query"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/workouts",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "level",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:17:50.340Z"
+    },
+    {
+      "id": "6ff82dfc-3c10-4e0b-bd48-d10d05c7e403",
+      "scenarioId": "param-library-header",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 4815.771541000024,
+      "modelMs": 0,
+      "containerMs": 4759.584959,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-library-header\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /books\n    param: x-library\n    in: header\n    default_value: central\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "X-Library",
+          "location": "header"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:17:56.256Z"
+    },
+    {
+      "id": "907e0240-eb0c-402a-9e9d-74ec072cd3b0",
+      "scenarioId": "param-library-header",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 276.5220419999969,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-library-header\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /books\n    param: x-library\n    in: header\n    default_value: central\n",
+      "runId": "eca82ca7-59e8-46ac-a4b5-ef3d6914c693",
+      "detection": {
+        "breaking": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 1
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/books",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "x-library",
+          "location": "header"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "X-Library",
+          "location": "header"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:01.118Z"
+    },
+    {
+      "id": "39f1e08a-885e-4618-b77d-0e70e1cead69",
+      "scenarioId": "param-library-header",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 4846.295249999996,
+      "modelMs": 0,
+      "containerMs": 4625.96779200001,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-library-header\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /books\n    param: x-library\n    in: header\n    default_value: central\n",
+      "runId": "f1a7a290-a5d5-467f-923d-e6f30b680b25",
+      "detection": {
+        "breaking": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 1
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/books",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "x-library",
+          "location": "header"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "X-Library",
+          "location": "header"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:01.447Z"
+    },
+    {
+      "id": "be5be589-4781-4aa9-bfb3-6592bd86edc7",
+      "scenarioId": "param-shop-query",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 4688.583207999996,
+      "modelMs": 0,
+      "containerMs": 4632.8127920000115,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-shop-query\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /orders\n    param: status\n    in: query\n    default_value: all\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/orders",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "status",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:06.350Z"
+    },
+    {
+      "id": "4f79ec17-fd1a-48ef-a22b-fbd58b5ae74a",
+      "scenarioId": "param-shop-query",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Single-shot patch did not pass validation (fail).",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5583.994084000005,
+      "modelMs": 0,
+      "containerMs": 5275.466833000013,
+      "guard": null,
+      "patch": "diff --git a/src/consumer.ts b/src/consumer.ts\n--- a/src/consumer.ts\n+++ b/src/consumer.ts\n@@ -1,9 +1,10 @@\n+// @ts-nocheck\n interface Payload { count: number }\n \n export async function readValue(id = '42') {\n   void id;\n   const response = await fetch(`https://api.example.test/orders`);\n   if (!response.ok) throw new Error(`HTTP ${response.status}`);\n   const data = await response.json() as Payload;\n   return data.count;\n }\n",
+      "migrationNote": "api: param-shop-query\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /orders\n    param: status\n    in: query\n    default_value: all\n",
+      "runId": "3be50412-a3fe-40c7-889a-0fb7d11e4294",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/orders",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "status",
+          "location": "query"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/orders",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "status",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:11.114Z"
+    },
+    {
+      "id": "3edd0a04-84f3-49d2-b238-42fc4175adad",
+      "scenarioId": "param-shop-query",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "cheating_rejected",
+      "reason": "Cheat guard type_suppression rejected attempt 1; the run stopped.",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5379.911000000022,
+      "modelMs": 0,
+      "containerMs": 5054.031625000003,
+      "guard": "type_suppression",
+      "patch": "diff --git a/src/consumer.ts b/src/consumer.ts\n--- a/src/consumer.ts\n+++ b/src/consumer.ts\n@@ -1,9 +1,10 @@\n+// @ts-nocheck\n interface Payload { count: number }\n \n export async function readValue(id = '42') {\n   void id;\n   const response = await fetch(`https://api.example.test/orders`);\n   if (!response.ok) throw new Error(`HTTP ${response.status}`);\n   const data = await response.json() as Payload;\n   return data.count;\n }\n",
+      "migrationNote": "api: param-shop-query\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /orders\n    param: status\n    in: query\n    default_value: all\n",
+      "runId": "283f05a5-672b-462d-ba00-4cddf20fda27",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/orders",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "status",
+          "location": "query"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/orders",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "status",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:16.765Z"
+    },
+    {
+      "id": "c90a5f90-f192-438b-97fe-caaaa1631bff",
+      "scenarioId": "param-tickets-threaded",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5551.501833000017,
+      "modelMs": 0,
+      "containerMs": 5478.204457999993,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-tickets-threaded\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /events/{id}/tickets\n    param: region\n    in: query\n    default_value: us\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/events/{id}/tickets",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "region",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:22.195Z"
+    },
+    {
+      "id": "327461f9-d70a-4611-ae55-8519b5346326",
+      "scenarioId": "param-tickets-threaded",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 287.9385830000101,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-tickets-threaded\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /events/{id}/tickets\n    param: region\n    in: query\n    default_value: us\n",
+      "runId": "5600a328-8ab4-4e16-ae2f-7b62a81c26fe",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/events/{id}/tickets",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "region",
+          "location": "query"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/events/{id}/tickets",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "region",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:27.841Z"
+    },
+    {
+      "id": "11cdaafe-c9b2-43df-be2a-b267a72520b9",
+      "scenarioId": "param-tickets-threaded",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5507.13066699999,
+      "modelMs": 0,
+      "containerMs": 5288.28220799999,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-tickets-threaded\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /events/{id}/tickets\n    param: region\n    in: query\n    default_value: us\n",
+      "runId": "faa43e55-d1dc-481f-baf2-9cfe16a9b2c5",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/events/{id}/tickets",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "region",
+          "location": "query"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/events/{id}/tickets",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "region",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:28.172Z"
+    },
+    {
+      "id": "b0a9fb3d-3e97-4c94-9d86-14feeb31a87f",
+      "scenarioId": "param-weather-enum",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5163.411708999978,
+      "modelMs": 0,
+      "containerMs": 5109.035249999986,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-weather-enum\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /stations/{id}/forecast\n    param: units\n    in: query\n    default_value: metric\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}/forecast",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "units",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:33.727Z"
+    },
+    {
+      "id": "e72a27fa-a2c9-46c7-b630-13e1437302c6",
+      "scenarioId": "param-weather-enum",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 280.58049999998184,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-weather-enum\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /stations/{id}/forecast\n    param: units\n    in: query\n    default_value: metric\n",
+      "runId": "8713379d-5e0c-403a-9d95-ece3d3464d51",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}/forecast",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "units",
+          "location": "query"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}/forecast",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "units",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:38.978Z"
+    },
+    {
+      "id": "8cad3392-dd49-420f-b2f7-d9e88734af80",
+      "scenarioId": "param-weather-enum",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "required_param_added",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5782.601040999987,
+      "modelMs": 0,
+      "containerMs": 5551.930999999982,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: param-weather-enum\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: required_param_added\n    method: GET\n    path: /stations/{id}/forecast\n    param: units\n    in: query\n    default_value: metric\n",
+      "runId": "bcdd2284-2b8d-4a45-a917-def29bf240fd",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}/forecast",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "units",
+          "location": "query"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}/forecast",
+          "category": "required_param_added",
+          "classification": "breaking",
+          "parameter": "units",
+          "location": "query"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:39.307Z"
+    },
+    {
+      "id": "29179406-5aad-40d2-8a99-42dbda3463be",
+      "scenarioId": "removed-fitness-refuse",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "refuse",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 4832.403374999994,
+      "modelMs": 0,
+      "containerMs": 4772.578666000016,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/sessions/{id}/ranking",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:45.139Z"
+    },
+    {
+      "id": "dd4952bf-2f32-4ab9-beeb-43cd4dabbd5a",
+      "scenarioId": "removed-fitness-refuse",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "refuse",
+      "outcome": "flagged",
+      "reason": "No confirmed mapping: reported, not repaired.",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 266.10854100002325,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "",
+      "runId": "0b512598-6265-4b6f-a4c2-976b5f0a425d",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/sessions/{id}/ranking",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/sessions/{id}/ranking",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:50.052Z"
+    },
+    {
+      "id": "e4b97544-6850-4145-b18c-60a782a172f8",
+      "scenarioId": "removed-fitness-refuse",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "refuse",
+      "outcome": "flagged",
+      "reason": "No confirmed mapping: reported, not repaired.",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 175.6343329999945,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "",
+      "runId": "0a6f04b5-ac98-465e-82e8-b07987556898",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/sessions/{id}/ranking",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/sessions/{id}/ranking",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:50.374Z"
+    },
+    {
+      "id": "4eb13be3-68cf-432d-8618-c8a999dff006",
+      "scenarioId": "removed-library-replacement",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5355.162165999995,
+      "modelMs": 0,
+      "containerMs": 5302.206917000003,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: removed-library-replacement\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: endpoint_removed\n    method: GET\n    path: /books/{id}/availability\n    replacement:\n      method: GET\n      path: /availability/{id}\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books/{id}/availability",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        },
+        {
+          "method": "GET",
+          "path": "/availability/{id}",
+          "category": "other",
+          "classification": "safe"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:50.601Z"
+    },
+    {
+      "id": "006bd72c-b178-4826-ad1f-f38d94a6e08c",
+      "scenarioId": "removed-library-replacement",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 225.90991700001177,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: removed-library-replacement\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: endpoint_removed\n    method: GET\n    path: /books/{id}/availability\n    replacement:\n      method: GET\n      path: /availability/{id}\n",
+      "runId": "2f4bfa46-0de7-4f64-9f58-3fcfdd630d84",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/availability/{id}",
+          "category": "other",
+          "classification": "safe"
+        },
+        {
+          "method": "GET",
+          "path": "/books/{id}/availability",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books/{id}/availability",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        },
+        {
+          "method": "GET",
+          "path": "/availability/{id}",
+          "category": "other",
+          "classification": "safe"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:56.039Z"
+    },
+    {
+      "id": "fae4ef91-1479-4ead-9f4a-3d67dde7ac2d",
+      "scenarioId": "removed-library-replacement",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5208.298791000008,
+      "modelMs": 0,
+      "containerMs": 4972.628041999997,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: removed-library-replacement\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: endpoint_removed\n    method: GET\n    path: /books/{id}/availability\n    replacement:\n      method: GET\n      path: /availability/{id}\n",
+      "runId": "c319f724-742c-4081-a3b3-857cd31a6224",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/availability/{id}",
+          "category": "other",
+          "classification": "safe"
+        },
+        {
+          "method": "GET",
+          "path": "/books/{id}/availability",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books/{id}/availability",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        },
+        {
+          "method": "GET",
+          "path": "/availability/{id}",
+          "category": "other",
+          "classification": "safe"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:18:56.319Z"
+    },
+    {
+      "id": "3ced4ee0-b1bf-4c02-b2d9-b40c27711ddd",
+      "scenarioId": "removed-shop-replacement",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5561.366666999995,
+      "modelMs": 0,
+      "containerMs": 5503.593167000014,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: removed-shop-replacement\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: endpoint_removed\n    method: GET\n    path: /orders/{id}/invoice\n    replacement:\n      method: GET\n      path: /invoices/{id}\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/orders/{id}/invoice",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        },
+        {
+          "method": "GET",
+          "path": "/invoices/{id}",
+          "category": "other",
+          "classification": "safe"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:01.585Z"
+    },
+    {
+      "id": "daacf6f6-1554-43e2-9130-aa0756cd8b98",
+      "scenarioId": "removed-shop-replacement",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 287.61737500000163,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: removed-shop-replacement\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: endpoint_removed\n    method: GET\n    path: /orders/{id}/invoice\n    replacement:\n      method: GET\n      path: /invoices/{id}\n",
+      "runId": "d0147fff-b72c-4435-bed3-e1b960ba9c91",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/invoices/{id}",
+          "category": "other",
+          "classification": "safe"
+        },
+        {
+          "method": "GET",
+          "path": "/orders/{id}/invoice",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/orders/{id}/invoice",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        },
+        {
+          "method": "GET",
+          "path": "/invoices/{id}",
+          "category": "other",
+          "classification": "safe"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:07.226Z"
+    },
+    {
+      "id": "c732df51-3b23-4be4-b68b-7b2f10c32314",
+      "scenarioId": "removed-shop-replacement",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5329.755040999997,
+      "modelMs": 0,
+      "containerMs": 5052.372291000007,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: removed-shop-replacement\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: endpoint_removed\n    method: GET\n    path: /orders/{id}/invoice\n    replacement:\n      method: GET\n      path: /invoices/{id}\n",
+      "runId": "8e63f57f-dc21-41f9-996a-bffec5c0c90f",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/invoices/{id}",
+          "category": "other",
+          "classification": "safe"
+        },
+        {
+          "method": "GET",
+          "path": "/orders/{id}/invoice",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/orders/{id}/invoice",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        },
+        {
+          "method": "GET",
+          "path": "/invoices/{id}",
+          "category": "other",
+          "classification": "safe"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:07.573Z"
+    },
+    {
+      "id": "8bc7171c-78a7-4c7a-8342-a7d65ba9cc52",
+      "scenarioId": "removed-tickets-refuse",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "refuse",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5140.028625000006,
+      "modelMs": 0,
+      "containerMs": 5079.627041,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}/resale",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:12.965Z"
+    },
+    {
+      "id": "d110cdfc-6988-4838-8b9a-aba7429bdbe9",
+      "scenarioId": "removed-tickets-refuse",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "refuse",
+      "outcome": "flagged",
+      "reason": "No confirmed mapping: reported, not repaired.",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 240.46850000001723,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "",
+      "runId": "69821264-9ddc-4ec2-9134-2db8db75cacf",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}/resale",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}/resale",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:18.202Z"
+    },
+    {
+      "id": "9c8e9573-684b-427c-84fb-ae71e2aad150",
+      "scenarioId": "removed-tickets-refuse",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "refuse",
+      "outcome": "flagged",
+      "reason": "No confirmed mapping: reported, not repaired.",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 176.58179200001177,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "",
+      "runId": "616f0108-7da7-4091-a526-1640558cdb34",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}/resale",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}/resale",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:18.506Z"
+    },
+    {
+      "id": "736359ab-ae1b-4bb2-a9e0-0798eb02e66b",
+      "scenarioId": "removed-weather-refuse",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "refuse",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5702.350208000018,
+      "modelMs": 0,
+      "containerMs": 5649.002417000011,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}/history",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:18.745Z"
+    },
+    {
+      "id": "0f835643-685a-43e8-bde3-41f25d98f749",
+      "scenarioId": "removed-weather-refuse",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "refuse",
+      "outcome": "flagged",
+      "reason": "No confirmed mapping: reported, not repaired.",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 203.03854199999478,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "",
+      "runId": "81a3ae96-016b-49e0-affb-b0dc5d46a5d3",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}/history",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}/history",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:24.530Z"
+    },
+    {
+      "id": "46224ab7-413d-4e7c-9c7b-1ecf0cd8377c",
+      "scenarioId": "removed-weather-refuse",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "endpoint_removed",
+      "expected": "refuse",
+      "outcome": "flagged",
+      "reason": "No confirmed mapping: reported, not repaired.",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 187.43224999998347,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "",
+      "runId": "62daa436-71f1-46ef-8d0c-e83dceab4141",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}/history",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}/history",
+          "category": "endpoint_removed",
+          "classification": "breaking"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:24.805Z"
+    },
+    {
+      "id": "c0773c7e-8b76-4426-8dd2-c218521b5464",
+      "scenarioId": "rename-fitness-destructure",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 4779.894083000021,
+      "modelMs": 0,
+      "containerMs": 4726.062291000009,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-fitness-destructure\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /workouts/{id}\n    location: response\n    old: workout_name\n    new: label\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/workouts/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "workout_name"
+        },
+        {
+          "method": "GET",
+          "path": "/workouts/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "label"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:25.061Z"
+    },
+    {
+      "id": "96a0bff2-1a5a-4d68-8d3f-c5a672de0490",
+      "scenarioId": "rename-fitness-destructure",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 244.15904100000625,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-fitness-destructure\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /workouts/{id}\n    location: response\n    old: workout_name\n    new: label\n",
+      "runId": "7e735bf3-fbb6-4eb7-b2ce-ebf5e3a14441",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/workouts/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "label"
+        },
+        {
+          "method": "GET",
+          "path": "/workouts/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "workout_name"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/workouts/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "workout_name"
+        },
+        {
+          "method": "GET",
+          "path": "/workouts/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "label"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:29.935Z"
+    },
+    {
+      "id": "e7966563-70bc-40b9-b937-14c5e390df42",
+      "scenarioId": "rename-fitness-destructure",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5649.867667000013,
+      "modelMs": 0,
+      "containerMs": 5390.123749999999,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-fitness-destructure\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /workouts/{id}\n    location: response\n    old: workout_name\n    new: label\n",
+      "runId": "35c308ee-bd76-4c62-9f30-053ea7e12419",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/workouts/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "label"
+        },
+        {
+          "method": "GET",
+          "path": "/workouts/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "workout_name"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/workouts/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "workout_name"
+        },
+        {
+          "method": "GET",
+          "path": "/workouts/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "label"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:30.252Z"
+    },
+    {
+      "id": "30fd6886-32ba-4e96-80f6-6a9a463027fa",
+      "scenarioId": "rename-library-nested",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5880.110958000005,
+      "modelMs": 0,
+      "containerMs": 5819.383791999979,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-library-nested\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /books/{id}\n    location: response\n    old: author/name\n    new: author/display_name\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "author/name"
+        },
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "author/display_name"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:35.991Z"
+    },
+    {
+      "id": "f0969855-5d67-49b8-a84f-1558b7364e69",
+      "scenarioId": "rename-library-nested",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 324.86558300000615,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-library-nested\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /books/{id}\n    location: response\n    old: author/name\n    new: author/display_name\n",
+      "runId": "1c617f53-8cea-45ce-80ad-94d2554c5f6f",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "author/display_name"
+        },
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "author/name"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "author/name"
+        },
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "author/display_name"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:41.970Z"
+    },
+    {
+      "id": "2b25b74c-36f6-4699-9daa-ba01a0c82cf5",
+      "scenarioId": "rename-library-nested",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5989.59808299999,
+      "modelMs": 0,
+      "containerMs": 5721.260582999996,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-library-nested\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /books/{id}\n    location: response\n    old: author/name\n    new: author/display_name\n",
+      "runId": "c4088cc3-ec7c-4e8d-842f-04f17831e226",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "author/display_name"
+        },
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "author/name"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "author/name"
+        },
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "author/display_name"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:42.372Z"
+    },
+    {
+      "id": "68ac8f88-edbf-4de3-980c-efef58473716",
+      "scenarioId": "rename-shop-flat",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5324.944208000001,
+      "modelMs": 0,
+      "containerMs": 5269.193375000003,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-shop-flat\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /customers/{id}\n    location: response\n    old: customer_name\n    new: full_name\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/customers/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "customer_name"
+        },
+        {
+          "method": "GET",
+          "path": "/customers/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "full_name"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:48.437Z"
+    },
+    {
+      "id": "c57c5fae-82f6-44b8-88f0-399382e6539b",
+      "scenarioId": "rename-shop-flat",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "repaired",
+      "reason": "Single-shot evaluation run (B2): the patch was scored, not delivered.",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5708.37604100001,
+      "modelMs": 0,
+      "containerMs": 5416.150500000047,
+      "guard": null,
+      "patch": "diff --git a/src/consumer.ts b/src/consumer.ts\n--- a/src/consumer.ts\n+++ b/src/consumer.ts\n@@ -1,8 +1,8 @@\n-interface Payload { customer_name: string }\n+interface Payload { full_name: string }\n \n export async function readValue(id = '42') {\n   const response = await fetch(`https://api.example.test/customers/${id}`);\n   if (!response.ok) throw new Error(`HTTP ${response.status}`);\n   const data = await response.json() as Payload;\n-  return data.customer_name;\n+  return data.full_name;\n }\n",
+      "migrationNote": "api: rename-shop-flat\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /customers/{id}\n    location: response\n    old: customer_name\n    new: full_name\n",
+      "runId": "cff229fa-5e20-490f-bc33-c758b18e0ae7",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/customers/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "full_name"
+        },
+        {
+          "method": "GET",
+          "path": "/customers/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "customer_name"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/customers/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "customer_name"
+        },
+        {
+          "method": "GET",
+          "path": "/customers/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "full_name"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:53.884Z"
+    },
+    {
+      "id": "9229cdad-a218-4401-94f5-1235d9e96152",
+      "scenarioId": "rename-shop-flat",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "repaired",
+      "reason": "Dry-run delivery: would open PR; no GitHub request made.",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 10370.648750000051,
+      "modelMs": 0,
+      "containerMs": 10035.868542000011,
+      "guard": null,
+      "patch": "diff --git a/src/consumer.ts b/src/consumer.ts\n--- a/src/consumer.ts\n+++ b/src/consumer.ts\n@@ -1,8 +1,8 @@\n-interface Payload { customer_name: string }\n+interface Payload { full_name: string }\n \n export async function readValue(id = '42') {\n   const response = await fetch(`https://api.example.test/customers/${id}`);\n   if (!response.ok) throw new Error(`HTTP ${response.status}`);\n   const data = await response.json() as Payload;\n-  return data.customer_name;\n+  return data.full_name;\n }\n",
+      "migrationNote": "api: rename-shop-flat\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /customers/{id}\n    location: response\n    old: customer_name\n    new: full_name\n",
+      "runId": "a5c3145b-9129-4646-b378-118e986545da",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/customers/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "full_name"
+        },
+        {
+          "method": "GET",
+          "path": "/customers/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "customer_name"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/customers/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "customer_name"
+        },
+        {
+          "method": "GET",
+          "path": "/customers/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "full_name"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:19:59.704Z"
+    },
+    {
+      "id": "3bde32c0-b32f-40e4-911a-c5cc42a26e1a",
+      "scenarioId": "rename-tickets-generated",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5564.0386249999865,
+      "modelMs": 0,
+      "containerMs": 5507.754874999984,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-tickets-generated\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /tickets/{id}\n    location: response\n    old: event_name\n    new: title\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "event_name"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "title"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:10.195Z"
+    },
+    {
+      "id": "4d0bb423-e810-403c-bdde-42664c0856d7",
+      "scenarioId": "rename-tickets-generated",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 294.03824999998324,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-tickets-generated\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /tickets/{id}\n    location: response\n    old: event_name\n    new: title\n",
+      "runId": "6e02db22-0b0d-47ae-9347-dd0f4ea83177",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "title"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "event_name"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "event_name"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "title"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:15.885Z"
+    },
+    {
+      "id": "4970c9de-01f5-4039-b61d-c9dd099a7f21",
+      "scenarioId": "rename-tickets-generated",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5266.252500000002,
+      "modelMs": 0,
+      "containerMs": 5000.846791999997,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-tickets-generated\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /tickets/{id}\n    location: response\n    old: event_name\n    new: title\n",
+      "runId": "881ad60f-5ed7-44b1-9e20-15caa66f5c1d",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "title"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "event_name"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "event_name"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "title"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:16.276Z"
+    },
+    {
+      "id": "e0c67d6b-36a6-44af-a045-1633284a665c",
+      "scenarioId": "rename-weather-two-files",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5036.4912919999915,
+      "modelMs": 0,
+      "containerMs": 4976.492084000027,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-weather-two-files\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /stations/{id}\n    location: response\n    old: station_name\n    new: display_name\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "station_name"
+        },
+        {
+          "method": "GET",
+          "path": "/stations/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "display_name"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:21.622Z"
+    },
+    {
+      "id": "11075333-ca4d-4a53-bb35-9370484c3cce",
+      "scenarioId": "rename-weather-two-files",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 307.52833400003146,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-weather-two-files\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /stations/{id}\n    location: response\n    old: station_name\n    new: display_name\n",
+      "runId": "5ca0a7cf-2c69-406f-9639-f65e7502b5ae",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "display_name"
+        },
+        {
+          "method": "GET",
+          "path": "/stations/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "station_name"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "station_name"
+        },
+        {
+          "method": "GET",
+          "path": "/stations/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "display_name"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:26.771Z"
+    },
+    {
+      "id": "f1c7934d-968b-4c2d-94fc-bb2fff078738",
+      "scenarioId": "rename-weather-two-files",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "field_renamed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5393.161040999985,
+      "modelMs": 0,
+      "containerMs": 5065.410417000006,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: rename-weather-two-files\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_renamed\n    method: GET\n    path: /stations/{id}\n    location: response\n    old: station_name\n    new: display_name\n",
+      "runId": "79e341fe-88d8-4505-8068-38df8b9aa5da",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "display_name"
+        },
+        {
+          "method": "GET",
+          "path": "/stations/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "station_name"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/stations/{id}",
+          "category": "field_renamed",
+          "classification": "breaking",
+          "field": "station_name"
+        },
+        {
+          "method": "GET",
+          "path": "/stations/{id}",
+          "category": "other",
+          "classification": "safe",
+          "field": "display_name"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:27.164Z"
+    },
+    {
+      "id": "bb4df275-a0fa-4393-9aea-2d89ea2500f4",
+      "scenarioId": "type-fitness-remote-conversion",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5475.88195900002,
+      "modelMs": 0,
+      "containerMs": 5409.950167000003,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-fitness-remote-conversion\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /sessions/{id}\n    field: distance\n    old_type: number\n    new_type: string\n    conversion: Number(value)\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/sessions/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "distance"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:32.638Z"
+    },
+    {
+      "id": "bdef75b7-84e5-43a6-b230-a50063173af6",
+      "scenarioId": "type-fitness-remote-conversion",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 297.21966699999757,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-fitness-remote-conversion\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /sessions/{id}\n    field: distance\n    old_type: number\n    new_type: string\n    conversion: Number(value)\n",
+      "runId": "9edcc95e-7113-4e38-b686-86ab2bd03631",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/sessions/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "distance"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/sessions/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "distance"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:38.293Z"
+    },
+    {
+      "id": "1e513775-0505-493a-93c6-806e8f304657",
+      "scenarioId": "type-fitness-remote-conversion",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5291.567333000014,
+      "modelMs": 0,
+      "containerMs": 5016.088458999991,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-fitness-remote-conversion\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /sessions/{id}\n    field: distance\n    old_type: number\n    new_type: string\n    conversion: Number(value)\n",
+      "runId": "b96d00d5-cd04-4de3-9d59-78b28c902299",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/sessions/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "distance"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/sessions/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "distance"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:38.687Z"
+    },
+    {
+      "id": "b6e8ba79-c640-4e5c-b623-9b1878096a27",
+      "scenarioId": "type-library-string-number",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5505.985374999989,
+      "modelMs": 0,
+      "containerMs": 5448.075542000006,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-library-string-number\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /books/{id}\n    field: pages\n    old_type: string\n    new_type: number\n    conversion: String(value)\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "pages"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:44.069Z"
+    },
+    {
+      "id": "4261c161-1f4c-458e-9812-a889139327d4",
+      "scenarioId": "type-library-string-number",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 321.19745899998816,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-library-string-number\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /books/{id}\n    field: pages\n    old_type: string\n    new_type: number\n    conversion: String(value)\n",
+      "runId": "0e09fb12-faea-4e69-9d35-aed5f38fe02c",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "pages"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "pages"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:49.683Z"
+    },
+    {
+      "id": "60d619e3-1b75-45c9-8846-41ba854d8d14",
+      "scenarioId": "type-library-string-number",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5005.576832999999,
+      "modelMs": 0,
+      "containerMs": 4731.255000000005,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-library-string-number\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /books/{id}\n    field: pages\n    old_type: string\n    new_type: number\n    conversion: String(value)\n",
+      "runId": "e00f542e-7d2b-46f7-914b-fb24a0fdb0dc",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "pages"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/books/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "pages"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:50.095Z"
+    },
+    {
+      "id": "3467af7d-a56a-400e-bc50-51f363fb32a1",
+      "scenarioId": "type-shop-number-string",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5957.230542000034,
+      "modelMs": 0,
+      "containerMs": 5892.479583000008,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-shop-number-string\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /orders/{id}\n    field: total\n    old_type: number\n    new_type: string\n    conversion: Number(value)\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/orders/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "total"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:20:55.198Z"
+    },
+    {
+      "id": "9103c385-dd31-4328-b937-88c70d5c7916",
+      "scenarioId": "type-shop-number-string",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 340.79537500004517,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-shop-number-string\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /orders/{id}\n    field: total\n    old_type: number\n    new_type: string\n    conversion: Number(value)\n",
+      "runId": "1a0609e1-aee4-4470-875b-bdf2ce547fec",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/orders/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "total"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/orders/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "total"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:21:01.309Z"
+    },
+    {
+      "id": "727aa2e0-cff2-4243-90d8-6b90e0d91cae",
+      "scenarioId": "type-shop-number-string",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5489.98333300004,
+      "modelMs": 0,
+      "containerMs": 5206.481417000003,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-shop-number-string\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /orders/{id}\n    field: total\n    old_type: number\n    new_type: string\n    conversion: Number(value)\n",
+      "runId": "f0382685-5e8a-4e75-8daf-74604d505044",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/orders/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "total"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/orders/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "total"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:21:01.775Z"
+    },
+    {
+      "id": "f78a30e4-c11e-4323-8645-1d255e22c7e1",
+      "scenarioId": "type-tickets-boolean-enum",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5780.151499999978,
+      "modelMs": 0,
+      "containerMs": 5722.259582999977,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-tickets-boolean-enum\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /tickets/{id}\n    field: available\n    old_type: boolean\n    new_type: string\n    conversion: value === 'available'\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "available"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:21:07.362Z"
+    },
+    {
+      "id": "87da2715-772a-4182-9aa3-c3921a40cd09",
+      "scenarioId": "type-tickets-boolean-enum",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 302.1734999999753,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-tickets-boolean-enum\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /tickets/{id}\n    field: available\n    old_type: boolean\n    new_type: string\n    conversion: value === 'available'\n",
+      "runId": "37c9b4f9-4786-458d-b815-3a9187ff3358",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "other",
+          "classification": "unknown",
+          "field": "available"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "available"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "available"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:21:13.271Z"
+    },
+    {
+      "id": "03e11b57-52f4-4213-9fe2-91255e8d97b2",
+      "scenarioId": "type-tickets-boolean-enum",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 4975.9684579999885,
+      "modelMs": 0,
+      "containerMs": 4694.903915999981,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-tickets-boolean-enum\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /tickets/{id}\n    field: available\n    old_type: boolean\n    new_type: string\n    conversion: value === 'available'\n",
+      "runId": "91d98ec3-158f-4a46-b408-0076f22f7721",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "other",
+          "classification": "unknown",
+          "field": "available"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "available"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/tickets/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "available"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:21:13.670Z"
+    },
+    {
+      "id": "7bddcddf-15d9-4eda-8ac7-12526adcf78d",
+      "scenarioId": "type-weather-timestamp",
+      "baseline": "B1",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "failed",
+      "reason": "Do nothing: after-state tests failed",
+      "attemptsUsed": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 5545.042709000001,
+      "modelMs": 0,
+      "containerMs": 5485.052083999966,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-weather-timestamp\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /forecasts/{id}\n    field: observed_at\n    old_type: integer\n    new_type: string\n    conversion: Date.parse(value) / 1000\n",
+      "runId": null,
+      "detection": null,
+      "detected": [],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/forecasts/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "observed_at"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:21:18.745Z"
+    },
+    {
+      "id": "cfe51ac1-e03e-407c-92f8-192acf7bc4f2",
+      "scenarioId": "type-weather-timestamp",
+      "baseline": "B2",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 322.9654579999624,
+      "modelMs": 0,
+      "containerMs": 0,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-weather-timestamp\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /forecasts/{id}\n    field: observed_at\n    old_type: integer\n    new_type: string\n    conversion: Date.parse(value) / 1000\n",
+      "runId": "53eb468a-459c-4239-af8c-5bf3f767de38",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/forecasts/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "observed_at"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/forecasts/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "observed_at"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:21:24.451Z"
+    },
+    {
+      "id": "47433458-d20f-40d1-866b-bb953aeb4b3d",
+      "scenarioId": "type-weather-timestamp",
+      "baseline": "B3",
+      "repeat": 1,
+      "category": "field_type_changed",
+      "expected": "repair",
+      "outcome": "flagged",
+      "reason": "Model refused: Scripted dry-test refusal (not model performance evidence)",
+      "attemptsUsed": 1,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "costUsd": 0,
+      "durationMs": 6035.959582999989,
+      "modelMs": 0,
+      "containerMs": 5768.839124999999,
+      "guard": null,
+      "patch": "",
+      "migrationNote": "api: type-weather-timestamp\nfrom: 1.0.0\nto: 2.0.0\nmappings:\n  - kind: field_type_changed\n    method: GET\n    path: /forecasts/{id}\n    field: observed_at\n    old_type: integer\n    new_type: string\n    conversion: Date.parse(value) / 1000\n",
+      "runId": "41eed443-75d4-4106-bbab-08c82a39cccb",
+      "detection": {
+        "breaking": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "safe": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "unknown": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "detected": [
+        {
+          "method": "GET",
+          "path": "/forecasts/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "observed_at"
+        }
+      ],
+      "labels": [
+        {
+          "method": "GET",
+          "path": "/forecasts/{id}",
+          "category": "field_type_changed",
+          "classification": "breaking",
+          "field": "observed_at"
+        }
+      ],
+      "review": null,
+      "completed": true,
+      "createdAt": "2026-11-23T20:21:24.875Z"
+    }
+  ],
+  "inFlight": null,
+  "spentUsd": 0,
+  "reservedUsd": 0
+}
