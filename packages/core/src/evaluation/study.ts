@@ -56,6 +56,18 @@ export const EvaluationTrialSchema = z.object({
   createdAt: z.string().datetime(),
   /** Provider `stop_reason` of each model call, in order (`no_response` when none arrived). */
   stopReasons: z.array(z.string()).default([]),
+  /** One record per model call, in order: stop reason, billed tokens and cost, model time. */
+  calls: z
+    .array(
+      z.object({
+        stopReason: z.string(),
+        tokensIn: count,
+        tokensOut: count,
+        costUsd: nonnegative,
+        durationMs: nonnegative,
+      }),
+    )
+    .default([]),
 });
 /** Versioned, independently readable evaluation artifact, also mirrored in PostgreSQL. */
 export const EvaluationStudySchema = z.object({

@@ -77,6 +77,7 @@ function sample(): EvaluationStudy {
         completed: true,
         createdAt: now,
         stopReasons: ['end_turn'],
+        calls: [],
       },
     ],
     inFlight: null,

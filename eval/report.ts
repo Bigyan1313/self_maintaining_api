@@ -159,6 +159,35 @@ export function renderEvaluationReport(study: EvaluationStudy, limitations: stri
             ],
           ),
     );
+    const callRows = trials.flatMap((t) =>
+      t.calls.map((c, i) => [
+        t.scenarioId,
+        t.repeat,
+        i + 1,
+        c.stopReason,
+        c.tokensIn,
+        c.tokensOut,
+        Math.round(c.durationMs),
+        c.costUsd.toFixed(6),
+      ]),
+    );
+    if (callRows.length)
+      output.push(
+        '### Model calls',
+        table(
+          [
+            'Scenario',
+            'Repeat',
+            'Call',
+            'Stop reason',
+            'Input tokens',
+            'Output tokens',
+            'Model ms',
+            'USD',
+          ],
+          callRows,
+        ),
+      );
     output.push(
       '### Cost and time',
       table(

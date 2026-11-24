@@ -63,6 +63,7 @@ export function sampleTrial(overrides: Partial<EvaluationTrial> = {}): Evaluatio
     completed: true,
     createdAt: '2026-11-23T00:00:00.000Z',
     stopReasons: [],
+    calls: [],
     ...overrides,
   };
 }

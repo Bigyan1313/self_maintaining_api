@@ -55,6 +55,7 @@ const trial = (overrides: Partial<EvaluationTrial> = {}): EvaluationTrial => ({
   completed: true,
   createdAt: '2026-11-23T00:00:00.000Z',
   stopReasons: ['end_turn'],
+  calls: [],
   ...overrides,
 });
 const study = (trials: EvaluationTrial[]): EvaluationStudy => ({

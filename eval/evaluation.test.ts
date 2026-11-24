@@ -198,6 +198,18 @@ describe('evaluation orchestration and artifacts', () => {
     expect(report).toContain('maxOutputTokens 16000; effort high');
     expect(report).toContain('stopped at max_tokens (truncated): **1**');
     expect(report).toContain('| Trials with a truncated answer | y r1 |');
+    study.trials[2]!.calls = [
+      {
+        stopReason: 'max_tokens',
+        tokensIn: 900,
+        tokensOut: 16000,
+        costUsd: 0.1618,
+        durationMs: 98765.4,
+      },
+    ];
+    expect(renderEvaluationReport(study, 'Known limits')).toContain(
+      '| y | 1 | 1 | max_tokens | 900 | 16000 | 98765 | 0.161800 |',
+    );
   });
   it('defaults to a $50 budget and estimates with the configured output limit', () => {
     expect(DEFAULT_MAX_COST_USD).toBe(50);

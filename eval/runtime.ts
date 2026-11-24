@@ -209,6 +209,7 @@ export async function runTrial(input: {
     completed: false,
     createdAt: new Date().toISOString(),
     stopReasons: [],
+    calls: [],
   };
   trial.reason = 'Trial in progress';
   study.trials.push(trial);
@@ -248,6 +249,13 @@ export async function runTrial(input: {
           trial.costUsd += usage?.costUsd ?? 0;
           trial.attemptsUsed++;
           trial.stopReasons.push(stopReasonOf(response));
+          trial.calls.push({
+            stopReason: stopReasonOf(response),
+            tokensIn: usage?.tokensIn ?? 0,
+            tokensOut: usage?.tokensOut ?? 0,
+            costUsd: usage?.costUsd ?? 0,
+            durationMs: response.durationMs,
+          });
           if (response.kind === 'patch') trial.patch = response.patch;
         },
       );
