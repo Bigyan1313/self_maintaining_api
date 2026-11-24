@@ -1,6 +1,6 @@
 # UML class diagram — Self-Maintaining APIs
 
-Built from the code on `main` after Increment 10. Every node below is a real TypeScript module,
+Built from the merged code through Increment 15. Every node below is a real TypeScript module,
 class, interface, or type in the repository. The table under the diagram lists each one with its
 file, and `npm run docs:check` checks that every listed symbol is in that file.
 
@@ -19,9 +19,6 @@ file, and `npm run docs:check` checks that every listed symbol is in that file.
   **Infrastructure adapters** (`apps/server/src/infra/*` except `db`) are the only code that
   touches processes, Docker, the file system, the network, or the LLM provider. The Controller
   calls them.
-- **Not built yet:** the repair loop (inc 11), delivery (inc 12), the pipeline orchestrator
-  (inc 13), and the dashboard views (inc 14). None of them appear as nodes, so the diagram shows
-  only code that exists.
 
 ![Class diagram](png/class-diagram.png)
 
@@ -337,6 +334,28 @@ classDiagram
   }
 
   namespace Controller_pipeline {
+    class Orchestrator {
+      +checkSpec()
+      +startRun()
+      +reanalyze()
+      +retryDelivery()
+      +recoverInterruptedRuns()
+    }
+    class repairLoop {
+      <<module>>
+      +repair()
+    }
+    class delivery {
+      <<module>>
+      +deliver()
+      +recordFlaggedFinding()
+    }
+    class runExport {
+      <<module>>
+      +exportRunJson()
+      +renderRunHtml()
+    }
+
     class ingestStage {
       <<module>>
       +ingest(db, apiId, source, retrieve) IngestResponse
@@ -583,6 +602,9 @@ classDiagram
   AnthropicLlmAdapter ..> repairContext
 
   %% ---- View ----
+  Orchestrator ..> repairLoop
+  Orchestrator ..> delivery
+  repairLoop ..> LlmAdapter
   WebApp ..> httpApp : HTTP API via shared contract
 ```
 
@@ -675,3 +697,8 @@ Node names that differ from the file name were changed to avoid name clashes in 
 example, `classifyModule` is `classify.ts` in core and `classifyStage` is `classify.ts` in the
 pipeline. `validateParsers`, `oasdiffRunner` and `specSource` each cover two small files, so they
 have two rows.
+
+| `Orchestrator` | class | `Orchestrator` `startRun` `checkSpec` `retryDelivery` | `apps/server/src/pipeline/orchestrator.ts` |
+| `repairLoop` | module | `repair` | `apps/server/src/pipeline/repair.ts` |
+| `delivery` | module | `deliver` `recordFlaggedFinding` | `apps/server/src/pipeline/deliver.ts` |
+| `runExport` | module | `exportRunJson` `renderRunHtml` | `apps/server/src/pipeline/export.ts` |

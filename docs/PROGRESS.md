@@ -21,7 +21,7 @@ its own line here in its own PR only (see Working Rules in `CLAUDE.md`).
 | 14  | Dashboard (5 views, text labels)                                                               | UI-01–04, FR-40, FR-42                   | Standard                  | In progress | #11   |
 | 15  | 20 frozen scenarios + failing-before check                                                     | EV-01, EV-02                             | **CRITICAL**              | Done        | #12   |
 | 16  | Evaluation script: B1/B2/B3, results file, generated tables                                    | EV-03–09                                 | **CRITICAL**              | Not started | #13   |
-| 17  | Deliverables: class diagram, statechart, TypeDoc, acceptance records AT-01–12                  | 7.1                                      | Standard                  | Not started | #14   |
+| 17  | Deliverables: class diagram, statechart, TypeDoc, acceptance records AT-01–12                  | 7.1                                      | Standard                  | In progress | #14   |
 | 17a | Early deliverables: diagrams, architecture, TypeDoc fix, early acceptance records              | 7.1                                      | Standard                  | Done        | #25   |
 
 Increment 12 live delivery smoke test: https://github.com/Bigyan1313/sma-demo-consumer/pull/1 (open, never merged).

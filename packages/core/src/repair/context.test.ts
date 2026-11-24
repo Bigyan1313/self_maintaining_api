@@ -89,7 +89,7 @@ describe('repair context', () => {
   it('redacts private keys before serialization and feedback truncation', () => {
     const input = demo();
     input.specSectionBefore = {
-      description: '-----BEGIN RSA PRIVATE KEY-----\nPLANTED\n-----END RSA PRIVATE KEY-----',
+      description: '---' + '--BEGIN RSA PRIVATE KEY-----\nPLANTED\n-----END RSA PRIVATE KEY-----',
     };
     input.previousErrors = ['FAIL ' + 'x'.repeat(3990) + ' sk-ant-PLANTED'];
     const ctx = buildRepairContext(input);

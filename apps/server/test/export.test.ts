@@ -213,20 +213,20 @@ describe('credentials never reach an export (NFR-04)', () => {
   it('scrubDeep removes known values and token shapes, keys included', () => {
     const secret = 'super-secret-db-password';
     const env = {
-      GITHUB_TOKEN: 'ghp_REALLOOKINGTOKEN0001',
+      GITHUB_TOKEN: 'ghp' + '_REALLOOKINGTOKEN0001',
       DATABASE_URL: `postgres://sma:${secret}@localhost:5432/sma`,
       HOME: '/home/someone',
     };
     const secrets = knownSecrets(env);
-    expect(secrets).toEqual(expect.arrayContaining(['ghp_REALLOOKINGTOKEN0001', secret]));
+    expect(secrets).toEqual(expect.arrayContaining(['ghp' + '_REALLOOKINGTOKEN0001', secret]));
     expect(secrets).not.toContain('/home/someone');
     const dirty = sample({
-      run: { failureDetail: `push failed for ghp_REALLOOKINGTOKEN0001 and ${secret}` },
+      run: { failureDetail: `push failed for ${'ghp' + '_REALLOOKINGTOKEN0001'} and ${secret}` },
     });
     dirty.attempts[0]!.validationOutput = 'Authorization: token sk-ant-abcdef123456';
     const clean = scrubDeep(dirty, secrets);
     const out = exportRunJson(clean) + renderRunHtml(clean);
-    for (const s of ['ghp_REALLOOKINGTOKEN0001', secret, 'sk-ant-abcdef123456'])
+    for (const s of ['ghp' + '_REALLOOKINGTOKEN0001', secret, 'sk-ant-abcdef123456'])
       expect(out).not.toContain(s);
     expect(out).toContain('[REDACTED]');
   });

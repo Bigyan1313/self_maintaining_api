@@ -17,7 +17,7 @@ const mmdc = join(root, 'node_modules/.bin/mmdc');
 const tmp = mkdtempSync(join(tmpdir(), 'sma-diagrams-'));
 mkdirSync(join(dir, 'png'), { recursive: true });
 try {
-  for (const file of ['class-diagram.md', 'statecharts.md']) {
+  for (const file of ['class-diagram.md', 'statecharts.md', 'reverse-engineered.md']) {
     for (const block of extractMermaidBlocks(readFileSync(join(dir, file), 'utf8'))) {
       if (!block.png) throw new Error(`${file}: a mermaid block has no PNG image link above it`);
       const input = join(tmp, 'diagram.mmd');

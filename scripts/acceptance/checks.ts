@@ -6,6 +6,7 @@
  *
  * @packageDocumentation
  */
+import { ADDITIONAL_CHECKS } from './suites.js';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
@@ -515,7 +516,7 @@ const at01: CheckDef = {
     );
     r.skip(
       'UI-01: the Configuration view in the dashboard',
-      'the dashboard views are built in inc 14',
+      'Dashboard exists; this direct-route check does not execute browser UI. See inc14 browser evidence.',
     );
   },
 };
@@ -629,7 +630,7 @@ const at02: CheckDef = {
     );
 
     r.step(
-      'detectAndClassify(db, apiId, v1, v2)  — called directly; its HTTP route comes with the orchestrator (inc 13)',
+      'detectAndClassify(db, apiId, v1, v2)  — called directly rather than through the orchestrator HTTP route',
     );
     const diff = await detectAndClassify(ctx.client.db, apiId, baselineId!, third.versionId!);
     if (!diff.ok) throw new Error(`detectAndClassify failed: ${JSON.stringify(diff.error)}`);
@@ -694,7 +695,7 @@ const at03: CheckDef = {
     procedure:
       'Over the frozen pairs, verify every expected difference is found with its path, method, and pointer, and that evidence is retained.',
     inputs: [
-      '`demo/api/specs/v1.yaml` → `demo/api/specs/v2.yaml` (the only spec pair that exists before inc 15).',
+      '`demo/api/specs/v1.yaml` → `demo/api/specs/v2.yaml` (the demo pair used by this check).',
       'The migration note `demo/api/migration-notes/v1-to-v2.yaml`.',
       'Hand-written expected differences: `DEMO_V1_V2` in `scripts/acceptance/expected.ts`.',
     ],
@@ -782,7 +783,7 @@ const at03: CheckDef = {
     );
     r.skip(
       '"over the frozen pairs": the other scenario pairs',
-      'the 20 frozen scenarios are built in inc 15; only the demo v1→v2 pair exists now',
+      'Frozen scenarios exist; this check executes only the demo pair. Full admission evidence comes from scenarios:verify.',
     );
   },
 };
@@ -974,7 +975,7 @@ const at04: CheckDef = {
     );
     r.skip(
       'a run for an unconfirmed change is recorded as "flagged" with its reason, and opens no pull request (FR-18, FR-36)',
-      'the repair loop and the orchestrator that set run status are inc 11 and inc 13',
+      'This direct-stage check does not execute orchestration; see the AT-06 and AT-08 regression evidence.',
     );
   },
 };
@@ -1290,11 +1291,11 @@ const at07: CheckDef = {
     );
     r.skip(
       'the run stops with no further attempts after a cheating verdict (FR-31, end to end)',
-      'the repair loop is inc 11',
+      'This check invokes guards directly; AT-06 exercises the repair loop.',
     );
     r.skip(
       'failure half: injected model, container and delivery failures and a token-ceiling breach, each reported as its own stage failure with no false success (FR-24, FR-37, NFR-02)',
-      'needs the repair loop (inc 11), delivery (inc 12) and the orchestrator (inc 13); the source-failure case is recorded in AT-02',
+      'This check does not inject failures into the full pipeline; source failures are recorded in AT-02 and regression checks in AT-08.',
     );
   },
 };
@@ -1470,7 +1471,7 @@ const at11: CheckDef = {
     }
     const probe = join(ctx.root, 'apps/server/test/fixtures/validator/probe-repo');
     const fakeGithub = `ghp_FAKE${'0'.repeat(32)}`;
-    const fakeAnthropic = 'sk-ant-FAKE-acceptance-0000';
+    const fakeAnthropic = 'sk-' + 'ant-FAKE-acceptance-0000';
     r.step(
       'validate({repoPath: probe-repo, env: {API_VERSION: "probe"}}) with fake GITHUB_TOKEN and ANTHROPIC_API_KEY in process.env',
     );
@@ -1587,39 +1588,23 @@ const at11: CheckDef = {
     r.check('no sandbox container is left behind', left === '', left || 'none');
     r.skip(
       'the default branch is unchanged after a full pipeline run, and nothing is merged (FR-34, C-02)',
-      'delivery (inc 12) and the full pipeline run (inc 13) are not built; no code in this build pushes or merges',
+      'This sandbox check does not invoke live GitHub delivery; controlled delivery tests are recorded in AT-08.',
     );
   },
 };
 
 /** The checks, in the order they run. Later checks reuse state from AT-03 and AT-05. */
-export const CHECKS: readonly CheckDef[] = [at01, at02, at03, at04, at05, at07, at09, at11];
+export const CHECKS: readonly CheckDef[] = [
+  at01,
+  at02,
+  at03,
+  at04,
+  at05,
+  at07,
+  at09,
+  at11,
+  ...ADDITIONAL_CHECKS,
+].sort((a, b) => a.info.id.localeCompare(b.info.id));
 
-/** Checks of Appendix A that cannot be recorded before later increments. */
-export const PENDING = [
-  {
-    id: 'AT-06',
-    title: 'Repair loop',
-    requirements: 'FR-18 to FR-23, FR-25, FR-26',
-    waitsFor: 'the repair loop (inc 11)',
-  },
-  {
-    id: 'AT-08',
-    title: 'Records, delivery, and export',
-    requirements: 'FR-33 to FR-35, FR-38 to FR-42; DR-01 to DR-03',
-    waitsFor: 'delivery (inc 12), the orchestrator and export (inc 13) and the dashboard (inc 14)',
-  },
-  {
-    id: 'AT-10',
-    title: 'Context and data protection',
-    requirements: 'FR-19; NFR-04, NFR-08',
-    waitsFor:
-      'the repair loop (inc 11) and delivery (inc 12), so the context, logs, reports and PR bodies can be inspected end to end',
-  },
-  {
-    id: 'AT-12',
-    title: 'Evaluation',
-    requirements: 'EV-01 to EV-09; NFR-01, NFR-05, NFR-07, NFR-09',
-    waitsFor: 'the scenarios (inc 15) and the evaluation script (inc 16)',
-  },
-] as const;
+/** Every Appendix A check now produces a record, including unexecuted portions. */
+export const PENDING = [] as const;

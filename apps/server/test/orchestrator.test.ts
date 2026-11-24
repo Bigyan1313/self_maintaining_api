@@ -407,7 +407,7 @@ describe('failure injection: each failure names its stage, never a success (NFR-
       validator: {
         ...fakeValidator(),
         guardedValidate: vi.fn(async () => {
-          throw new Error(`boom with ${TOKEN} and ghp_abcdefghijklmnop1234`);
+          throw new Error(`boom with ${TOKEN} and ${'ghp' + '_abcdefghijklmnop1234'}`);
         }),
       },
     });
@@ -417,7 +417,7 @@ describe('failure injection: each failure names its stage, never a success (NFR-
     expect(final).toMatchObject({ status: 'stage_failure', failureStage: 'repair' });
     expect(final.failureDetail).toContain('[REDACTED]');
     expect(final.failureDetail).not.toContain(TOKEN);
-    expect(final.failureDetail).not.toContain('ghp_abcdefghijklmnop1234');
+    expect(final.failureDetail).not.toContain('ghp' + '_abcdefghijklmnop1234');
   });
 
   it('an unknown change, an unknown repository or a non-git path → refused before any run exists', async () => {

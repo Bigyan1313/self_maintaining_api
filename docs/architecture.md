@@ -1,7 +1,7 @@
 # Architecture — Self-Maintaining APIs
 
-This describes the code on `main` after Increment 10. Parts that later increments add are marked
-**not built yet**. Each link goes to a real file. `npm run docs:check` checks every link in this
+This describes the merged core, server, dashboard and frozen scenarios through Increment 15.
+The evaluation implementation remains tracked in PR #33 until merged. Each link goes to a real file. `npm run docs:check` checks every link in this
 file.
 
 - Class diagram: [diagrams/class-diagram.md](diagrams/class-diagram.md)
@@ -59,20 +59,19 @@ can't drift from the code.
 Each stage writes its result to the database before the next one starts (FR-38). Run records are
 append-only (FR-39).
 
-| #   | Stage    | Code                                                                                                                                                                                                                                                         | Status             |
-| --- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
-| 1   | Ingest   | [pipeline/ingest.ts](../apps/server/src/pipeline/ingest.ts), [core ingest/spec.ts](../packages/core/src/ingest/spec.ts)                                                                                                                                      | Built (inc 04)     |
-| 2   | Detect   | [pipeline/detect.ts](../apps/server/src/pipeline/detect.ts), [infra/oasdiff/runner.ts](../apps/server/src/infra/oasdiff/runner.ts), [core detect/parse.ts](../packages/core/src/detect/parse.ts)                                                             | Built (inc 05)     |
-| 3   | Classify | [pipeline/classify.ts](../apps/server/src/pipeline/classify.ts), [core classify/classify.ts](../packages/core/src/classify/classify.ts)                                                                                                                      | Built (inc 06)     |
-| 4   | Locate   | [pipeline/locate.ts](../apps/server/src/pipeline/locate.ts), [core locate/analyze.ts](../packages/core/src/locate/analyze.ts)                                                                                                                                | Built (inc 07)     |
-| 5   | Repair   | LLM adapter ([adapter.ts](../apps/server/src/infra/llm/adapter.ts)) and context ([repair/context.ts](../packages/core/src/repair/context.ts)) are built (inc 10). The **repair loop** (retries, error feedback, token ceiling) is **not built yet** (inc 11) | Partly built       |
-| 6   | Validate | [pipeline/validate.ts](../apps/server/src/pipeline/validate.ts), [pipeline/guarded-validate.ts](../apps/server/src/pipeline/guarded-validate.ts), [infra/validator/sandbox.ts](../apps/server/src/infra/validator/sandbox.ts)                                | Built (inc 08, 09) |
-| 7   | Deliver  | **Not built yet** (inc 12)                                                                                                                                                                                                                                   | Not built          |
+| #   | Stage    | Code                                                                                                                                                                                                                          | Status             |
+| --- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| 1   | Ingest   | [pipeline/ingest.ts](../apps/server/src/pipeline/ingest.ts), [core ingest/spec.ts](../packages/core/src/ingest/spec.ts)                                                                                                       | Built (inc 04)     |
+| 2   | Detect   | [pipeline/detect.ts](../apps/server/src/pipeline/detect.ts), [infra/oasdiff/runner.ts](../apps/server/src/infra/oasdiff/runner.ts), [core detect/parse.ts](../packages/core/src/detect/parse.ts)                              | Built (inc 05)     |
+| 3   | Classify | [pipeline/classify.ts](../apps/server/src/pipeline/classify.ts), [core classify/classify.ts](../packages/core/src/classify/classify.ts)                                                                                       | Built (inc 06)     |
+| 4   | Locate   | [pipeline/locate.ts](../apps/server/src/pipeline/locate.ts), [core locate/analyze.ts](../packages/core/src/locate/analyze.ts)                                                                                                 | Built (inc 07)     |
+| 5   | Repair   | [pipeline/repair.ts](../apps/server/src/pipeline/repair.ts), adapter and bounded context                                                                                                                                      | Built (inc 11)     |
+| 6   | Validate | [pipeline/validate.ts](../apps/server/src/pipeline/validate.ts), [pipeline/guarded-validate.ts](../apps/server/src/pipeline/guarded-validate.ts), [infra/validator/sandbox.ts](../apps/server/src/infra/validator/sandbox.ts) | Built (inc 08, 09) |
+| 7   | Deliver  | [pipeline/deliver.ts](../apps/server/src/pipeline/deliver.ts), GitHub port and PR body                                                                                                                                        | Built (inc 12)     |
 
-The **orchestrator** that runs the stages in order for one run and writes each stage result is
-**not built yet** (inc 13). Today Ingest is reachable over HTTP, while Detect + Classify
-(`detectAndClassify`) and Locate are functions the orchestrator will call. The acceptance script
-calls them directly.
+The [orchestrator](../apps/server/src/pipeline/orchestrator.ts) coordinates the stages,
+records their results before proceeding, serializes active work, and preserves terminal runs.
+The dashboard calls HTTP routes; direct stage functions also support isolated acceptance checks.
 
 **The rule that is never broken (BR-04, C-04):** Repair runs only for a change whose old→new
 mapping is confirmed by a migration note or a human. Today this is enforced in two places:
@@ -318,13 +317,41 @@ file (C-06).
 
 ---
 
-## 5. Not built yet
+## 5. Repair, orchestration, delivery, and the dashboard
 
-| Increment | Adds                                                                       |
-| --------- | -------------------------------------------------------------------------- |
-| 11        | Repair loop: up to 4 attempts, error feedback, token ceiling, cost records |
-| 12        | Delivery: push a branch and open a labeled PR, flagged findings            |
-| 13        | Pipeline orchestrator, run records per stage, JSON/HTML export             |
-| 14        | Dashboard: Configuration, Changes, Runs, Run Detail, Results views         |
-| 15        | 20 frozen evaluation scenarios                                             |
-| 16        | Evaluation script: B1/B2/B3, results file, generated tables                |
+The [repair loop](../apps/server/src/pipeline/repair.ts) checks confirmed mapping and token
+headroom before calling the model. In full mode it establishes a baseline, then applies each
+candidate to a fresh copy, evaluates guards and validation, records the attempt, and feeds
+bounded newest-first validation errors into the next call. Four attempts is the hard maximum.
+Cheating stops immediately. Provider/container failures remain explicit stage failures; an LLM
+refusal is a flagged finding. Single-shot mode is explicitly unguarded evaluation behavior.
+
+The [orchestrator](../apps/server/src/pipeline/orchestrator.ts) serializes active runs, records
+stage results before advancing, and recovers interrupted running records as stage failures.
+Spec checks classify the new pair before advancing the baseline. Reanalysis and delivery retry
+create child runs rather than overwriting terminal history. [Run routes](../apps/server/src/http/run-routes.ts)
+return 202 for background execution and expose the stored evidence. [Exports](../apps/server/src/pipeline/export.ts)
+produce JSON and HTML from the same redacted record; HTML escapes untrusted evidence.
+
+[Delivery](../apps/server/src/pipeline/deliver.ts) uses a GitHub port to publish a new branch
+and a labeled review PR after validation. It never merges. The target default branch remains
+unchanged. Missing mapping, failed validation, and delivery failure retain a specific reason.
+
+The [dashboard](../apps/web/src/App.tsx) renders five routed views from the shared contract.
+It never authorizes a mapping by similarity or computes evaluation scores. Its
+[client](../apps/web/src/api.ts) validates responses and keeps failed requests visible.
+Only the unimplemented results endpoint is mocked in normal opt-in development; full fixtures
+require a separate flag and a visible demonstration banner. Production starts no mock worker.
+
+The [scenario set](../scenarios/README.md) contains twenty source snapshots with independently
+committed labels, five per category and three deliberate refusals. Whole-folder hashes and
+reproducible Git commits pin the inputs. [Admission verification](../scenarios/verify.ts) checks
+old-API passes and new-API assertion failures in the pinned Docker sandbox. It is not an
+estimate of model accuracy.
+
+## 6. Evaluation and submission limits
+
+Increment 16 is tracked separately. A generated report may be imported only with its label,
+provenance and limitations intact. Fixture trials establish infrastructure behavior, not paid
+model quality or human-reviewed correctness. The submission builder refuses to call an archive
+final while evaluation or human presentation evidence is absent.

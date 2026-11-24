@@ -4,12 +4,8 @@ Three UML statecharts, drawn as Mermaid `stateDiagram-v2`. The state names are t
 values from [`packages/core/src/domain/enums.ts`](../../packages/core/src/domain/enums.ts), so the
 charts use the same words as the database, the API, and the UI.
 
-**Labels on transitions**
-
-- **built** means the code that makes this transition exists on `main` now.
-- **planned (inc NN)** means the transition needs code that is not built yet: the repair loop
-  (inc 11), delivery (inc 12), or the pipeline orchestrator (inc 13). The stored value already
-  exists in the enum and in the database, but nothing sets it yet.
+The orchestrator and repair loop are implemented. Activity and choice nodes are explicitly
+listed separately from stored statuses; a delivery retry creates a new run.
 
 `npm run docs:check` compares each chart with its enum. Every enum value must be a state in
 the chart, and every state in the chart must be an enum value or a pseudo-state listed in that
@@ -37,15 +33,17 @@ stateDiagram-v2
   state locate_outcome <<choice>>
   state repair_gate <<choice>>
   running --> locate_outcome : locate() writes LocateResult — built
-  locate_outcome --> not_affected : outcome not_affected — planned (inc 13)
-  locate_outcome --> needs_review : outcome needs_review — planned (inc 13)
-  locate_outcome --> repair_gate : outcome affected — planned (inc 13)
-  repair_gate --> flagged : not breaking, or mapping unconfirmed (FR-18) — planned (inc 11/13)
-  repair_gate --> repaired : attempt outcome pass — planned (inc 11)
-  repair_gate --> failed : 4 attempts without pass (FR-22) — planned (inc 11)
-  repair_gate --> cheating_rejected : attempt outcome cheating (FR-31) — planned (inc 11)
-  repair_gate --> aborted : token ceiling exceeded (FR-24) — planned (inc 11)
-  running --> stage_failure : a stage errors, failure_stage set — planned (inc 13)
+  locate_outcome --> not_affected : outcome not_affected
+  locate_outcome --> needs_review : outcome needs_review
+  locate_outcome --> repair_gate : outcome affected
+  repair_gate --> flagged : not breaking, or mapping unconfirmed (FR-18)
+  repair_gate --> delivery : attempt outcome pass
+  delivery --> repaired : branch and PR delivered
+  delivery --> stage_failure : delivery failure, failure_stage deliver
+  repair_gate --> failed : 4 attempts without pass (FR-22)
+  repair_gate --> cheating_rejected : attempt outcome cheating (FR-31)
+  repair_gate --> aborted : token ceiling exceeded (FR-24)
+  running --> stage_failure : a stage errors, failure_stage set
   not_affected --> [*]
   needs_review --> [*]
   flagged --> [*]
@@ -56,28 +54,31 @@ stateDiagram-v2
   stage_failure --> [*]
   note right of running
     stage_reached records the last stage (STAGES).
-    locate() sets it to locate — built.
+    Terminal records are immutable. Reanalysis and
+    delivery retry create a new child run.
   end note
   note right of repaired
-    Delivery (inc 12) adds pr_url. A delivery
-    failure is reported as its own stage failure
-    (FR-37) — planned (inc 12/13).
+    Delivery adds pr_url before finishing repaired.
+    A failed delivery retains the validated patch
+    for a new retry run (FR-37).
   end note
 ```
 
-| State               | Kind         | Where it lives in the code                                                                                                                                                       |
-| ------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `running`           | RunStatus    | `packages/core/src/domain/enums.ts`; default of the `runStatusEnum` column in `apps/server/src/infra/db/schema.ts`                                                               |
-| `not_affected`      | RunStatus    | `packages/core/src/domain/enums.ts`; locator verdict in `packages/core/src/locate/locate.ts`                                                                                     |
-| `needs_review`      | RunStatus    | `packages/core/src/domain/enums.ts`; locator verdict in `packages/core/src/locate/locate.ts`                                                                                     |
-| `flagged`           | RunStatus    | `packages/core/src/domain/enums.ts`                                                                                                                                              |
-| `repaired`          | RunStatus    | `packages/core/src/domain/enums.ts`                                                                                                                                              |
-| `failed`            | RunStatus    | `packages/core/src/domain/enums.ts`                                                                                                                                              |
-| `aborted`           | RunStatus    | `packages/core/src/domain/enums.ts`                                                                                                                                              |
-| `cheating_rejected` | RunStatus    | `packages/core/src/domain/enums.ts`; `cheatingEndsRun` in `packages/core/src/guards/verdict.ts`                                                                                  |
-| `stage_failure`     | RunStatus    | `packages/core/src/domain/enums.ts`; check `runs_stage_failure_has_stage` in `apps/server/src/infra/db/schema.ts`                                                                |
-| `locate_outcome`    | pseudo-state | Choice on `LocateResult.outcome` (`affected`, `not_affected`, `needs_review`) in `packages/core/src/locate/types.ts`                                                             |
-| `repair_gate`       | pseudo-state | Choice made by the repair loop (inc 11, not built). `buildRepairContext` in `packages/core/src/repair/context.ts` already refuses a change that is not breaking or not confirmed |
+| State               | Kind         | Where it lives in the code                                                                                                                                                                    |
+| ------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `running`           | RunStatus    | `packages/core/src/domain/enums.ts`; default of the `runStatusEnum` column in `apps/server/src/infra/db/schema.ts`                                                                            |
+| `not_affected`      | RunStatus    | `packages/core/src/domain/enums.ts`; locator verdict in `packages/core/src/locate/locate.ts`                                                                                                  |
+| `needs_review`      | RunStatus    | `packages/core/src/domain/enums.ts`; locator verdict in `packages/core/src/locate/locate.ts`                                                                                                  |
+| `flagged`           | RunStatus    | `packages/core/src/domain/enums.ts`                                                                                                                                                           |
+| `repaired`          | RunStatus    | `packages/core/src/domain/enums.ts`                                                                                                                                                           |
+| `failed`            | RunStatus    | `packages/core/src/domain/enums.ts`                                                                                                                                                           |
+| `aborted`           | RunStatus    | `packages/core/src/domain/enums.ts`                                                                                                                                                           |
+| `cheating_rejected` | RunStatus    | `packages/core/src/domain/enums.ts`; `cheatingEndsRun` in `packages/core/src/guards/verdict.ts`                                                                                               |
+| `stage_failure`     | RunStatus    | `packages/core/src/domain/enums.ts`; check `runs_stage_failure_has_stage` in `apps/server/src/infra/db/schema.ts`                                                                             |
+| `locate_outcome`    | pseudo-state | Choice on `LocateResult.outcome` (`affected`, `not_affected`, `needs_review`) in `packages/core/src/locate/types.ts`                                                                          |
+| `repair_gate`       | pseudo-state | Choice made by `repair` in `apps/server/src/pipeline/repair.ts`. `buildRepairContext` in `packages/core/src/repair/context.ts` already refuses a change that is not breaking or not confirmed |
+
+| `delivery` | activity | `deliver` in `apps/server/src/pipeline/deliver.ts`; orchestrator finishes the run after delivery |
 
 ---
 
@@ -105,7 +106,11 @@ stateDiagram-v2
   failed --> [*] : baseline unchanged, a later check may retry (FR-11) — built
   baseline_established --> [*]
   no_change --> [*]
-  changed --> [*] : detectAndClassify(baseline, new) — built, called directly, advanceBaseline() — built, called by the orchestrator — planned (inc 13)
+  changed --> classified : detectAndClassify succeeds
+  classified --> baseline_advanced : advanceBaseline succeeds
+  baseline_advanced --> [*]
+  changed --> classification_failed : detector or classifier failure
+  classification_failed --> [*] : preserve old baseline; retry on a later check
 ```
 
 | State                  | Kind             | Where it lives in the code                                                                                                                                                        |
@@ -117,6 +122,10 @@ stateDiagram-v2
 | `retrieve_and_parse`   | pseudo-state     | `retrieveSpec` in `apps/server/src/infra/spec-source/retrieve.ts`, `parseSpec` in `packages/core/src/ingest/spec.ts`                                                              |
 | `compare_hash`         | pseudo-state     | `decideCheckOutcome` in `packages/core/src/ingest/spec.ts`                                                                                                                        |
 
+| `classified` | activity | `detectAndClassify` in `apps/server/src/pipeline/classify.ts` |
+| `baseline_advanced` | activity | `advanceBaseline` in `apps/server/src/pipeline/orchestrator.ts` |
+| `classification_failed` | activity | stage failure in `apps/server/src/pipeline/orchestrator.ts`; the ingest check still records changed |
+
 ---
 
 ## 3. Repair attempt loop (`ATTEMPT_OUTCOMES`, guard order)
@@ -124,9 +133,9 @@ stateDiagram-v2
 One attempt is: get a patch from the model, run the guards, and validate the patch in the
 sandbox. `guardedValidate()` in
 [`apps/server/src/pipeline/guarded-validate.ts`](../../apps/server/src/pipeline/guarded-validate.ts)
-is built and does everything after the model call for one patch. The loop around it (retry up to
-4 times, feed validator errors back, enforce the token ceiling) is the repair loop of inc 11, so
-those transitions are planned.
+handles validation for one patch. [`repair`](../../apps/server/src/pipeline/repair.ts)
+wraps it with the eligibility gate, pre-patch baseline, token budget and up to four attempts.
+The diagram shows full mode; B2 single-shot deliberately bypasses the guards.
 
 The guards run in the fixed order `GUARD_ORDER` from
 [`packages/core/src/guards/verdict.ts`](../../packages/core/src/guards/verdict.ts):
@@ -140,8 +149,8 @@ before and after the patch, so it needs the validation result.
 ```mermaid
 stateDiagram-v2
   direction TB
-  [*] --> model_call : attempt n, n ≤ 4 — planned (inc 11)
-  model_call --> path_safety : LlmAdapter.generatePatch() returns a patch — built (adapter), planned (loop)
+  [*] --> model_call : attempt n, n ≤ 4
+  model_call --> path_safety : LlmAdapter.generatePatch() returns a patch
   path_safety --> error : unsafe path or malformed diff — built
   path_safety --> test_file_changed : inspectPatch() and parseUnifiedDiff() ok — built
   test_file_changed --> cheating : adds, edits, deletes or skips a test (FR-27) — built
@@ -156,18 +165,19 @@ stateDiagram-v2
   test_count_changed --> cheating : total changed, passing went down, or a test went missing (FR-28) — built
   test_count_changed --> pass : clean, result pass — built
   test_count_changed --> fail : clean, result fail — built
-  cheating --> [*] : run ends at once, run cheating_rejected (FR-31) — cheatingEndsRun() built, loop planned (inc 11)
-  pass --> [*] : run repaired — planned (inc 11)
-  fail --> model_call : n < 4, validator output goes into the next context (FR-21) — planned (inc 11)
-  error --> model_call : n < 4 — planned (inc 11)
-  timeout --> model_call : n < 4 — planned (inc 11)
-  fail --> [*] : n = 4, run failed (FR-22) — planned (inc 11)
-  error --> [*] : n = 4, run failed — planned (inc 11)
-  timeout --> [*] : n = 4, run failed — planned (inc 11)
+  cheating --> [*] : run ends at once, run cheating_rejected (FR-31)
+  pass --> [*] : return validated patch to orchestrator for delivery
+  fail --> model_call : n < 4, validator output goes into the next context (FR-21)
+  error --> model_call : retryable invalid output or completed validation error, n < 4
+  timeout --> model_call : completed validation timeout, n < 4
+  fail --> [*] : n = 4, run failed (FR-22)
+  error --> [*] : n = 4, run failed
+  timeout --> [*] : n = 4, run failed
+  model_call --> [*] : refusal flags run; provider failure ends stage_failure
   note left of model_call
-    How an LLM refusal or an LLM error maps to
-    an attempt outcome, and the token ceiling
-    (FR-24, run aborted), are decided in inc 11.
+    Before each call: token ceiling may abort the run.
+    Baseline or validator infrastructure failure ends stage_failure.
+    Invalid model output retries; provider errors do not.
   end note
 ```
 

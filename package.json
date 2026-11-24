@@ -31,7 +31,7 @@
     "consumer:test:v2": "API_VERSION=v2 npm test --prefix demo/consumer",
     "typecheck:scripts": "npm run build -w @sma/core && tsc -p scripts/tsconfig.json",
     "test:scripts": "vitest run --root scripts",
-    "diagrams": "npm run docs:check && tsx scripts/diagrams/render.ts",
+    "diagrams": "npm run diagrams:reverse && npm run docs:check && tsx scripts/diagrams/render.ts",
     "acceptance": "npm run build -w @sma/core && tsx scripts/acceptance/run.ts",
     "docs:check": "tsx scripts/diagrams/check.ts",
     "e2e": "npm run build -w @sma/core && npm run e2e -w @sma/web",
@@ -39,12 +39,17 @@
     "scenarios:build": "tsx scenarios/build.ts",
     "scenarios:verify": "npm run build -w @sma/core && tsx scenarios/verify.ts",
     "typecheck:scenarios": "tsc -p scenarios/tsconfig.json",
-    "test:scenarios": "vitest run --root scenarios"
+    "test:scenarios": "vitest run --root scenarios",
+    "diagrams:reverse": "tsx scripts/deliverables/reverse-diagram.ts",
+    "test:coverage": "tsx scripts/deliverables/unit-tests.ts",
+    "report:final": "tsx scripts/deliverables/final-report.ts",
+    "submission": "bash scripts/make-submission.sh"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@mermaid-js/mermaid-cli": "12.2.0",
     "@types/node": "22.20.5",
+    "@vitest/coverage-v8": "5.0.5",
     "esbuild": "0.28.2",
     "eslint": "10.14.0",
     "eslint-config-prettier": "10.1.8",

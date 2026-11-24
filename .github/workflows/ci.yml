@@ -25,10 +25,12 @@ jobs:
     env:
       # Throwaway credentials for the CI-only service container; tests derive `sma_test` from this.
       DATABASE_URL: postgres://sma:ci-only-password@localhost:5432/sma
-      # CI never renders diagrams (only checks them), so skip puppeteer's Chrome download.
+      # Reuse Playwright Chromium for diagrams and acceptance rendering later in the job.
       PUPPETEER_SKIP_DOWNLOAD: 'true'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -57,7 +59,8 @@ jobs:
       # Every class/state in docs/diagrams must still exist in the code.
       - run: npm run docs:check
       # Includes the Docker validator integration tests (AT-11); the runner has Docker.
-      - run: npm test
+      - run: npm run test:coverage
+      - run: python3 -m unittest discover -s scripts/deliverables -p 'test_*.py'
       # The validator must leave the developer's repo and Docker clean (FR-20, NFR-06).
       - name: Validator left no changes or containers behind
         run: |
@@ -118,3 +121,27 @@ jobs:
         run: |
           test -z "$(docker ps --all --quiet --filter label=sma.validator=1)"
           git diff --exit-code -- scenarios ':!scenarios/verification.json'
+
+      - name: Render current diagrams and record acceptance checks
+        run: |
+          echo "PUPPETEER_EXECUTABLE_PATH=$(node --input-type=module -e "import { chromium } from 'playwright'; console.log(chromium.executablePath())")" >> "$GITHUB_ENV"
+      - run: npm run diagrams
+      - run: npm run acceptance
+      - name: Generate final-report scaffold
+        if: always()
+        run: npm run report:final
+      - name: Package review draft
+        run: npm run submission -- --draft
+      - name: Preserve course deliverables and actual execution records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: course-deliverables
+          path: |
+            docs/acceptance
+            docs/unit-tests.md
+            docs/final-report.md
+            docs/diagrams
+            coverage
+            submission
+          if-no-files-found: error

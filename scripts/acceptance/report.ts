@@ -108,7 +108,7 @@ export function renderRecord(rec: CheckRecord, meta: RunMeta): string {
     '',
     ...(rec.screenshot
       ? [
-          `Terminal screenshot (the transcript rendered as a terminal window; dashboard screenshots come with inc 14):`,
+          `Terminal screenshot (the transcript rendered as a terminal window; browser screenshots are recorded separately under screenshots/inc14):`,
           '',
           `![${rec.id} terminal output](screenshots/${rec.id}.png)`,
           '',
@@ -163,7 +163,7 @@ export function renderReadme(
     '',
     '- **PASS**: every part of the SRS procedure ran and every assertion held.',
     '- **PARTIAL**: every assertion that can run on this build held, but part of the procedure',
-    '  needs an increment that is not built yet. The record lists exactly which part.',
+    '  was not executed by this check. The record lists exactly which part.',
     '- **FAIL**: an assertion did not hold, or the check could not run.',
     '',
     `Last run: ${meta.runAt}, ${buildLine(meta)}.`,

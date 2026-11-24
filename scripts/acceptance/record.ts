@@ -146,7 +146,7 @@ export class Recorder {
         .map((f) => f.name)
         .join('; ')}.`;
     if (this.notRun.length)
-      return `All ${passed} assertions that can run on this build passed; ${this.notRun.length} required part(s) need later increments: ${this.notRun
+      return `All ${passed} assertions that can run on this build passed; ${this.notRun.length} required part(s) remain unexecuted: ${this.notRun
         .map((n) => `${n.item} (${n.reason})`)
         .join('; ')}.`;
     return `All ${passed} assertions passed.`;

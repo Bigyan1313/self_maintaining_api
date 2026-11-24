@@ -14,3 +14,5 @@ exports/
 test-results/
 apps/web/test-results/
 apps/web/playwright-report/
+submission/
+__pycache__/
