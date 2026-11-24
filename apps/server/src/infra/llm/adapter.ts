@@ -17,6 +17,8 @@ export const MAX_LLM_TIMEOUT_MS = 120_000;
  * claude-sonnet-5-5, non-default `temperature`/`top_p`/`top_k` and `thinking: disabled` are 400s.
  */
 export const LLM_EFFORT = 'high' as const;
+/** Content blocks an answer may contain; only `text` blocks are read. */
+const ANSWER_BLOCK_TYPES = new Set(['text', 'thinking', 'redacted_thinking']);
 interface Price {
   inputUsdPerMillionTokens: number;
   outputUsdPerMillionTokens: number;
@@ -121,7 +123,13 @@ export class AnthropicLlmAdapter implements LlmAdapter {
         return unusable(
           `Answer truncated at max_tokens (${opts.maxOutputTokens} output tokens); not a usable patch`,
         );
-      if (stopReason !== 'end_turn' || response.content.some((block) => block.type !== 'text'))
+      // Adaptive thinking is on by default on current models, so an answer can carry thinking
+      // blocks (empty text unless display is requested). They are not the answer: skip them and
+      // read only the text. Any other block type (tool use, server tools) is still unsupported.
+      if (
+        stopReason !== 'end_turn' ||
+        response.content.some((block) => !ANSWER_BLOCK_TYPES.has(block.type))
+      )
         return unusable('Provider returned an incomplete or unsupported response');
       const text = response.content
         .map((block) => (block.type === 'text' ? block.text : ''))

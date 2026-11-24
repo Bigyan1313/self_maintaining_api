@@ -76,6 +76,28 @@ describe('Anthropic adapter', () => {
     });
     expect(result).toMatchObject({ stopReason: 'end_turn' });
   });
+  it('reads the text answer and skips thinking blocks (adaptive thinking is on by default)', async () => {
+    mock.create.mockResolvedValue({
+      ...response(),
+      content: [
+        { type: 'thinking', thinking: '', signature: 'sig' },
+        { type: 'redacted_thinking', data: 'opaque' },
+        { type: 'text', text: patch },
+      ],
+    });
+    expect(await new AnthropicLlmAdapter().generatePatch(ctx, opts)).toMatchObject({
+      kind: 'patch',
+      patch,
+    });
+    mock.create.mockResolvedValue({
+      ...response(),
+      content: [{ type: 'tool_use', id: 't', name: 'x', input: {} }],
+    });
+    expect(await new AnthropicLlmAdapter().generatePatch(ctx, opts)).toMatchObject({
+      kind: 'error',
+      errorKind: 'invalid_output',
+    });
+  });
   it('sends no sampling or thinking parameters (400s on claude-sonnet-5-5)', async () => {
     mock.create.mockResolvedValue(response());
     await new AnthropicLlmAdapter().generatePatch(ctx, opts);
