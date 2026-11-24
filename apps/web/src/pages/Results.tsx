@@ -3,6 +3,11 @@ import { api, ApiError } from '../api';
 import { LoadState, Status, money, useLoad } from '../ui';
 const rate = (value: number | null) =>
   value === null ? 'Not reported' : `${(value * 100).toFixed(1)}%`;
+/** A rate with its denominator, e.g. "70.6% (12/17)". */
+const counted = (value: number | null, n: number, d: number) =>
+  d === 0 ? 'Not reported (0 eligible)' : `${rate(value)} (${n}/${d})`;
+/** Banner text shown whenever the study used the scripted fake model (SRS 6.6). */
+export const FAKE_BANNER = 'FAKE MODEL DRY TEST — not model performance';
 const duration = (value: number | null) =>
   value === null ? 'Not reported' : `${(value / 1000).toFixed(2)} s`;
 /** Present server-computed evaluation metrics; absence is never interpreted as zero. */
@@ -26,6 +31,11 @@ export function Results() {
       ) : (
         d && (
           <>
+            {d.fake && (
+              <p className="fake-banner" role="alert">
+                {FAKE_BANNER}
+              </p>
+            )}
             <h2>{d.label}</h2>
             {d.results.some((r) => r.isPartial) && (
               <p className="warning">Partial results — some scenarios have not completed.</p>
@@ -46,12 +56,26 @@ export function Results() {
                     <dd>{rate(s.detectionRecall)}</dd>
                   </div>
                   <div>
-                    <dt>Overall repair rate</dt>
-                    <dd>{rate(s.repairRate)}</dd>
+                    <dt>Repair rate (expected-repair scenarios)</dt>
+                    <dd>
+                      {counted(s.repairRate, s.repairCounts.repaired, s.repairCounts.eligible)}
+                    </dd>
                   </div>
                   <div>
                     <dt>Refusal correctness</dt>
-                    <dd>{rate(s.refusalCorrectness)}</dd>
+                    <dd>
+                      {s.refusalCounts === null
+                        ? 'n/a (B1 makes no decision)'
+                        : counted(
+                            s.refusalCorrectness,
+                            s.refusalCounts.correct,
+                            s.refusalCounts.total,
+                          )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Wrong actions (repaired a refusal scenario)</dt>
+                    <dd>{s.wrongActions}</dd>
                   </div>
                   <div>
                     <dt>False confidence</dt>
@@ -87,7 +111,7 @@ export function Results() {
                       {s.repairRateByCategory.map((c) => (
                         <tr key={c.category}>
                           <td>{CHANGE_CATEGORY_LABELS[c.category]}</td>
-                          <td>{rate(c.rate)}</td>
+                          <td>{counted(c.rate, c.repaired, c.eligible)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -121,6 +145,25 @@ export function Results() {
                       <tbody>
                         {s.cheatRejections.map((g) => (
                           <tr key={g.guard}>
+                            <td>{GUARD_NAME_LABELS[g.guard]}</td>
+                            <td>{g.count}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <table>
+                      <caption>Cheat rejections by change category</caption>
+                      <thead>
+                        <tr>
+                          <th>Category</th>
+                          <th>Guard</th>
+                          <th>Rejected</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {s.cheatRejectionsByCategory.map((g) => (
+                          <tr key={`${g.category}/${g.guard}`}>
+                            <td>{CHANGE_CATEGORY_LABELS[g.category]}</td>
                             <td>{GUARD_NAME_LABELS[g.guard]}</td>
                             <td>{g.count}</td>
                           </tr>

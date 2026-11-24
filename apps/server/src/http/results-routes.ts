@@ -21,6 +21,7 @@ export async function registerResultsRoutes(app: FastifyInstance, deps: { db: Db
     const rows = await listEvaluationResults(deps.db, study.label);
     return {
       label: study.label,
+      fake: study.fake,
       results: rows.map((row) => ({
         ...row,
         createdAt: row.createdAt.toISOString(),

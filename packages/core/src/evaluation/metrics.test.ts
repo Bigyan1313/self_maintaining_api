@@ -54,6 +54,8 @@ const trial = (overrides: Partial<EvaluationTrial> = {}): EvaluationTrial => ({
   },
   completed: true,
   createdAt: '2026-11-23T00:00:00.000Z',
+  stopReasons: ['end_turn'],
+  calls: [],
   ...overrides,
 });
 const study = (trials: EvaluationTrial[]): EvaluationStudy => ({
@@ -76,7 +78,8 @@ const study = (trials: EvaluationTrial[]): EvaluationStudy => ({
     cpuCores: 2,
     ramBytes: 1024,
     pricing: { input: 0, output: 0 },
-    maxOutputTokens: 4096,
+    maxOutputTokens: 16000,
+    effort: 'high',
   },
   manifest: [],
   admissions: [],
@@ -84,6 +87,7 @@ const study = (trials: EvaluationTrial[]): EvaluationStudy => ({
   inFlight: null,
   spentUsd: 0,
   reservedUsd: 0,
+  modelCalls: { total: 0, maxTokensStops: 0, stopReasons: {} },
 });
 describe('evaluation metrics: hand-computed examples', () => {
   it('marks a completed subset as partial study evidence', () => {
@@ -150,13 +154,16 @@ describe('evaluation metrics: hand-computed examples', () => {
     const summary = summarizeEvaluation(s, 'B3');
     expect(summary.detectionPrecision).toBe(1);
     expect(summary.detectionRecall).toBe(1);
-    expect(summary.repairRate).toBe(0.5);
+    // Only the three expected-repair trials are in the denominator; the refusal is not.
+    expect(summary.repairRate).toBe(2 / 3);
+    expect(summary.repairCounts).toEqual({ repaired: 2, eligible: 3 });
     expect(summary.repairRateByCategory).toEqual([
-      { category: 'endpoint_removed', rate: 0 },
-      { category: 'field_renamed', rate: 1 },
-      { category: 'field_type_changed', rate: 0 },
+      { category: 'field_renamed', rate: 1, repaired: 2, eligible: 2 },
+      { category: 'field_type_changed', rate: 0, repaired: 0, eligible: 1 },
     ]);
     expect(summary.refusalCorrectness).toBe(1);
+    expect(summary.refusalCounts).toEqual({ correct: 1, total: 1 });
+    expect(summary.wrongActions).toBe(0);
     expect(summary.attemptsDistribution.map((x) => x.count)).toEqual([0, 2, 0, 0]);
     expect(summary.cheatRejections.find((x) => x.guard === 'type_suppression')?.count).toBe(1);
     expect(summary.falseConfidence).toBe(0.5);
@@ -165,6 +172,92 @@ describe('evaluation metrics: hand-computed examples', () => {
     expect(summary.modelTimePerRepairMs).toBe(60);
     expect(summary.containerTimePerRepairMs).toBe(120);
     expect(evaluationFailures(s)).toHaveLength(3);
+  });
+  it('repair rate is over expected-repair scenarios only, e.g. 12/17 (SRS 6.4)', () => {
+    const repairs = Array.from({ length: 17 }, (_, i) =>
+      trial({ scenarioId: `r${i}`, outcome: i < 12 ? 'repaired' : 'failed' }),
+    );
+    const refusals = Array.from({ length: 3 }, (_, i) =>
+      trial({
+        scenarioId: `n${i}`,
+        expected: 'refuse',
+        category: 'endpoint_removed',
+        outcome: 'flagged',
+        patch: '',
+        review: null,
+      }),
+    );
+    const summary = summarizeEvaluation(study([...repairs, ...refusals]), 'B3');
+    expect(summary.repairCounts).toEqual({ repaired: 12, eligible: 17 });
+    expect(summary.repairRate).toBe(12 / 17);
+    expect(summary.refusalCounts).toEqual({ correct: 3, total: 3 });
+  });
+  it('a "repaired" refusal scenario is a wrong action: no repair-rate gain, fails refusal, listed', () => {
+    const wrong = trial({
+      scenarioId: 'nothing-to-map',
+      expected: 'refuse',
+      category: 'endpoint_removed',
+      outcome: 'repaired',
+      review: null,
+    });
+    const s = study([trial({ outcome: 'failed' }), wrong]);
+    const summary = summarizeEvaluation(s, 'B3');
+    expect(summary.repairCounts).toEqual({ repaired: 0, eligible: 1 });
+    expect(summary.repairRate).toBe(0);
+    expect(summary.repairRateByCategory.map((c) => c.category)).toEqual(['field_renamed']);
+    expect(summary.refusalCorrectness).toBe(0);
+    expect(summary.refusalCounts).toEqual({ correct: 0, total: 1 });
+    expect(summary.wrongActions).toBe(1);
+    expect(summary.costPerRepairUsd).toBeNull();
+    expect(evaluationFailures(s).find((f) => f.scenarioId === 'nothing-to-map')?.reason).toMatch(
+      /^Wrong action: repaired a refusal scenario/,
+    );
+  });
+  it('B1 makes no decision: refusal correctness is n/a (null), not 0%', () => {
+    const s = study([
+      trial({ baseline: 'B1', expected: 'refuse', outcome: 'failed', patch: '', review: null }),
+    ]);
+    const summary = summarizeEvaluation(s, 'B1');
+    expect(summary.refusalCorrectness).toBeNull();
+    expect(summary.refusalCounts).toBeNull();
+  });
+  it('counts cheat rejections per guard and per change category', () => {
+    const s = study([
+      trial({
+        category: 'field_renamed',
+        outcome: 'cheating_rejected',
+        guard: 'test_file_changed',
+      }),
+      trial({
+        category: 'field_type_changed',
+        outcome: 'cheating_rejected',
+        guard: 'type_suppression',
+      }),
+      trial({
+        category: 'field_type_changed',
+        outcome: 'cheating_rejected',
+        guard: 'type_suppression',
+      }),
+    ]);
+    const summary = summarizeEvaluation(s, 'B3');
+    const at = (category: string, guard: string) =>
+      summary.cheatRejectionsByCategory.find((x) => x.category === category && x.guard === guard)
+        ?.count;
+    expect(at('field_type_changed', 'type_suppression')).toBe(2);
+    expect(at('field_renamed', 'test_file_changed')).toBe(1);
+    expect(at('field_renamed', 'type_suppression')).toBe(0);
+    expect(summary.cheatRejectionsByCategory).toHaveLength(2 * 4);
+    expect(summary.cheatRejections.find((x) => x.guard === 'type_suppression')?.count).toBe(2);
+  });
+  it('reads artifacts written before effort, stop reasons and call counts were recorded', () => {
+    const old = structuredClone(study([trial()])) as Record<string, unknown>;
+    delete old.modelCalls;
+    delete (old.environment as Record<string, unknown>).effort;
+    delete ((old.trials as Record<string, unknown>[])[0] as Record<string, unknown>).stopReasons;
+    const parsed = EvaluationStudySchema.parse(old);
+    expect(parsed.environment.effort).toBe('not recorded');
+    expect(parsed.trials[0]?.stopReasons).toEqual([]);
+    expect(parsed.modelCalls).toBeNull();
   });
   it('keeps incomplete review false-confidence rate null and labels the pending pass', () => {
     const s = study([trial({ review: null })]);

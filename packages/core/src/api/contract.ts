@@ -276,6 +276,11 @@ export const EvaluationResultSchema = z.object({
 /** Latest evaluation; no label/results before the first study. @implementedIn inc16 */
 export const ResultsSchema = z.object({
   label: z.string().nullable(),
+  /**
+   * True when the study used the scripted fake model (a dry test, not model performance). The
+   * latest-study default never selects one; it is returned only for an explicit label.
+   */
+  fake: z.boolean().optional(),
   results: z.array(EvaluationResultSchema),
   /** Optional until inc16 publishes server-computed Section 6.4 metrics. */
   summaries: z.array(EvaluationSummarySchema).optional(),

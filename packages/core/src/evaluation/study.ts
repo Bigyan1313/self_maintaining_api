@@ -54,6 +54,20 @@ export const EvaluationTrialSchema = z.object({
     .nullable(),
   completed: z.boolean(),
   createdAt: z.string().datetime(),
+  /** Provider `stop_reason` of each model call, in order (`no_response` when none arrived). */
+  stopReasons: z.array(z.string()).default([]),
+  /** One record per model call, in order: stop reason, billed tokens and cost, model time. */
+  calls: z
+    .array(
+      z.object({
+        stopReason: z.string(),
+        tokensIn: count,
+        tokensOut: count,
+        costUsd: nonnegative,
+        durationMs: nonnegative,
+      }),
+    )
+    .default([]),
 });
 /** Versioned, independently readable evaluation artifact, also mirrored in PostgreSQL. */
 export const EvaluationStudySchema = z.object({
@@ -82,6 +96,8 @@ export const EvaluationStudySchema = z.object({
     ramBytes: count,
     pricing: z.object({ input: nonnegative, output: nonnegative }),
     maxOutputTokens: count,
+    /** `output_config.effort` sent on every model call; older artifacts did not record it. */
+    effort: z.string().default('not recorded'),
   }),
   manifest: z.array(z.object({ id: z.string(), sha256: z.string(), repoCommit: z.string() })),
   admissions: z.array(
@@ -103,6 +119,19 @@ export const EvaluationStudySchema = z.object({
   // conservatively because the provider may have billed a response we never received.
   spentUsd: nonnegative,
   reservedUsd: nonnegative,
+  /**
+   * Every model call's stop reason, counted. `maxTokensStops` makes truncated answers
+   * (`stop_reason: "max_tokens"`) visible on their own. `null` in artifacts written before
+   * calls were recorded (never a fabricated zero).
+   */
+  modelCalls: z
+    .object({
+      total: count,
+      maxTokensStops: count,
+      stopReasons: z.record(z.string(), count),
+    })
+    .nullable()
+    .default(null),
 });
 /** A persisted study. */
 export type EvaluationStudy = z.infer<typeof EvaluationStudySchema>;

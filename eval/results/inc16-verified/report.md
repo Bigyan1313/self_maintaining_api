@@ -10,6 +10,12 @@ Git: 3dbf1fd45a2db3124be90c2228dc5b80bdee70ab; Node: v22.19.0; oasdiff: 1.35.0; 
 
 Recorded model spend: $0.000000; uncertain/reserved spend: $0.000000.
 
+Model request settings: maxOutputTokens 4096; effort not recorded.
+
+Model calls and stop reasons: not recorded (this artifact predates stop-reason recording).
+
+Repair rate (SRS 6.4) is counted only over scenarios that expect a repair (17 of 20): a trial counts when it passed validation AND its scenario expects a repair. A "repaired" refusal scenario is a wrong action: it fails refusal correctness and is listed under failures. B1 makes no decision, so its refusal correctness is n/a. Cost/time per repair divide by counted repairs.
+
 Repair rate (SRS 6.4) means passed validation, not semantic correctness. Correct repair requires human review. Unreviewed passes remain pending. Cost/time per validation pass include all completed trials, including failures. Container time includes dependency installation and validator orchestration; admission time is outside trial timing.
 
 ## Excluded scenarios
@@ -33,9 +39,10 @@ None.
 | --- | --- |
 | Completed trials | 20 |
 | Validation passes (not correctness) | 0/20 completed trials |
-| Repair rate (passed validation) | 0.0% |
+| Repair rate (passed validation, expected-repair scenarios) | 0.0% (0/17) |
 | Human-reviewed correct repairs | 0 |
-| Refusal correctness | 0.0% |
+| Refusal correctness | n/a (B1 makes no decision) |
+| Wrong actions (repaired a refusal scenario) | 0 |
 | False confidence: incorrect validation passes | 0 |
 | Review coverage | 0/0; 0 not yet reviewed |
 | False-confidence rate | not yet reviewed / no validation passes |
@@ -43,10 +50,10 @@ None.
 
 | Category | Repair rate (passed validation) |
 | --- | --- |
-| endpoint_removed | 0.0% |
-| field_renamed | 0.0% |
-| field_type_changed | 0.0% |
-| required_param_added | 0.0% |
+| endpoint_removed | 0.0% (0/2) |
+| field_renamed | 0.0% (0/5) |
+| field_type_changed | 0.0% (0/5) |
+| required_param_added | 0.0% (0/5) |
 
 
 ### Attempts for validation passes
@@ -59,14 +66,20 @@ None.
 | 4 | 0 |
 
 
-### Cheat attempts caught
+### Cheat attempts caught, by guard
+
+| Guard | Count |
+| --- | --- |
+| test_file_changed | 0 |
+| test_count_changed | 0 |
+| type_suppression | 0 |
+| config_changed | 0 |
+
+
+### Cheat attempts caught, by change category and guard
 
 | Category | Guard | Count |
 | --- | --- | --- |
-| required_param_added | test_file_changed | 0 |
-| required_param_added | test_count_changed | 0 |
-| required_param_added | type_suppression | 0 |
-| required_param_added | config_changed | 0 |
 | endpoint_removed | test_file_changed | 0 |
 | endpoint_removed | test_count_changed | 0 |
 | endpoint_removed | type_suppression | 0 |
@@ -79,7 +92,15 @@ None.
 | field_type_changed | test_count_changed | 0 |
 | field_type_changed | type_suppression | 0 |
 | field_type_changed | config_changed | 0 |
+| required_param_added | test_file_changed | 0 |
+| required_param_added | test_count_changed | 0 |
+| required_param_added | type_suppression | 0 |
+| required_param_added | config_changed | 0 |
 
+
+### Model stop reasons
+
+Not recorded (this artifact predates stop-reason recording).
 
 ### Cost and time
 
@@ -117,9 +138,10 @@ Worst categories by validation pass rate: endpoint_removed, field_renamed, field
 | --- | --- |
 | Completed trials | 20 |
 | Validation passes (not correctness) | 1/20 completed trials |
-| Repair rate (passed validation) | 5.0% |
+| Repair rate (passed validation, expected-repair scenarios) | 5.9% (1/17) |
 | Human-reviewed correct repairs | 0 |
-| Refusal correctness | 100.0% |
+| Refusal correctness | 100.0% (3/3) |
+| Wrong actions (repaired a refusal scenario) | 0 |
 | False confidence: incorrect validation passes | 0 |
 | Review coverage | 0/1; 1 not yet reviewed |
 | False-confidence rate | not yet reviewed / no validation passes |
@@ -127,10 +149,10 @@ Worst categories by validation pass rate: endpoint_removed, field_renamed, field
 
 | Category | Repair rate (passed validation) |
 | --- | --- |
-| endpoint_removed | 0.0% |
-| field_renamed | 20.0% |
-| field_type_changed | 0.0% |
-| required_param_added | 0.0% |
+| endpoint_removed | 0.0% (0/2) |
+| field_renamed | 20.0% (1/5) |
+| field_type_changed | 0.0% (0/5) |
+| required_param_added | 0.0% (0/5) |
 
 
 ### Attempts for validation passes
@@ -143,14 +165,20 @@ Worst categories by validation pass rate: endpoint_removed, field_renamed, field
 | 4 | 0 |
 
 
-### Cheat attempts caught
+### Cheat attempts caught, by guard
+
+| Guard | Count |
+| --- | --- |
+| test_file_changed | 0 |
+| test_count_changed | 0 |
+| type_suppression | 0 |
+| config_changed | 0 |
+
+
+### Cheat attempts caught, by change category and guard
 
 | Category | Guard | Count |
 | --- | --- | --- |
-| required_param_added | test_file_changed | 0 |
-| required_param_added | test_count_changed | 0 |
-| required_param_added | type_suppression | 0 |
-| required_param_added | config_changed | 0 |
 | endpoint_removed | test_file_changed | 0 |
 | endpoint_removed | test_count_changed | 0 |
 | endpoint_removed | type_suppression | 0 |
@@ -163,7 +191,15 @@ Worst categories by validation pass rate: endpoint_removed, field_renamed, field
 | field_type_changed | test_count_changed | 0 |
 | field_type_changed | type_suppression | 0 |
 | field_type_changed | config_changed | 0 |
+| required_param_added | test_file_changed | 0 |
+| required_param_added | test_count_changed | 0 |
+| required_param_added | type_suppression | 0 |
+| required_param_added | config_changed | 0 |
 
+
+### Model stop reasons
+
+Not recorded (this artifact predates stop-reason recording).
 
 ### Cost and time
 
@@ -201,9 +237,10 @@ Worst categories by validation pass rate: endpoint_removed, field_type_changed, 
 | --- | --- |
 | Completed trials | 20 |
 | Validation passes (not correctness) | 1/20 completed trials |
-| Repair rate (passed validation) | 5.0% |
+| Repair rate (passed validation, expected-repair scenarios) | 5.9% (1/17) |
 | Human-reviewed correct repairs | 0 |
-| Refusal correctness | 100.0% |
+| Refusal correctness | 100.0% (3/3) |
+| Wrong actions (repaired a refusal scenario) | 0 |
 | False confidence: incorrect validation passes | 0 |
 | Review coverage | 0/1; 1 not yet reviewed |
 | False-confidence rate | not yet reviewed / no validation passes |
@@ -211,10 +248,10 @@ Worst categories by validation pass rate: endpoint_removed, field_type_changed, 
 
 | Category | Repair rate (passed validation) |
 | --- | --- |
-| endpoint_removed | 0.0% |
-| field_renamed | 20.0% |
-| field_type_changed | 0.0% |
-| required_param_added | 0.0% |
+| endpoint_removed | 0.0% (0/2) |
+| field_renamed | 20.0% (1/5) |
+| field_type_changed | 0.0% (0/5) |
+| required_param_added | 0.0% (0/5) |
 
 
 ### Attempts for validation passes
@@ -227,14 +264,20 @@ Worst categories by validation pass rate: endpoint_removed, field_type_changed, 
 | 4 | 0 |
 
 
-### Cheat attempts caught
+### Cheat attempts caught, by guard
+
+| Guard | Count |
+| --- | --- |
+| test_file_changed | 0 |
+| test_count_changed | 0 |
+| type_suppression | 1 |
+| config_changed | 0 |
+
+
+### Cheat attempts caught, by change category and guard
 
 | Category | Guard | Count |
 | --- | --- | --- |
-| required_param_added | test_file_changed | 0 |
-| required_param_added | test_count_changed | 0 |
-| required_param_added | type_suppression | 1 |
-| required_param_added | config_changed | 0 |
 | endpoint_removed | test_file_changed | 0 |
 | endpoint_removed | test_count_changed | 0 |
 | endpoint_removed | type_suppression | 0 |
@@ -247,7 +290,15 @@ Worst categories by validation pass rate: endpoint_removed, field_type_changed, 
 | field_type_changed | test_count_changed | 0 |
 | field_type_changed | type_suppression | 0 |
 | field_type_changed | config_changed | 0 |
+| required_param_added | test_file_changed | 0 |
+| required_param_added | test_count_changed | 0 |
+| required_param_added | type_suppression | 1 |
+| required_param_added | config_changed | 0 |
 
+
+### Model stop reasons
+
+Not recorded (this artifact predates stop-reason recording).
 
 ### Cost and time
 

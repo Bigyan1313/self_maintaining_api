@@ -1,0 +1,70 @@
+
+> self-maintaining-apis@0.1.0 eval
+> npm run build -w @sma/core && tsx eval/run.ts --label at12-run1 --fake
+
+
+> @sma/core@0.1.0 build
+> tsc -p tsconfig.build.json
+
+Estimated model cost: $0–$0.00 (100 maximum calls, assuming 8000 input/16000 output tokens each at effort n/a (fake model); actual prompts vary). Hard budget: $50.00. Existing billed/reserved: $0.000000.
+param-fitness-axios-instance B1 repeat 1
+param-fitness-axios-instance B2 repeat 1
+param-fitness-axios-instance B3 repeat 1
+param-library-header B1 repeat 1
+param-library-header B2 repeat 1
+param-library-header B3 repeat 1
+param-shop-query B1 repeat 1
+param-shop-query B2 repeat 1
+param-shop-query B3 repeat 1
+param-tickets-threaded B1 repeat 1
+param-tickets-threaded B2 repeat 1
+param-tickets-threaded B3 repeat 1
+param-weather-enum B1 repeat 1
+param-weather-enum B2 repeat 1
+param-weather-enum B3 repeat 1
+removed-fitness-refuse B1 repeat 1
+removed-fitness-refuse B2 repeat 1
+removed-fitness-refuse B3 repeat 1
+removed-library-replacement B1 repeat 1
+removed-library-replacement B2 repeat 1
+removed-library-replacement B3 repeat 1
+removed-shop-replacement B1 repeat 1
+removed-shop-replacement B2 repeat 1
+removed-shop-replacement B3 repeat 1
+removed-tickets-refuse B1 repeat 1
+removed-tickets-refuse B2 repeat 1
+removed-tickets-refuse B3 repeat 1
+removed-weather-refuse B1 repeat 1
+removed-weather-refuse B2 repeat 1
+removed-weather-refuse B3 repeat 1
+rename-fitness-destructure B1 repeat 1
+rename-fitness-destructure B2 repeat 1
+rename-fitness-destructure B3 repeat 1
+rename-library-nested B1 repeat 1
+rename-library-nested B2 repeat 1
+rename-library-nested B3 repeat 1
+rename-shop-flat B1 repeat 1
+rename-shop-flat B2 repeat 1
+rename-shop-flat B3 repeat 1
+rename-tickets-generated B1 repeat 1
+rename-tickets-generated B2 repeat 1
+rename-tickets-generated B3 repeat 1
+rename-weather-two-files B1 repeat 1
+rename-weather-two-files B2 repeat 1
+rename-weather-two-files B3 repeat 1
+type-fitness-remote-conversion B1 repeat 1
+type-fitness-remote-conversion B2 repeat 1
+type-fitness-remote-conversion B3 repeat 1
+type-library-string-number B1 repeat 1
+type-library-string-number B2 repeat 1
+type-library-string-number B3 repeat 1
+type-shop-number-string B1 repeat 1
+type-shop-number-string B2 repeat 1
+type-shop-number-string B3 repeat 1
+type-tickets-boolean-enum B1 repeat 1
+type-tickets-boolean-enum B2 repeat 1
+type-tickets-boolean-enum B3 repeat 1
+type-weather-timestamp B1 repeat 1
+type-weather-timestamp B2 repeat 1
+type-weather-timestamp B3 repeat 1
+complete: 60 completed trials, 0 exclusions. 
