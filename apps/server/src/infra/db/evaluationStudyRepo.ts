@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { EvaluationStudySchema, isPartialEvaluation, type EvaluationStudy } from '@sma/core';
 import type { Db } from './client.js';
 import { evaluationResults, evaluationStudies } from './schema.js';
@@ -73,13 +73,19 @@ export async function saveEvaluationStudy(db: Db, input: EvaluationStudy): Promi
     }
   });
 }
-/** Latest study, or one exact label. Returns null before the first evaluation. */
+/**
+ * One exact label (fake or not), or, without a label, the latest **non-fake** study: a fake
+ * dry test is never presented as the current results (SRS 6.6). Returns null before the first
+ * qualifying evaluation.
+ */
 export async function loadEvaluationStudy(db: Db, label?: string): Promise<EvaluationStudy | null> {
   const query = db.select().from(evaluationStudies);
   const rows = await (
     label
       ? query.where(eq(evaluationStudies.label, label))
-      : query.orderBy(desc(evaluationStudies.updatedAt))
+      : query
+          .where(sql`(${evaluationStudies.snapshot}->>'fake')::boolean IS NOT TRUE`)
+          .orderBy(desc(evaluationStudies.updatedAt))
   ).limit(1);
   return rows[0] ? EvaluationStudySchema.parse(rows[0].snapshot) : null;
 }

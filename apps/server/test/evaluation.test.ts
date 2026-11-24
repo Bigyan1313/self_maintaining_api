@@ -34,7 +34,8 @@ function sample(): EvaluationStudy {
       cpuCores: 2,
       ramBytes: 100,
       pricing: { input: 0, output: 0 },
-      maxOutputTokens: 4096,
+      maxOutputTokens: 16000,
+      effort: 'high',
     },
     manifest: [],
     admissions: [
@@ -75,11 +76,13 @@ function sample(): EvaluationStudy {
         review: null,
         completed: true,
         createdAt: now,
+        stopReasons: ['end_turn'],
       },
     ],
     inFlight: null,
     spentUsd: 0.1,
     reservedUsd: 0,
+    modelCalls: { total: 1, maxTokensStops: 0, stopReasons: { end_turn: 1 } },
   };
 }
 describe('evaluation persistence and HTTP', () => {
@@ -124,11 +127,29 @@ describe('evaluation persistence and HTTP', () => {
       await app.close();
     }
   });
+  it('without a label returns the latest NON-fake study; a fake study only by its label (SRS 6.6)', async () => {
+    const real = { ...sample(), fake: false, updatedAt: '2099-06-01T00:00:00.000Z' };
+    const fake = { ...sample(), fake: true, updatedAt: '2099-12-31T00:00:00.000Z' };
+    await saveEvaluationStudy(client.db, real);
+    await saveEvaluationStudy(client.db, fake);
+    expect((await loadEvaluationStudy(client.db))?.label).toBe(real.label);
+    const app = buildApp({}, { db: client.db });
+    try {
+      const latest = ResultsSchema.parse((await app.inject('/api/results')).json());
+      expect(latest).toMatchObject({ label: real.label, fake: false });
+      const named = ResultsSchema.parse(
+        (await app.inject(`/api/results?label=${fake.label}`)).json(),
+      );
+      expect(named).toMatchObject({ label: fake.label, fake: true });
+    } finally {
+      await app.close();
+    }
+  });
   it('selects latest by persisted update time and rejects invalid snapshots before writes', async () => {
-    const study = sample();
-    study.updatedAt = '2099-01-01T00:00:00.000Z';
+    const study = { ...sample(), fake: false };
+    study.updatedAt = '2100-01-01T00:00:00.000Z';
     await saveEvaluationStudy(client.db, study);
-    expect((await loadEvaluationStudy(client.db))?.label).toBe(study.label);
+    expect((await loadEvaluationStudy(client.db, study.label))?.label).toBe(study.label);
     await expect(saveEvaluationStudy(client.db, { ...study, spentUsd: -1 })).rejects.toThrow();
   });
 });
