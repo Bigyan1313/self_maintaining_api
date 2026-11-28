@@ -29,6 +29,61 @@ def checked(name, data):
     return data
 
 
+EXPECTED_CHECKS = [f'AT-{i:02}' for i in range(1, 13)]
+VERDICTS = {'PASS', 'PARTIAL', 'FAIL'}
+PARTIAL_BEGIN = '<!-- BEGIN PARTIAL ACCEPTANCE -->'
+PARTIAL_END = '<!-- END PARTIAL ACCEPTANCE -->'
+
+
+def one_line(text):
+    """Collapse whitespace so a reason compares the same in JSON and Markdown."""
+    return ' '.join(str(text).split())
+
+
+def acceptance_gate(summary, main, report):
+    """Decide what blocks a final archive and which acceptance checks are PARTIAL.
+
+    Blocks on: a missing summary, any FAIL or unknown verdict, a missing or extra AT record,
+    evidence recorded at a commit other than origin/main, or a PARTIAL check
+    that docs/final-report.md does not list with its reason. PARTIAL checks are allowed but are
+    returned, verdict unchanged, for MANIFEST.json; nothing here turns a PARTIAL into a PASS.
+
+    Returns (gaps, partials) where partials is a list of {id, title, verdict, reason}.
+    """
+    if summary is None:
+        return ['Acceptance summary missing (run `npm run acceptance` on origin/main)'], []
+    gaps, partials = [], []
+    checks = summary.get('checks', [])
+    ids = [c.get('id') for c in checks]
+    missing = [i for i in EXPECTED_CHECKS if i not in ids]
+    extra = sorted({i for i in ids if i not in EXPECTED_CHECKS} | {i for i in ids if ids.count(i) > 1})
+    if missing:
+        gaps.append('Acceptance records missing: ' + ', '.join(missing))
+    if extra:
+        gaps.append('Unexpected or duplicate acceptance records: ' + ', '.join(map(str, extra)))
+    for c in sorted(checks, key=lambda c: str(c.get('id'))):
+        verdict = c.get('verdict')
+        if verdict not in VERDICTS:
+            gaps.append(f"{c.get('id')} has unknown verdict {verdict!r}")
+        elif verdict == 'FAIL':
+            gaps.append(f"{c.get('id')} FAIL: {one_line(c.get('reason', ''))}")
+        elif verdict == 'PARTIAL':
+            partials.append({'id': c['id'], 'title': c.get('title', ''), 'verdict': 'PARTIAL',
+                             'reason': one_line(c.get('reason', ''))})
+    meta = summary.get('meta', {})
+    recorded_commit = meta.get('commit', '')
+    if not re.fullmatch(r'[0-9a-f]{12,40}', recorded_commit) or not main.startswith(recorded_commit):
+        gaps.append('Acceptance evidence is not from the submitted origin/main commit')
+    section = ''
+    if PARTIAL_BEGIN in report and PARTIAL_END in report:
+        section = one_line(report.split(PARTIAL_BEGIN, 1)[1].split(PARTIAL_END, 1)[0])
+    for p in partials:
+        if f"**{p['id']}**" not in section or p['reason'] not in section:
+            gaps.append(f"docs/final-report.md does not list PARTIAL {p['id']} with its reason "
+                        '(re-run `npm run report:final` after `npm run acceptance`)')
+    return gaps, partials
+
+
 def build(root, draft=False):
     """Return a validated bundle in memory, before replacing any output archive."""
     files = {}
@@ -99,20 +154,13 @@ def build(root, draft=False):
     if 'Included verbatim from ' not in report:
         gaps.append('Generated evaluation report has not been included')
     summary_path = root / 'docs/acceptance/output/summary.json'
-    if summary_path.exists():
-        summary = json.loads(summary_path.read_text())
-        checks = summary.get('checks', [])
-        expected = {f'AT-{i:02}' for i in range(1, 13)}
-        if {c['id'] for c in checks} != expected or any(c['verdict'] != 'PASS' for c in checks):
-            gaps.append('Acceptance checks are incomplete or not all PASS; review the actual records')
-        recorded_commit = summary.get('meta', {}).get('commit', '')
-        if not re.fullmatch(r'[0-9a-f]{12,40}', recorded_commit) or not main.startswith(recorded_commit):
-            gaps.append('Acceptance evidence is not from the submitted main commit')
-    else:
-        gaps.append('Acceptance summary missing')
+    summary = json.loads(summary_path.read_text()) if summary_path.exists() else None
+    acceptance_gaps, partials = acceptance_gate(summary, main, report)
+    gaps.extend(acceptance_gaps)
     if gaps and not draft:
         raise ValueError('Final submission is incomplete:\n- ' + '\n- '.join(gaps))
     manifest = {'draft': draft, 'sourceCommit': source_commit, 'evidenceCommit': head, 'missing': gaps,
+                'partialAcceptance': partials,
                 'note': 'Review generated results and semantic reviews; a bundle is not a certification of model quality.'}
     stream = io.BytesIO()
     with zipfile.ZipFile(stream, 'w', zipfile.ZIP_DEFLATED) as out:

@@ -41,3 +41,39 @@ it('refuses an existing report outside eval/results', () => {
   const result = spawnSync(process.execPath, ['--import', tsx, script, 'report.md'], { cwd: root });
   expect(result.status).not.toBe(0);
 });
+it('lists each PARTIAL acceptance check with its reason, never as a pass', () => {
+  const root = fixture();
+  mkdirSync(join(root, 'docs/acceptance/output'), { recursive: true });
+  const check = (id: string, verdict: string, reason: string) => ({
+    id,
+    title: `T ${id}`,
+    verdict,
+    reason,
+  });
+  writeFileSync(
+    join(root, 'docs/acceptance/output/summary.json'),
+    JSON.stringify({
+      meta: { commit: 'abcdef123456' },
+      checks: [
+        check('AT-01', 'PASS', 'All 5 assertions passed.'),
+        check('AT-12', 'PARTIAL', 'Study missing:\n  fake model adapter.'),
+      ],
+    }),
+  );
+  execFileSync(process.execPath, ['--import', tsx, script], { cwd: root });
+  const output = readFileSync(join(root, 'docs/final-report.md'), 'utf8');
+  const section =
+    output
+      .split('<!-- BEGIN PARTIAL ACCEPTANCE -->')[1]
+      ?.split('<!-- END PARTIAL ACCEPTANCE -->')[0] ?? '';
+  expect(section).toContain('commit abcdef123456: 1 PASS, 1 PARTIAL, 0 FAIL');
+  expect(section).toContain('- **AT-12** T AT-12: Study missing: fake model adapter.');
+  expect(section).not.toContain('**AT-01**');
+});
+it('says when no acceptance summary exists instead of inventing one', () => {
+  const root = fixture();
+  execFileSync(process.execPath, ['--import', tsx, script], { cwd: root });
+  expect(readFileSync(join(root, 'docs/final-report.md'), 'utf8')).toContain(
+    'No acceptance summary found',
+  );
+});

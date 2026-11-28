@@ -1,5 +1,5 @@
 /** Include a generated evaluation report verbatim; missing evidence remains explicitly pending. */
-import { readFileSync, writeFileSync, realpathSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, realpathSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 const selected = process.argv[2];
@@ -14,6 +14,28 @@ if (selected) {
     throw new Error('Select an existing eval/results/<label>/report.md');
   evaluation = readFileSync(path, 'utf8');
   provenance = `Included verbatim from ${selected}; SHA-256 ${createHash('sha256').update(evaluation).digest('hex')}. Inclusion does not certify a paid study or completed human review; inspect the report limitations.`;
+}
+// PARTIAL acceptance checks are listed verbatim, with their recorded reasons; the submission
+// packager refuses a final archive whose report does not list every one of them.
+const summaryPath = 'docs/acceptance/output/summary.json';
+let acceptance = 'No acceptance summary found. Run `npm run acceptance`, then re-run this command.';
+if (existsSync(summaryPath)) {
+  const summary = JSON.parse(readFileSync(summaryPath, 'utf8')) as {
+    meta?: { commit?: string };
+    checks?: { id: string; title: string; verdict: string; reason: string }[];
+  };
+  const checks = summary.checks ?? [];
+  const partial = checks.filter((c) => c.verdict === 'PARTIAL');
+  const tally = ['PASS', 'PARTIAL', 'FAIL']
+    .map((v) => `${checks.filter((c) => c.verdict === v).length} ${v}`)
+    .join(', ');
+  acceptance = [
+    `From [docs/acceptance/output/summary.json](acceptance/output/summary.json), commit ${summary.meta?.commit ?? 'unknown'}: ${tally}. PARTIAL means every assertion that ran held but part of the Appendix A procedure was not executed; it is not a pass.`,
+    '',
+    ...(partial.length
+      ? partial.map((c) => `- **${c.id}** ${c.title}: ${c.reason.trim().split(/\s+/).join(' ')}`)
+      : ['- None.']),
+  ].join('\n');
 }
 writeFileSync(
   'docs/final-report.md',
@@ -31,6 +53,12 @@ writeFileSync(
     '<!-- BEGIN GENERATED EVALUATION REPORT -->',
     evaluation,
     '<!-- END GENERATED EVALUATION REPORT -->',
+    '',
+    '## Acceptance checks recorded PARTIAL',
+    '',
+    '<!-- BEGIN PARTIAL ACCEPTANCE -->',
+    acceptance,
+    '<!-- END PARTIAL ACCEPTANCE -->',
     '',
     '## Failures, limitations and deferred work',
     '',
