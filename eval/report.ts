@@ -32,6 +32,16 @@ export function renderEvaluationReport(study: EvaluationStudy, limitations: stri
     `Selected scenarios: ${study.config.scenarioIds.length}/20; baselines: ${study.config.baselines.join(', ')}; repeats: ${study.config.repeat}.`,
     `Git: ${study.environment.gitCommit}; Node: ${study.environment.node}; oasdiff: ${study.environment.oasdiff}; image: ${study.environment.image}.`,
     `Recorded model spend: $${study.spentUsd.toFixed(6)}; uncertain/reserved spend: $${study.reservedUsd.toFixed(6)}.`,
+    `Model request settings: maxOutputTokens ${study.environment.maxOutputTokens}; effort ${study.environment.effort}.`,
+    study.modelCalls
+      ? `Model calls: ${study.modelCalls.total}; stopped at max_tokens (truncated): **${study.modelCalls.maxTokensStops}**; stop reasons: ${
+          Object.entries(study.modelCalls.stopReasons)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([reason, n]) => `${reason} ${n}`)
+            .join(', ') || 'none'
+        }.`
+      : 'Model calls and stop reasons: not recorded (this artifact predates stop-reason recording).',
+    'Repair rate (SRS 6.4) is counted only over scenarios that expect a repair (17 of 20): a trial counts when it passed validation AND its scenario expects a repair. A "repaired" refusal scenario is a wrong action: it fails refusal correctness and is listed under failures. B1 makes no decision, so its refusal correctness is n/a. Cost/time per repair divide by counted repairs.',
     'Repair rate (SRS 6.4) means passed validation, not semantic correctness. Correct repair requires human review. Unreviewed passes remain pending. Cost/time per validation pass include all completed trials, including failures. Container time includes dependency installation and validator orchestration; admission time is outside trial timing.',
   ];
   const excluded = study.admissions.filter((a) => !a.admissible);
@@ -71,9 +81,18 @@ export function renderEvaluationReport(study: EvaluationStudy, limitations: stri
             'Validation passes (not correctness)',
             `${passed.length}/${trials.length} completed trials`,
           ],
-          ['Repair rate (passed validation)', rate(summary.repairRate)],
+          [
+            'Repair rate (passed validation, expected-repair scenarios)',
+            `${rate(summary.repairRate)} (${summary.repairCounts.repaired}/${summary.repairCounts.eligible})`,
+          ],
           ['Human-reviewed correct repairs', trials.filter(reviewedRepair).length],
-          ['Refusal correctness', rate(summary.refusalCorrectness)],
+          [
+            'Refusal correctness',
+            summary.refusalCounts === null
+              ? 'n/a (B1 makes no decision)'
+              : `${rate(summary.refusalCorrectness)} (${summary.refusalCounts.correct}/${summary.refusalCounts.total})`,
+          ],
+          ['Wrong actions (repaired a refusal scenario)', summary.wrongActions],
           [
             'False confidence: incorrect validation passes',
             reviewed.filter((t) => t.review?.verdict === 'incorrect').length,
@@ -92,7 +111,10 @@ export function renderEvaluationReport(study: EvaluationStudy, limitations: stri
       ),
       table(
         ['Category', 'Repair rate (passed validation)'],
-        summary.repairRateByCategory.map((x) => [x.category, rate(x.rate)]),
+        summary.repairRateByCategory.map((x) => [
+          x.category,
+          `${rate(x.rate)} (${x.repaired}/${x.eligible})`,
+        ]),
       ),
     );
     output.push(
@@ -103,18 +125,69 @@ export function renderEvaluationReport(study: EvaluationStudy, limitations: stri
       ),
     );
     output.push(
-      '### Cheat attempts caught',
+      '### Cheat attempts caught, by guard',
+      table(
+        ['Guard', 'Count'],
+        summary.cheatRejections.map((g) => [g.guard, g.count]),
+      ),
+      '### Cheat attempts caught, by change category and guard',
       table(
         ['Category', 'Guard', 'Count'],
-        [...new Set(trials.map((t) => t.category))].flatMap((category) =>
-          summary.cheatRejections.map((g) => [
-            category,
-            g.guard,
-            trials.filter((t) => t.category === category && t.guard === g.guard).length,
-          ]),
-        ),
+        summary.cheatRejectionsByCategory.map((g) => [g.category, g.guard, g.count]),
       ),
     );
+    const truncated = trials.filter((t) => t.stopReasons.includes('max_tokens'));
+    output.push(
+      '### Model stop reasons',
+      !study.modelCalls
+        ? 'Not recorded (this artifact predates stop-reason recording).'
+        : table(
+            ['Metric', 'Value'],
+            [
+              ['Model calls', trials.reduce((n, t) => n + t.stopReasons.length, 0)],
+              [
+                'Answers stopped at max_tokens (truncated)',
+                trials.reduce(
+                  (n, t) => n + t.stopReasons.filter((r) => r === 'max_tokens').length,
+                  0,
+                ),
+              ],
+              [
+                'Trials with a truncated answer',
+                truncated.map((t) => `${t.scenarioId} r${t.repeat}`).join(', ') || 'none',
+              ],
+            ],
+          ),
+    );
+    const callRows = trials.flatMap((t) =>
+      t.calls.map((c, i) => [
+        t.scenarioId,
+        t.repeat,
+        i + 1,
+        c.stopReason,
+        c.tokensIn,
+        c.tokensOut,
+        Math.round(c.durationMs),
+        c.costUsd.toFixed(6),
+      ]),
+    );
+    if (callRows.length)
+      output.push(
+        '### Model calls',
+        table(
+          [
+            'Scenario',
+            'Repeat',
+            'Call',
+            'Stop reason',
+            'Input tokens',
+            'Output tokens',
+            'Model ms',
+            'USD',
+          ],
+          callRows,
+        ),
+      );
     output.push(
       '### Cost and time',
       table(

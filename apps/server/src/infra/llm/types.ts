@@ -12,6 +12,8 @@ export interface LlmUsage {
   costUsd: number;
   modelId: string;
   durationMs: number;
+  /** Provider `stop_reason` (for example `end_turn`, `max_tokens`); absent for fakes. */
+  stopReason?: string;
 }
 /** One attempt returns a patch, explicit refusal, or a safe typed failure. */
 export type LlmResult =
@@ -28,6 +30,8 @@ export type LlmResult =
        * token ceiling (FR-23, FR-24). Absent when no response was received.
        */
       usage?: Omit<LlmUsage, 'durationMs'>;
+      /** Provider `stop_reason` when a response arrived (for example `max_tokens`). */
+      stopReason?: string;
     };
 /** All repair orchestration depends on this interface, never on a provider SDK. */
 export interface LlmAdapter {

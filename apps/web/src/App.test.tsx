@@ -110,6 +110,26 @@ it('renders server summaries, exclusions, failures and partial labels', async ()
   expect(screen.getByText(/Excluded: Example/)).toBeTruthy();
   expect(screen.getAllByText('False confidence')).toHaveLength(3);
 });
+it('shows the FAKE MODEL DRY TEST banner only for a fake study (SRS 6.6)', async () => {
+  vi.spyOn(api, 'results').mockResolvedValue({ ...fixtureResults, fake: true });
+  const { unmount } = render(<Results />);
+  expect((await screen.findByRole('alert')).textContent).toBe(
+    'FAKE MODEL DRY TEST — not model performance',
+  );
+  unmount();
+  vi.spyOn(api, 'results').mockResolvedValue({ ...fixtureResults, fake: false });
+  render(<Results />);
+  expect(await screen.findByText('Failed scenarios')).toBeTruthy();
+  expect(screen.queryByText(/FAKE MODEL DRY TEST/)).toBeNull();
+});
+it('shows repair-rate denominators, B1 refusal as n/a, and cheats by category', async () => {
+  vi.spyOn(api, 'results').mockResolvedValue(fixtureResults);
+  render(<Results />);
+  expect(await screen.findByText('50.0% (2/4)')).toBeTruthy();
+  expect(screen.getByText('n/a (B1 makes no decision)')).toBeTruthy();
+  expect(screen.getByText('100.0% (1/1)')).toBeTruthy();
+  expect(screen.getAllByText('Cheat rejections by change category')).toHaveLength(3);
+});
 it('shows no-results state without inventing metrics', async () => {
   vi.spyOn(api, 'results').mockResolvedValue({ label: null, results: [] });
   render(<Results />);
@@ -130,26 +150,24 @@ it('shows a failed export instead of saving an error page', async () => {
 it('does not treat a failed spec check as no change', async () => {
   vi.stubGlobal(
     'fetch',
-    vi
-      .fn()
-      .mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            check: {
-              id: '00000000-0000-4000-8000-000000000001',
-              apiId: '00000000-0000-4000-8000-000000000002',
-              startedAt: '2026-11-23T12:00:00Z',
-              finishedAt: null,
-              outcome: { value: 'failed', label: 'Check failed' },
-              specVersionId: null,
-              errorDetail: 'Invalid OpenAPI',
-            },
-            baselineVersionId: null,
-            sourceMode: { value: 'uploaded', label: 'Uploaded' },
-          }),
-          { status: 422 },
-        ),
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          check: {
+            id: '00000000-0000-4000-8000-000000000001',
+            apiId: '00000000-0000-4000-8000-000000000002',
+            startedAt: '2026-11-23T12:00:00Z',
+            finishedAt: null,
+            outcome: { value: 'failed', label: 'Check failed' },
+            specVersionId: null,
+            errorDetail: 'Invalid OpenAPI',
+          },
+          baselineVersionId: null,
+          sourceMode: { value: 'uploaded', label: 'Uploaded' },
+        }),
+        { status: 422 },
       ),
+    ),
   );
   await expect(api.upload('id', 'invalid')).rejects.toThrow('Check failed: Invalid OpenAPI');
 });

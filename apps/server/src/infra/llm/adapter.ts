@@ -11,6 +11,14 @@ export type { LlmAdapter, LlmOptions, LlmResult, LlmUsage } from './types.js';
 
 /** Hard per-attempt deadline (NFR-06). */
 export const MAX_LLM_TIMEOUT_MS = 120_000;
+/**
+ * `output_config.effort` sent on every request. Sent explicitly so a provider default change
+ * cannot silently change the evaluation. No sampling parameters or `thinking` are sent: on
+ * claude-sonnet-5-5, non-default `temperature`/`top_p`/`top_k` and `thinking: disabled` are 400s.
+ */
+export const LLM_EFFORT = 'high' as const;
+/** Content blocks an answer may contain; only `text` blocks are read. */
+const ANSWER_BLOCK_TYPES = new Set(['text', 'thinking', 'redacted_thinking']);
 interface Price {
   inputUsdPerMillionTokens: number;
   outputUsdPerMillionTokens: number;
@@ -78,6 +86,7 @@ export class AnthropicLlmAdapter implements LlmAdapter {
           {
             model: modelId,
             max_tokens: opts.maxOutputTokens,
+            output_config: { effort: LLM_EFFORT },
             system: scrub(ctx.system),
             messages: [{ role: 'user', content: scrub(ctx.user) }],
           },
@@ -105,13 +114,21 @@ export class AnthropicLlmAdapter implements LlmAdapter {
           1_000_000,
         modelId,
       };
+      const stopReason = String(response.stop_reason ?? 'none');
       const unusable = (message: string): LlmResult => {
         const failure = error('invalid_output', message);
-        return failure.kind === 'error' ? { ...failure, usage: billed } : failure;
+        return failure.kind === 'error' ? { ...failure, usage: billed, stopReason } : failure;
       };
+      if (stopReason === 'max_tokens')
+        return unusable(
+          `Answer truncated at max_tokens (${opts.maxOutputTokens} output tokens); not a usable patch`,
+        );
+      // Adaptive thinking is on by default on current models, so an answer can carry thinking
+      // blocks (empty text unless display is requested). They are not the answer: skip them and
+      // read only the text. Any other block type (tool use, server tools) is still unsupported.
       if (
-        response.stop_reason !== 'end_turn' ||
-        response.content.some((block) => block.type !== 'text')
+        stopReason !== 'end_turn' ||
+        response.content.some((block) => !ANSWER_BLOCK_TYPES.has(block.type))
       )
         return unusable('Provider returned an incomplete or unsupported response');
       const text = response.content
@@ -122,7 +139,7 @@ export class AnthropicLlmAdapter implements LlmAdapter {
       if (parsed.kind === 'invalid_output') return unusable(parsed.message);
       if (parsed.kind === 'patch' && scrub(parsed.patch) !== parsed.patch)
         return unusable('Provider patch contains credential-like text');
-      const usage = { ...billed, durationMs: duration() };
+      const usage = { ...billed, durationMs: duration(), stopReason };
       return parsed.kind === 'patch'
         ? { ...parsed, ...usage }
         : { ...parsed, reason: scrub(parsed.reason), ...usage };
