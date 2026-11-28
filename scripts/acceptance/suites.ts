@@ -3,6 +3,14 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { CheckDef } from './checks.js';
+import type { Recorder } from './record.js';
+import { EVAL_LABEL_ENV, inspectStudy } from './study-evidence.js';
+
+/**
+ * What a suite records beyond its tests: either a fixed statement of the end-to-end evidence it
+ * cannot produce (always a NOT RUN item), or a function that checks real evidence.
+ */
+type Beyond = string | ((r: Recorder, root: string) => void);
 
 function suite(
   id: string,
@@ -10,7 +18,8 @@ function suite(
   requirements: string,
   group: string,
   paths: string[],
-  limitation: string,
+  beyond: Beyond,
+  extraInputs: string[] = [],
 ): CheckDef {
   return {
     info: {
@@ -23,6 +32,7 @@ function suite(
         group,
         ...paths,
         'Scripted LLM responses and controlled GitHub ports; no paid model call or live PR is implied.',
+        ...extraInputs,
       ],
     },
     async run(r, ctx) {
@@ -59,9 +69,24 @@ function suite(
             r.skip(assertion.fullName, 'Vitest did not execute this check in this environment');
           else r.check(assertion.fullName, assertion.status === 'passed', assertion.status);
         }
-      r.skip('Full Appendix A end-to-end evidence', limitation);
+      if (typeof beyond === 'string') r.skip('Full Appendix A end-to-end evidence', beyond);
+      else beyond(r, ctx.root);
     },
   };
+}
+
+/**
+ * AT-12's end-to-end part: inspects the study named by `SMA_EVAL_LABEL`. Each condition that holds
+ * is a passed assertion; each one that does not is NOT RUN with exactly what is missing, so the
+ * check is PARTIAL rather than FAIL or PASS.
+ */
+function recordStudyEvidence(r: Recorder, root: string): void {
+  const label = process.env[EVAL_LABEL_ENV];
+  r.step(`inspect evaluation study ${EVAL_LABEL_ENV}=${label ?? '(unset)'}`);
+  const evidence = inspectStudy(root, label);
+  if (evidence.source) r.show('study', evidence.source);
+  for (const name of evidence.met) r.check(name, true);
+  for (const gap of evidence.missing) r.skip(gap.item, gap.reason);
 }
 
 /** Additional checks introduced once repair, delivery and orchestration are implemented. */
@@ -102,6 +127,9 @@ export const ADDITIONAL_CHECKS: readonly CheckDef[] = [
     'EV-01 to EV-09; NFR-01, NFR-05, NFR-07, NFR-09',
     'eval',
     [],
-    'Evaluation tooling is tested. The reviewed model study and three repeated executions remain required; scripted adapter trials do not establish model repair quality.',
+    recordStudyEvidence,
+    [
+      `The evaluation study named by ${EVAL_LABEL_ENV} (eval/results/<label>/results.json): live, complete, 3 repeats, every B2/B3 validation pass reviewed by a named person.`,
+    ],
   ),
 ];
